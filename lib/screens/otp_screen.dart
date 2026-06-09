@@ -1,0 +1,216 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../theme/app_colors.dart';
+
+class OtpScreen extends StatefulWidget {
+  const OtpScreen({super.key});
+  @override
+  State<OtpScreen> createState() => _OtpScreenState();
+}
+
+class _OtpScreenState extends State<OtpScreen> {
+  final List<TextEditingController> _ctrls = List.generate(4, (_) => TextEditingController());
+  final List<FocusNode> _nodes = List.generate(4, (_) => FocusNode());
+  bool _hasError = false;
+  int _seconds = 45;
+  Timer? _timer;
+  late Map<String, dynamic> _args;
+  bool _argsLoaded = false;
+
+  String get _code => _ctrls.map((c) => c.text).join();
+  bool get _complete => _code.length == 4;
+
+  @override
+  void initState() {
+    super.initState();
+    _startTimer();
+  }
+
+  void _startTimer() {
+    _timer?.cancel();
+    setState(() => _seconds = 45);
+    _timer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (_seconds == 0) { t.cancel(); return; }
+      setState(() => _seconds--);
+    });
+  }
+
+  void _onDigit(int index, String value) {
+    if (value.isNotEmpty && index < 3) {
+      _nodes[index + 1].requestFocus();
+    }
+    setState(() => _hasError = false);
+    setState(() {});
+  }
+
+  void _confirm() {
+    if (!_complete) return;
+    // TODO: validate OTP with backend
+    final mode = _args['mode'] as String? ?? 'signup';
+    if (mode == 'forgot') {
+      Navigator.pushReplacementNamed(context, '/new-password');
+    } else {
+      Navigator.pushReplacementNamed(context, '/location');
+    }
+  }
+
+  void _resend() {
+    for (final c in _ctrls) c.clear();
+    setState(() => _hasError = false);
+    _startTimer();
+    _nodes[0].requestFocus();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    for (final c in _ctrls) c.dispose();
+    for (final n in _nodes) n.dispose();
+    super.dispose();
+  }
+
+  String get _subtitle {
+    final mode = _argsLoaded ? (_args['mode'] as String? ?? 'signup') : 'signup';
+    final identifier = _argsLoaded ? (_args['phone'] ?? _args['email'] ?? '') : '';
+    if (mode == 'forgot') {
+      return 'A 4-Digit Verification Code Has Been Sent To This Phone Number. $identifier';
+    }
+    return 'A 4-Digit Verification Code Has Been Sent To This Phone Number. $identifier';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_argsLoaded) {
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args is Map<String, dynamic>) {
+        _args = args;
+        _argsLoaded = true;
+      } else {
+        _args = {'mode': 'signup', 'phone': '+9451234557'};
+        _argsLoaded = true;
+      }
+    }
+
+    final String id = _args['phone'] ?? _args['email'] ?? '';
+
+    return Scaffold(
+      backgroundColor: AppColors.white,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 16),
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: const Icon(Icons.chevron_left, size: 28, color: AppColors.textDark),
+              ),
+              const SizedBox(height: 16),
+              const Text('OTP CODE',
+                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.textDark)),
+              const SizedBox(height: 12),
+              RichText(
+                text: TextSpan(
+                  style: const TextStyle(fontSize: 13, color: AppColors.textMedium, height: 1.5),
+                  children: [
+                    const TextSpan(text: 'A 4-Digit Verification Code Has Been Sent To This Phone Number. '),
+                    TextSpan(text: id, style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.textDark)),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 32),
+
+              const Text('Enter 4-Digit Code',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textDark)),
+              const SizedBox(height: 12),
+
+              // OTP boxes
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: _hasError ? Colors.red : AppColors.divider),
+                  color: AppColors.white,
+                ),
+                child: Row(
+                  children: List.generate(4, (i) => Expanded(
+                    child: TextField(
+                      controller: _ctrls[i],
+                      focusNode: _nodes[i],
+                      textAlign: TextAlign.center,
+                      keyboardType: TextInputType.number,
+                      maxLength: 1,
+                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      decoration: const InputDecoration(
+                        counterText: '',
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                      ),
+                      onChanged: (v) => _onDigit(i, v),
+                      onTap: () {
+                        _ctrls[i].selection = TextSelection.fromPosition(
+                          TextPosition(offset: _ctrls[i].text.length));
+                      },
+                    ),
+                  )),
+                ),
+              ),
+
+              if (_hasError) ...[
+                const SizedBox(height: 6),
+                const Text('Invalid Verification Code.',
+                    style: TextStyle(color: Colors.red, fontSize: 12)),
+              ],
+
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  if (!_hasError)
+                    Row(children: [
+                      const Text('Remaining ', style: TextStyle(fontSize: 12, color: AppColors.textMedium)),
+                      Text(
+                        '${(_seconds ~/ 60).toString().padLeft(2, '0')}:${(_seconds % 60).toString().padLeft(2, '0')} S',
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textDark),
+                      ),
+                    ])
+                  else
+                    const SizedBox(),
+                  GestureDetector(
+                    onTap: _resend,
+                    child: const Text('Resend Code?',
+                        style: TextStyle(fontSize: 13, color: AppColors.primary,
+                            fontWeight: FontWeight.w600,
+                            decoration: TextDecoration.underline,
+                            decorationColor: AppColors.primary)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 40),
+
+              // Confirm button
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton(
+                  onPressed: _complete ? _confirm : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _complete ? AppColors.primary : const Color(0xFFEEEEEE),
+                    foregroundColor: _complete ? Colors.white : AppColors.textMedium,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    elevation: 0,
+                  ),
+                  child: const Text('Confirm', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
