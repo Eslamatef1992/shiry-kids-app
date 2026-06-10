@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import '../theme/app_colors.dart';
 import '../models/product.dart';
@@ -108,7 +109,10 @@ class _ProductsScreenState extends State<ProductsScreen> {
                         ),
                         child: ClipOval(
                           child: cat.imageUrl != null && cat.imageUrl!.startsWith('http')
-                              ? Image.network(cat.imageUrl!, fit: BoxFit.cover, width: 52, height: 52, errorBuilder: (_, __, ___) => Center(child: Text(cat.emoji, style: const TextStyle(fontSize: 22))))
+                              ? (cat.imageUrl!.toLowerCase().endsWith('.svg')
+                                  ? SvgPicture.network(cat.imageUrl!, fit: BoxFit.cover, width: 52, height: 52,
+                                      placeholderBuilder: (_) => Center(child: Text(cat.emoji, style: const TextStyle(fontSize: 22))))
+                                  : Image.network(cat.imageUrl!, fit: BoxFit.cover, width: 52, height: 52, errorBuilder: (_, __, ___) => Center(child: Text(cat.emoji, style: const TextStyle(fontSize: 22)))))
                               : cat.imagePath != null
                               ? Image.asset(cat.imagePath!, fit: BoxFit.cover, width: 52, height: 52)
                               : Container(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import '../theme/app_colors.dart';
 import '../models/product.dart';
@@ -285,9 +286,13 @@ class _CategoriesRow extends StatelessWidget {
             children: [
               ClipOval(
                 child: (cat.imageUrl != null && cat.imageUrl!.startsWith('http'))
-                    ? Image.network(cat.imageUrl!, width: 44, height: 44, fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(width: 44, height: 44, color: const Color(0xFFFFDDDD),
-                            child: Center(child: Text(cat.emoji.isNotEmpty ? cat.emoji : '🎁', style: const TextStyle(fontSize: 22)))))
+                    ? (cat.imageUrl!.toLowerCase().endsWith('.svg')
+                        ? SvgPicture.network(cat.imageUrl!, width: 44, height: 44, fit: BoxFit.cover,
+                            placeholderBuilder: (_) => Container(width: 44, height: 44, color: const Color(0xFFFFDDDD),
+                                child: Center(child: Text(cat.emoji.isNotEmpty ? cat.emoji : '🎁', style: const TextStyle(fontSize: 22)))))
+                        : Image.network(cat.imageUrl!, width: 44, height: 44, fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Container(width: 44, height: 44, color: const Color(0xFFFFDDDD),
+                                child: Center(child: Text(cat.emoji.isNotEmpty ? cat.emoji : '🎁', style: const TextStyle(fontSize: 22))))))
                     : cat.imagePath != null
                     ? Image.asset(cat.imagePath!, width: 44, height: 44, fit: BoxFit.cover)
                     : Container(width: 44, height: 44, color: const Color(0xFFFFDDDD),
