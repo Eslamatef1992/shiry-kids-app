@@ -40,7 +40,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     setState(() => _paying = true);
     try {
       final items = [
-        ...widget.coupons.map((c) => {'id': c.couponId, 'type': 'coupon', 'qty': c.quantity}),
+        ...widget.coupons.map((c) => {'id': c.id, 'type': 'coupon', 'qty': c.quantity}),
         ...widget.products.map((p) => {'id': p.product.id, 'type': 'product', 'qty': p.quantity}),
       ];
 

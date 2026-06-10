@@ -517,12 +517,12 @@ class _WeeklyCard extends StatelessWidget {
               GestureDetector(
                 onTap: () {
                   final product = Product(
-                    id: 'w_${offer.title.hashCode}',
-                    name: offer.title,
-                    description: offer.countdown,
-                    price: double.tryParse(offer.price.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 10,
-                    originalPrice: double.tryParse(offer.originalPrice.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 15,
-                    imageUrl: offer.image,
+                    id: 'w_${offer.name.hashCode}',
+                    name: offer.name,
+                    description: offer.description,
+                    price: offer.price,
+                    originalPrice: offer.originalPrice,
+                    imageUrl: offer.imageUrl,
                     category: 'birthday',
                   );
                   Navigator.push(context, MaterialPageRoute(

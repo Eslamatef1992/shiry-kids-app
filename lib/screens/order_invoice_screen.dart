@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../widgets/wavy_app_bar.dart';
-import 'my_orders_screen.dart';
+import '../models/product.dart' show AppOrder;
 
 class OrderInvoiceScreen extends StatelessWidget {
-  final Order order;
+  final AppOrder order;
   const OrderInvoiceScreen({super.key, required this.order});
 
   @override
   Widget build(BuildContext context) {
-    final isPaid = order.paymentStatus == PaymentStatus.paid;
-    final subtotal = order.items.fold<double>(0, (s, i) => s + i.price);
+    final isPaid = order.paymentStatus == 'paid';
+    final items = order.items
+        .whereType<Map>()
+        .map((e) => e.cast<String, dynamic>())
+        .toList();
+    final subtotal = items.fold<double>(
+        0, (s, i) => s + (double.tryParse(i['price']?.toString() ?? '0') ?? 0));
+    final dateStr =
+        '${order.createdAt.day}/${order.createdAt.month}/${order.createdAt.year}';
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -19,7 +26,7 @@ class OrderInvoiceScreen extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 32),
         children: [
           // Breadcrumb
-          _Breadcrumb(parts: ['My Profile', 'My Orders', order.id]),
+          _Breadcrumb(parts: ['My Profile', 'My Orders', '#${order.orderNumber}']),
           const SizedBox(height: 16),
 
           // ── Header card ─────────────────────────────────────────
@@ -70,12 +77,12 @@ class OrderInvoiceScreen extends StatelessWidget {
                   children: [
                     const Text('Invoice Id',
                         style: TextStyle(fontSize: 11, color: AppColors.textLight)),
-                    Text(order.id,
+                    Text('#${order.orderNumber}',
                         style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textDark)),
                     const SizedBox(height: 10),
                     const Text('Order Date',
                         style: TextStyle(fontSize: 11, color: AppColors.textLight)),
-                    Text(order.date,
+                    Text(dateStr,
                         style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textDark)),
                     const SizedBox(height: 10),
                     const Text('Payment Status',
@@ -129,26 +136,27 @@ class OrderInvoiceScreen extends StatelessWidget {
                 ),
 
                 // Item rows
-                ...order.items.asMap().entries.map((e) {
+                ...items.asMap().entries.map((e) {
                   final i = e.value;
-                  final isLast = e.key == order.items.length - 1;
+                  final isLast = e.key == items.length - 1;
+                  final price = double.tryParse(i['price']?.toString() ?? '0') ?? 0;
                   return Column(
                     children: [
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                         child: Row(children: [
-                          Expanded(child: Text(i.productName,
+                          Expanded(child: Text(i['product_name']?.toString() ?? i['name']?.toString() ?? '',
                               style: const TextStyle(fontSize: 12, color: AppColors.textDark))),
-                          SizedBox(width: 40, child: Text('${i.qty}',
+                          SizedBox(width: 40, child: Text('${i['quantity'] ?? i['qty'] ?? 1}',
                               textAlign: TextAlign.center,
                               style: const TextStyle(fontSize: 12, color: AppColors.textDark))),
-                          SizedBox(width: 40, child: Text(i.size,
+                          SizedBox(width: 40, child: Text(i['size']?.toString() ?? '-',
                               textAlign: TextAlign.center,
                               style: const TextStyle(fontSize: 12, color: AppColors.textDark))),
-                          SizedBox(width: 44, child: Text(i.color,
+                          SizedBox(width: 44, child: Text(i['color']?.toString() ?? '-',
                               textAlign: TextAlign.center,
                               style: const TextStyle(fontSize: 12, color: AppColors.textDark))),
-                          SizedBox(width: 54, child: Text('${i.price.toInt()} Kd',
+                          SizedBox(width: 54, child: Text('${price.toInt()} Kd',
                               textAlign: TextAlign.right,
                               style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textDark))),
                         ]),

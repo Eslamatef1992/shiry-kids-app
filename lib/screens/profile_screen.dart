@@ -27,8 +27,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _loadUser() async {
     try {
       final res = await ApiService.getUser();
-      if (mounted && res['success'] == true) {
-        setState(() => _user = res['data'] as Map<String, dynamic>?);
+      if (mounted && res != null) {
+        setState(() => _user = res);
       }
     } catch (_) {}
   }
