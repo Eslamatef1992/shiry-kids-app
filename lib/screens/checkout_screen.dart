@@ -7,7 +7,7 @@ import '../providers/cart_provider.dart';
 import '../services/api_service.dart';
 import '../widgets/wavy_app_bar.dart';
 import '../widgets/network_image.dart';
-import 'location_picker_screen.dart';
+import '../widgets/address_method_sheet.dart';
 import 'payment_success_screen.dart';
 import 'payment_failed_screen.dart';
 
@@ -81,17 +81,24 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   Future<void> _pickLocation() async {
-    final result = await Navigator.push<Map<String, dynamic>>(
-      context,
-      MaterialPageRoute(builder: (_) => const LocationPickerScreen()),
-    );
+    final result = await pickAddress(context);
     if (result == null || !mounted) return;
     final detail = result['detail'] as String?;
-    setState(() => _address = detail);
+    final manualName = result['name'] as String?;
+    final manualPhone = result['phone'] as String?;
+    setState(() {
+      _address = detail;
+      if (manualName != null && manualName.trim().isNotEmpty) _name = manualName;
+      if (manualPhone != null && manualPhone.trim().isNotEmpty) _phone = manualPhone;
+    });
 
     final loggedIn = await ApiService.isLoggedIn();
     if (loggedIn && detail != null) {
-      await ApiService.updateProfile(address: detail);
+      await ApiService.updateProfile(
+        address: detail,
+        name: (manualName != null && manualName.trim().isNotEmpty) ? manualName : null,
+        phone: (manualPhone != null && manualPhone.trim().isNotEmpty) ? manualPhone : null,
+      );
     }
   }
 
@@ -151,6 +158,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         final shipping = double.tryParse('${order['shipping_fees'] ?? 0}') ?? 0.0;
         final delivery = double.tryParse('${order['delivery_fees'] ?? 0}') ?? 0.0;
 
+        // Real per-unit QR codes uploaded by the admin for any purchased
+        // coupons (assigned in upload order). Fall back to the generated
+        // order QR if none were assigned.
+        final couponQrCodes = (order['coupon_qr_codes'] as List?) ?? [];
+        final couponQrImages = couponQrCodes
+            .map((c) => (c as Map)['image']?.toString())
+            .whereType<String>()
+            .where((s) => s.isNotEmpty)
+            .map((s) => s.startsWith('http') ? s : 'https://back.sherykids.com$s')
+            .toList();
+
         context.read<CartProvider>().clear();
 
         Navigator.pushReplacement(context, MaterialPageRoute(
@@ -160,6 +178,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             discount: discount,
             shippingFees: shipping,
             deliveryFees: delivery,
+            couponQrImages: couponQrImages,
           ),
         ));
       } else {

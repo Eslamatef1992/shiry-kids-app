@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../theme/app_colors.dart';
+import '../widgets/network_image.dart';
 
 class PaymentSuccessScreen extends StatelessWidget {
   final String orderId;
@@ -10,6 +11,11 @@ class PaymentSuccessScreen extends StatelessWidget {
   final double shippingFees;
   final double deliveryFees;
 
+  /// Real per-unit QR code images uploaded by the admin for any purchased
+  /// coupons (full URLs). When non-empty, these are shown instead of the
+  /// generated order QR code.
+  final List<String> couponQrImages;
+
   const PaymentSuccessScreen({
     super.key,
     this.orderId = '#12345',
@@ -17,6 +23,7 @@ class PaymentSuccessScreen extends StatelessWidget {
     this.discount = 0.0,
     this.shippingFees = 0.0,
     this.deliveryFees = 1.5,
+    this.couponQrImages = const [],
   });
 
   double get _total => subtotal - discount + shippingFees + deliveryFees;
@@ -74,20 +81,45 @@ class PaymentSuccessScreen extends StatelessWidget {
                     _DashedDivider(),
                     const SizedBox(height: 28),
 
-                    // QR code
-                    QrImageView(
-                      data: 'SHIRY-ORDER-$orderId',
-                      version: QrVersions.auto,
-                      size: 130,
-                      eyeStyle: const QrEyeStyle(
-                        eyeShape: QrEyeShape.square,
-                        color: Color(0xFF000508),
+                    // QR code(s) — show real uploaded coupon QR codes if any
+                    // were assigned, otherwise the generated order QR.
+                    if (couponQrImages.isNotEmpty)
+                      Column(
+                        children: [
+                          const Text(
+                            'Your Coupon QR Code${couponQrImages.length > 1 ? 's' : ''}',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textDark,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Wrap(
+                            spacing: 12,
+                            runSpacing: 12,
+                            alignment: WrapAlignment.center,
+                            children: couponQrImages.map((url) => ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: smartImage(url, width: 130, height: 130, fit: BoxFit.contain),
+                            )).toList(),
+                          ),
+                        ],
+                      )
+                    else
+                      QrImageView(
+                        data: 'SHIRY-ORDER-$orderId',
+                        version: QrVersions.auto,
+                        size: 130,
+                        eyeStyle: const QrEyeStyle(
+                          eyeShape: QrEyeShape.square,
+                          color: Color(0xFF000508),
+                        ),
+                        dataModuleStyle: const QrDataModuleStyle(
+                          dataModuleShape: QrDataModuleShape.square,
+                          color: Color(0xFF000508),
+                        ),
                       ),
-                      dataModuleStyle: const QrDataModuleStyle(
-                        dataModuleShape: QrDataModuleShape.square,
-                        color: Color(0xFF000508),
-                      ),
-                    ),
                     const SizedBox(height: 8),
                     Text(
                       orderId,

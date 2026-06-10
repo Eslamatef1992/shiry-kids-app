@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/wavy_app_bar.dart';
 import '../../services/api_service.dart';
-import '../location_picker_screen.dart';
+import '../../widgets/address_method_sheet.dart';
 
 class MyAddressesScreen extends StatefulWidget {
   const MyAddressesScreen({super.key});
@@ -45,30 +45,41 @@ class _MyAddressesScreenState extends State<MyAddressesScreen> {
   }
 
   Future<void> _pickAddress() async {
-    final result = await Navigator.push<Map<String, dynamic>>(
-      context,
-      MaterialPageRoute(builder: (_) => const LocationPickerScreen()),
-    );
+    final result = await pickAddress(context);
     if (result == null || !mounted) return;
     final detail = result['detail'] as String?;
     if (detail == null) return;
+    final manualName = result['name'] as String?;
+    final manualPhone = result['phone'] as String?;
 
     setState(() => _loading = true);
     try {
-      final res = await ApiService.updateProfile(address: detail);
+      final res = await ApiService.updateProfile(
+        address: detail,
+        name: (manualName != null && manualName.trim().isNotEmpty) ? manualName : null,
+        phone: (manualPhone != null && manualPhone.trim().isNotEmpty) ? manualPhone : null,
+      );
       if (!mounted) return;
       if (res['success'] == true) {
         final user = res['user'] as Map<String, dynamic>?;
         setState(() {
           _address = (user?['address'] as String?) ?? detail;
-          _name = (user?['name'] as String?) ?? _name;
-          _phone = (user?['phone'] as String?) ?? _phone;
+          _name = (user?['name'] as String?) ?? manualName ?? _name;
+          _phone = (user?['phone'] as String?) ?? manualPhone ?? _phone;
         });
       } else {
-        setState(() => _address = detail);
+        setState(() {
+          _address = detail;
+          _name = manualName ?? _name;
+          _phone = manualPhone ?? _phone;
+        });
       }
     } catch (_) {
-      setState(() => _address = detail);
+      setState(() {
+        _address = detail;
+        _name = manualName ?? _name;
+        _phone = manualPhone ?? _phone;
+      });
     } finally {
       if (mounted) setState(() => _loading = false);
     }
