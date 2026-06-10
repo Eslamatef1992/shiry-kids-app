@@ -107,7 +107,11 @@ class ApiService {
 
   static Future<Map<String, dynamic>> register(String name, String email, String phone, String password) async {
     final res = await _request('POST', '/auth/register', body: {'name': name, 'email': email, 'phone': phone, 'password': password});
-    if (res['success'] == true) await saveToken(res['token']);
+    if (res['success'] == true) {
+      await saveToken(res['token'], refresh: res['refresh']);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('user', jsonEncode(res['user']));
+    }
     return res;
   }
 
@@ -236,6 +240,15 @@ class ApiService {
 
   // ── CMS pages ─────────────────────────────────────────────────────────────
   static Future<Map<String, dynamic>> getCmsPage(String slug) async => _request('GET', '/cms/$slug');
+
+  // ── Push notifications ────────────────────────────────────────────────────
+  static Future<Map<String, dynamic>> registerDeviceToken(String token, {String? platform}) async {
+    final loggedIn = await isLoggedIn();
+    return _request('POST', '/notifications/register-token', auth: loggedIn, body: {
+      'token': token,
+      if (platform != null) 'platform': platform,
+    });
+  }
 
   // ── Admin auth ────────────────────────────────────────────────────────────
   static Future<Map<String, dynamic>> adminLogin(String email, String password) async {

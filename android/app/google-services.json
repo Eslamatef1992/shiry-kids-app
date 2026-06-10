@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "414026227515",
+    "project_id": "teknulugy-1773461663922",
+    "storage_bucket": "teknulugy-1773461663922.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:414026227515:android:20520ed64d930481e4611e",
+        "android_client_info": {
+          "package_name": "com.tek.shiry"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "414026227515-fsn9jeelo59r2et66uc9m7a029a01b52.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZ3QTUAfV31jbi8p71BEGpWGcs0jZScU4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "414026227515-fsn9jeelo59r2et66uc9m7a029a01b52.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

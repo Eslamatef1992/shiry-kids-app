@@ -44,9 +44,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
               .map((j) => ProductCategory.fromJson(j as Map<String, dynamic>))
               .toList();
           _categories = [const ProductCategory(id: 'all', name: 'All', emoji: '🎉'), ...cats];
-          final rows = (prodRes['data'] != null && prodRes['data']['rows'] != null)
-              ? prodRes['data']['rows'] as List
-              : (prodRes['data'] as List? ?? []);
+          final prodData = prodRes['data'];
+          final rows = prodData is Map ? (prodData['rows'] as List? ?? []) : (prodData as List? ?? []);
           _allProducts = rows.map((j) => Product.fromJson(j as Map<String, dynamic>)).toList();
           _loading = false;
         });

@@ -30,14 +30,14 @@ class _GuestCheckoutScreenState extends State<GuestCheckoutScreen> {
   }
 
   void _openLocationPicker() async {
-    final result = await Navigator.push<Map<String, String>>(
+    final result = await Navigator.push<Map<String, dynamic>>(
       context,
       MaterialPageRoute(builder: (_) => const LocationPickerScreen()),
     );
     if (result != null && mounted) {
       setState(() {
-        _locationCity   = result['city'];
-        _locationDetail = result['detail'];
+        _locationCity   = 'Selected Location';
+        _locationDetail = result['detail'] as String?;
       });
     }
   }

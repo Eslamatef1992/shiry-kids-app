@@ -12,8 +12,10 @@ import 'screens/forgot_password_screen.dart';
 import 'screens/new_password_screen.dart';
 import 'screens/location_permission_screen.dart';
 import 'screens/main_shell.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'services/notification_service.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   SystemChrome.setSystemUIOverlayStyle(
@@ -22,6 +24,14 @@ void main() {
       statusBarIconBrightness: Brightness.dark,
     ),
   );
+
+  // Push notifications (no-ops gracefully if Firebase config files aren't
+  // present yet — see services/notification_service.dart).
+  await NotificationService.init();
+  try {
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  } catch (_) {}
+
   runApp(const ShiryKidsApp());
 }
 

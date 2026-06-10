@@ -1,21 +1,130 @@
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../theme/app_colors.dart';
 
-class LocationPickerScreen extends StatelessWidget {
+class LocationPickerScreen extends StatefulWidget {
   const LocationPickerScreen({super.key});
+
+  @override
+  State<LocationPickerScreen> createState() => _LocationPickerScreenState();
+}
+
+class _LocationPickerScreenState extends State<LocationPickerScreen> {
+  // Default camera position (Kuwait City) until we get the user's location.
+  static const LatLng _defaultCenter = LatLng(29.3759, 47.9774);
+
+  GoogleMapController? _mapController;
+  LatLng _center = _defaultCenter;
+  String _address = 'Kuwait City, Kuwait';
+  bool _loading = true;
+  bool _resolvingAddress = false;
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _detectCurrentLocation();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _detectCurrentLocation() async {
+    try {
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        setState(() => _loading = false);
+        return;
+      }
+
+      final pos = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      ).timeout(const Duration(seconds: 8));
+
+      _center = LatLng(pos.latitude, pos.longitude);
+      await _resolveAddress(_center);
+    } catch (_) {
+      // Fall back to the default center silently.
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _resolveAddress(LatLng position) async {
+    setState(() => _resolvingAddress = true);
+    try {
+      final placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+      if (placemarks.isNotEmpty) {
+        final p = placemarks.first;
+        final parts = [p.street, p.subLocality, p.locality, p.country]
+            .where((e) => e != null && e.isNotEmpty)
+            .toList();
+        if (mounted) {
+          setState(() => _address = parts.isNotEmpty ? parts.join(', ') : 'Selected location');
+        }
+      }
+    } catch (_) {
+      // Keep the previous address if reverse geocoding fails.
+    } finally {
+      if (mounted) setState(() => _resolvingAddress = false);
+    }
+  }
+
+  Future<void> _searchAddress(String query) async {
+    if (query.trim().isEmpty) return;
+    try {
+      final locations = await locationFromAddress(query);
+      if (locations.isNotEmpty) {
+        final loc = locations.first;
+        final target = LatLng(loc.latitude, loc.longitude);
+        _mapController?.animateCamera(CameraUpdate.newLatLng(target));
+        setState(() => _center = target);
+        await _resolveAddress(target);
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Address not found')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(children: [
-        // ── Map placeholder ───────────────────────────────────
-        Container(
-          color: const Color(0xFFE8EAD3), // map sand color
-          child: CustomPaint(
-            painter: _MapPainter(),
-            size: Size.infinite,
-          ),
+        // ── Google Map ────────────────────────────────────────
+        GoogleMap(
+          initialCameraPosition: CameraPosition(target: _center, zoom: 15),
+          onMapCreated: (controller) => _mapController = controller,
+          onCameraMove: (position) => _center = position.target,
+          onCameraIdle: () => _resolveAddress(_center),
+          myLocationEnabled: true,
+          myLocationButtonEnabled: false,
+          zoomControlsEnabled: false,
+          mapToolbarEnabled: false,
         ),
+
+        if (_loading)
+          const Positioned.fill(
+            child: ColoredBox(
+              color: Colors.white54,
+              child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+            ),
+          ),
 
         // ── Search bar ────────────────────────────────────────
         Positioned(
@@ -27,8 +136,11 @@ class LocationPickerScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(30),
               boxShadow: const [BoxShadow(color: Color(0x20000000), blurRadius: 8, offset: Offset(0, 2))],
             ),
-            child: const TextField(
-              decoration: InputDecoration(
+            child: TextField(
+              controller: _searchController,
+              textInputAction: TextInputAction.search,
+              onSubmitted: _searchAddress,
+              decoration: const InputDecoration(
                 hintText: 'Search Your Address',
                 hintStyle: TextStyle(color: Color(0xFFAAAAAA), fontSize: 13),
                 prefixIcon: Icon(Icons.search, color: Color(0xFFAAAAAA), size: 20),
@@ -39,9 +151,28 @@ class LocationPickerScreen extends StatelessWidget {
           ),
         ),
 
-        // ── Center pin ────────────────────────────────────────
+        // ── My location button ─────────────────────────────────
+        Positioned(
+          bottom: 180, right: 16,
+          child: FloatingActionButton(
+            heroTag: 'my-location',
+            mini: true,
+            backgroundColor: Colors.white,
+            onPressed: () async {
+              setState(() => _loading = true);
+              await _detectCurrentLocation();
+              _mapController?.animateCamera(CameraUpdate.newLatLng(_center));
+            },
+            child: const Icon(Icons.my_location, color: AppColors.primary),
+          ),
+        ),
+
+        // ── Center pin (fixed, map moves underneath) ───────────
         const Center(
-          child: Icon(Icons.location_on, color: AppColors.primary, size: 40),
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 40),
+            child: Icon(Icons.location_on, color: AppColors.primary, size: 40),
+          ),
         ),
 
         // ── Bottom sheet ──────────────────────────────────────
@@ -54,18 +185,27 @@ class LocationPickerScreen extends StatelessWidget {
               borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             ),
             child: Column(mainAxisSize: MainAxisSize.min, children: [
-              const Text(
-                'Allow Access To The Site For More\nAccurate Delivery.',
-                style: TextStyle(fontSize: 13, color: AppColors.textMedium, height: 1.5),
-              ),
+              Row(children: [
+                const Icon(Icons.location_on, color: AppColors.primary, size: 18),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _resolvingAddress ? 'Locating...' : _address,
+                    style: const TextStyle(fontSize: 13, color: AppColors.textMedium, height: 1.5),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ]),
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context, {
-                    'city': 'Kuwait',
-                    'detail': 'Kuwait City ,Kuwait',
+                    'lat': _center.latitude,
+                    'lng': _center.longitude,
+                    'detail': _address,
                   }),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFFEDED),
@@ -97,33 +237,4 @@ class LocationPickerScreen extends StatelessWidget {
       ]),
     );
   }
-}
-
-// Simple painted map background (rivers + roads suggestion)
-class _MapPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final water = Paint()..color = const Color(0xFF9FC5D8);
-    final road = Paint()..color = const Color(0xFFFFFFFF)..strokeWidth = 3..style = PaintingStyle.stroke;
-    final roadMinor = Paint()..color = const Color(0xFFFFCC66)..strokeWidth = 2..style = PaintingStyle.stroke;
-
-    // Water body (Gulf)
-    final waterPath = Path()
-      ..moveTo(size.width * 0.6, 0)
-      ..lineTo(size.width, 0)
-      ..lineTo(size.width, size.height * 0.8)
-      ..quadraticBezierTo(size.width * 0.7, size.height * 0.6, size.width * 0.5, size.height * 0.4)
-      ..quadraticBezierTo(size.width * 0.65, size.height * 0.2, size.width * 0.6, 0)
-      ..close();
-    canvas.drawPath(waterPath, water);
-
-    // Main roads
-    canvas.drawLine(Offset(0, size.height * 0.45), Offset(size.width * 0.55, size.height * 0.45), road);
-    canvas.drawLine(Offset(size.width * 0.3, 0), Offset(size.width * 0.3, size.height), road);
-    canvas.drawLine(Offset(0, size.height * 0.65), Offset(size.width * 0.5, size.height * 0.65), roadMinor);
-    canvas.drawLine(Offset(size.width * 0.15, 0), Offset(size.width * 0.15, size.height), roadMinor);
-  }
-
-  @override
-  bool shouldRepaint(_) => false;
 }

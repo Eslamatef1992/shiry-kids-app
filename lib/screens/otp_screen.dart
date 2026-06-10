@@ -44,9 +44,16 @@ class _OtpScreenState extends State<OtpScreen> {
     setState(() {});
   }
 
+  // TEMP: fixed test OTP until a real SMS provider is integrated.
+  // Any signup/login/forgot-password flow is "verified" by entering 1234.
+  static const String _testOtp = '1234';
+
   void _confirm() {
     if (!_complete) return;
-    // TODO: validate OTP with backend
+    if (_code != _testOtp) {
+      setState(() => _hasError = true);
+      return;
+    }
     final mode = _args['mode'] as String? ?? 'signup';
     if (mode == 'forgot') {
       Navigator.pushReplacementNamed(context, '/new-password');
@@ -165,6 +172,11 @@ class _OtpScreenState extends State<OtpScreen> {
                 const Text('Invalid Verification Code.',
                     style: TextStyle(color: Colors.red, fontSize: 12)),
               ],
+
+              // TEMP: testing hint until real SMS OTP is integrated.
+              const SizedBox(height: 6),
+              const Text('Testing mode: enter 1234 to continue.',
+                  style: TextStyle(color: AppColors.textLight, fontSize: 11, fontStyle: FontStyle.italic)),
 
               const SizedBox(height: 12),
               Row(

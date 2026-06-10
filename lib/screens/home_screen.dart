@@ -62,14 +62,14 @@ class _HomeScreenState extends State<HomeScreen> {
               .map((j) => ProductCategory.fromJson(j as Map<String, dynamic>)).toList();
           _featuredCoupons = ((results[2]['data'] as List?) ?? [])
               .map((j) => CouponProduct.fromJson(j as Map<String, dynamic>)).toList();
-          final prodRows0 = (results[3]['data'] != null && results[3]['data']['rows'] != null)
-              ? results[3]['data']['rows'] as List : (results[3]['data'] as List? ?? []);
+          final data3 = results[3]['data'];
+          final prodRows0 = data3 is Map ? (data3['rows'] as List? ?? []) : (data3 as List? ?? []);
           _featuredProducts = prodRows0.map((j) => Product.fromJson(j as Map<String, dynamic>)).toList();
-          final prodRows1 = (results[4]['data'] != null && results[4]['data']['rows'] != null)
-              ? results[4]['data']['rows'] as List : (results[4]['data'] as List? ?? []);
+          final data4 = results[4]['data'];
+          final prodRows1 = data4 is Map ? (data4['rows'] as List? ?? []) : (data4 as List? ?? []);
           _newArrivals = prodRows1.map((j) => Product.fromJson(j as Map<String, dynamic>)).toList();
-          final prodRows2 = (results[5]['data'] != null && results[5]['data']['rows'] != null)
-              ? results[5]['data']['rows'] as List : (results[5]['data'] as List? ?? []);
+          final data5 = results[5]['data'];
+          final prodRows2 = data5 is Map ? (data5['rows'] as List? ?? []) : (data5 as List? ?? []);
           _weeklyOffers = prodRows2.map((j) => Product.fromJson(j as Map<String, dynamic>)).toList();
           _loading = false;
         });

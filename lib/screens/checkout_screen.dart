@@ -66,11 +66,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
       if (res['success'] == true) {
         final order = res['data'] as Map<String, dynamic>? ?? {};
-        final orderId = order['orderNumber'] as String? ??
+        final orderId = order['order_number'] as String? ??
             '#${DateTime.now().millisecondsSinceEpoch % 100000}';
-        final discount = (order['discountAmount'] as num?)?.toDouble() ?? 0.0;
-        final shipping = (order['shippingFees'] as num?)?.toDouble() ?? 0.0;
-        final delivery = (order['deliveryFees'] as num?)?.toDouble() ?? 0.0;
+        final discount = double.tryParse('${order['discount'] ?? 0}') ?? 0.0;
+        final shipping = double.tryParse('${order['shipping_fees'] ?? 0}') ?? 0.0;
+        final delivery = double.tryParse('${order['delivery_fees'] ?? 0}') ?? 0.0;
 
         context.read<CartProvider>().clear();
 

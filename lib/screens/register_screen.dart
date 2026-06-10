@@ -28,12 +28,40 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _confirmCtrl.text.isNotEmpty &&
       _acceptedTerms;
 
-  void _signUp() {
+  void _signUp() async {
     if (!_canSubmit) return;
-    Navigator.pushNamed(context, '/otp', arguments: {
-      'phone': '+965${_phoneCtrl.text}',
-      'mode': 'signup',
-    });
+    if (_passCtrl.text != _confirmCtrl.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Passwords do not match'), backgroundColor: Colors.red),
+      );
+      return;
+    }
+    setState(() => _loading = true);
+    try {
+      final res = await ApiService.register(
+        _nameCtrl.text.trim(),
+        _emailCtrl.text.trim(),
+        '+965${_phoneCtrl.text.trim()}',
+        _passCtrl.text,
+      );
+      if (!mounted) return;
+      if (res['success'] == true) {
+        Navigator.pushNamed(context, '/otp', arguments: {
+          'phone': '+965${_phoneCtrl.text.trim()}',
+          'mode': 'signup',
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(res['message'] ?? 'Registration failed'), backgroundColor: Colors.red),
+        );
+      }
+    } catch (_) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Network error. Please try again.'), backgroundColor: Colors.red),
+      );
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
   @override
@@ -194,7 +222,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 width: double.infinity,
                 height: 52,
                 child: ElevatedButton(
-                  onPressed: _canSubmit ? _signUp : null,
+                  onPressed: _canSubmit && !_loading ? _signUp : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _canSubmit ? AppColors.primary : const Color(0xFFFFE8E8),
                     foregroundColor: _canSubmit ? Colors.white : AppColors.primary.withOpacity(0.4),
