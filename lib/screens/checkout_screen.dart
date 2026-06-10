@@ -164,13 +164,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         ));
       } else {
         Navigator.push(context, MaterialPageRoute(
-          builder: (_) => const PaymentFailedScreen(),
+          builder: (_) => PaymentFailedScreen(message: res['message'] as String?),
         ));
       }
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
       Navigator.push(context, MaterialPageRoute(
-        builder: (_) => const PaymentFailedScreen(),
+        builder: (_) => PaymentFailedScreen(message: e.toString()),
       ));
     } finally {
       if (mounted) setState(() => _paying = false);

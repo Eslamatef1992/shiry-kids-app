@@ -111,7 +111,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           // ── Settings ─────────────────────────────────────────
           _Label('Settings'),
           _Card(children: [
-            _SvgRow(asset: 'assets/icons/icon_language.svg', label: 'Change Password', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ChangePasswordScreen()))),
+            _SvgRow(asset: 'assets/icons/icon_change_password.svg', label: 'Change Password', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ChangePasswordScreen()))),
             _Divider(),
             _SvgRow(
               asset: 'assets/icons/icon_language.svg',

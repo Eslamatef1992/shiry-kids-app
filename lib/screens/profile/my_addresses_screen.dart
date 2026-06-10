@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/wavy_app_bar.dart';
-import 'add_address_screen.dart';
-import 'map_location_screen.dart';
+import '../../services/api_service.dart';
+import '../location_picker_screen.dart';
 
 class MyAddressesScreen extends StatefulWidget {
   const MyAddressesScreen({super.key});
@@ -11,12 +11,70 @@ class MyAddressesScreen extends StatefulWidget {
 }
 
 class _MyAddressesScreenState extends State<MyAddressesScreen> {
-  int _selectedIndex = 0;
+  bool _loading = true;
+  String? _name;
+  String? _phone;
+  String? _address;
 
-  final List<_Address> _addresses = [
-    _Address(name: 'Dina Rizk', city: 'Kuwait City ,Kuwait', phone: '+9561234567'),
-    _Address(name: 'Dina Rizk', city: 'Kuwait City ,Kuwait', phone: '+9561234567'),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    setState(() => _loading = true);
+    try {
+      final res = await ApiService.getProfile();
+      if (!mounted) return;
+      if (res['success'] == true) {
+        final user = res['user'] as Map<String, dynamic>?;
+        if (user != null) {
+          setState(() {
+            _name = user['name'] as String?;
+            _phone = user['phone'] as String?;
+            _address = user['address'] as String?;
+          });
+        }
+      }
+    } catch (_) {
+      // Keep whatever we have; user can still try to add an address.
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _pickAddress() async {
+    final result = await Navigator.push<Map<String, dynamic>>(
+      context,
+      MaterialPageRoute(builder: (_) => const LocationPickerScreen()),
+    );
+    if (result == null || !mounted) return;
+    final detail = result['detail'] as String?;
+    if (detail == null) return;
+
+    setState(() => _loading = true);
+    try {
+      final res = await ApiService.updateProfile(address: detail);
+      if (!mounted) return;
+      if (res['success'] == true) {
+        final user = res['user'] as Map<String, dynamic>?;
+        setState(() {
+          _address = (user?['address'] as String?) ?? detail;
+          _name = (user?['name'] as String?) ?? _name;
+          _phone = (user?['phone'] as String?) ?? _phone;
+        });
+      } else {
+        setState(() => _address = detail);
+      }
+    } catch (_) {
+      setState(() => _address = detail);
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  bool get _hasAddress => _address != null && _address!.trim().isNotEmpty;
 
   @override
   Widget build(BuildContext context) {
@@ -27,46 +85,68 @@ class _MyAddressesScreenState extends State<MyAddressesScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const ProfileBreadcrumb(section: 'My Address'),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: GestureDetector(
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddAddressScreen())),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    Icon(Icons.add_location_alt_outlined, color: AppColors.primary, size: 20),
-                    SizedBox(width: 8),
-                    Text('Add New Address',
-                        style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600, fontSize: 14)),
-                  ],
+          if (!_hasAddress)
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: GestureDetector(
+                onTap: _loading ? null : _pickAddress,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(Icons.add_location_alt_outlined, color: AppColors.primary, size: 20),
+                      SizedBox(width: 8),
+                      Text('Add New Address',
+                          style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600, fontSize: 14)),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Text('Selected Address',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textDark)),
-          ),
+          if (_hasAddress)
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Text('My Address',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textDark)),
+            ),
           const SizedBox(height: 12),
           Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: _addresses.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
-              itemBuilder: (_, i) => _AddressCard(
-                address: _addresses[i],
-                isSelected: _selectedIndex == i,
-                onSelect: () => setState(() => _selectedIndex = i),
-                onEdit: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MapLocationScreen())),
-              ),
-            ),
+            child: _loading
+                ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                : _hasAddress
+                    ? ListView(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        children: [
+                          _AddressCard(
+                            name: _name,
+                            address: _address!,
+                            phone: _phone,
+                            onEdit: _pickAddress,
+                          ),
+                        ],
+                      )
+                    : Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 32),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.location_off_outlined, color: AppColors.textLight, size: 40),
+                              const SizedBox(height: 12),
+                              const Text(
+                                'You haven\'t added an address yet.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontSize: 13, color: AppColors.textMedium),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
           ),
         ],
       ),
@@ -75,11 +155,11 @@ class _MyAddressesScreenState extends State<MyAddressesScreen> {
 }
 
 class _AddressCard extends StatelessWidget {
-  final _Address address;
-  final bool isSelected;
-  final VoidCallback onSelect;
+  final String? name;
+  final String address;
+  final String? phone;
   final VoidCallback onEdit;
-  const _AddressCard({required this.address, required this.isSelected, required this.onSelect, required this.onEdit});
+  const _AddressCard({this.name, required this.address, this.phone, required this.onEdit});
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +168,7 @@ class _AddressCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
-        border: isSelected ? Border.all(color: AppColors.primary, width: 1.5) : null,
+        border: Border.all(color: AppColors.primary, width: 1.5),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,34 +179,26 @@ class _AddressCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(address.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: AppColors.textDark)),
+                if (name != null && name!.isNotEmpty)
+                  Text(name!, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: AppColors.textDark)),
                 const SizedBox(height: 2),
-                Text(address.city, style: const TextStyle(fontSize: 12, color: AppColors.textMedium)),
-                const SizedBox(height: 2),
-                Text(address.phone, style: const TextStyle(fontSize: 12, color: AppColors.textMedium)),
+                Text(address, style: const TextStyle(fontSize: 12, color: AppColors.textMedium)),
+                if (phone != null && phone!.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(phone!, style: const TextStyle(fontSize: 12, color: AppColors.textMedium)),
+                ],
                 const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: onEdit,
-                        style: OutlinedButton.styleFrom(
-                          minimumSize: const Size(0, 38),
-                          side: const BorderSide(color: AppColors.divider),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        ),
-                        child: const Text('Edit', style: TextStyle(color: AppColors.textDark, fontSize: 13)),
-                      ),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: onEdit,
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(0, 38),
+                      side: const BorderSide(color: AppColors.divider),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: onSelect,
-                        style: ElevatedButton.styleFrom(minimumSize: const Size(0, 38)),
-                        child: const Text('Select', style: TextStyle(fontSize: 13)),
-                      ),
-                    ),
-                  ],
+                    child: const Text('Edit', style: TextStyle(color: AppColors.textDark, fontSize: 13)),
+                  ),
                 ),
               ],
             ),
@@ -135,9 +207,4 @@ class _AddressCard extends StatelessWidget {
       ),
     );
   }
-}
-
-class _Address {
-  final String name, city, phone;
-  const _Address({required this.name, required this.city, required this.phone});
 }

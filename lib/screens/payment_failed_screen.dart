@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
 class PaymentFailedScreen extends StatelessWidget {
-  const PaymentFailedScreen({super.key});
+  final String? message;
+  const PaymentFailedScreen({super.key, this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -57,10 +58,12 @@ class PaymentFailedScreen extends StatelessWidget {
                       const SizedBox(height: 10),
 
                       // Subtitle
-                      const Text(
-                        'The Available Balance Is Less Than The Order Total.',
+                      Text(
+                        (message != null && message!.trim().isNotEmpty)
+                            ? message!
+                            : 'The Available Balance Is Less Than The Order Total.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 13,
                           color: AppColors.textMedium,
                           height: 1.5,
