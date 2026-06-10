@@ -6,6 +6,7 @@ import '../models/product.dart';
 import '../providers/cart_provider.dart';
 import '../services/api_service.dart';
 import '../widgets/wavy_app_bar.dart';
+import '../widgets/network_image.dart';
 import 'payment_success_screen.dart';
 import 'payment_failed_screen.dart';
 
@@ -290,7 +291,7 @@ class _CheckoutCouponCard extends StatelessWidget {
     child: Row(children: [
       ClipRRect(
         borderRadius: BorderRadius.circular(8),
-        child: Image.asset(item.imageUrl, width: 60, height: 60, fit: BoxFit.cover),
+        child: smartImage(item.imageUrl, width: 60, height: 60, fit: BoxFit.cover),
       ),
       const SizedBox(width: 12),
       Expanded(
@@ -299,7 +300,11 @@ class _CheckoutCouponCard extends StatelessWidget {
               style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textDark)),
           Row(children: [
             ClipOval(
-              child: Image.asset(item.brandImageUrl, width: 14, height: 14, fit: BoxFit.cover),
+              child: smartImage(item.brandImageUrl, width: 14, height: 14, fit: BoxFit.cover,
+                  placeholder: Container(
+                      color: AppColors.primary.withOpacity(0.1),
+                      child: const Icon(Icons.storefront_outlined,
+                          size: 10, color: AppColors.primary))),
             ),
             const SizedBox(width: 4),
             Text(item.brandName,
@@ -342,9 +347,7 @@ class _CheckoutProductCard extends StatelessWidget {
       child: Row(children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: p.imageUrl.isNotEmpty
-              ? Image.asset(p.imageUrl, width: 60, height: 60, fit: BoxFit.cover)
-              : Container(width: 60, height: 60, color: const Color(0xFFF0F0F0)),
+          child: smartImage(p.imageUrl, width: 60, height: 60, fit: BoxFit.cover),
         ),
         const SizedBox(width: 12),
         Expanded(

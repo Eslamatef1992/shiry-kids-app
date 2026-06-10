@@ -4,6 +4,7 @@ import '../theme/app_colors.dart';
 import '../models/product.dart';
 import '../providers/cart_provider.dart';
 import '../widgets/wavy_app_bar.dart';
+import '../widgets/network_image.dart';
 import 'checkout_screen.dart';
 import 'guest_checkout_screen.dart';
 
@@ -199,7 +200,7 @@ class _CouponCartCard extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(10, 12, 0, 12),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
-                    child: Image.asset(item.imageUrl, fit: BoxFit.cover),
+                    child: smartImage(item.imageUrl, fit: BoxFit.cover),
                   ),
                 ),
               ),
@@ -330,7 +331,11 @@ class _CouponCartCard extends StatelessWidget {
                 ],
               ),
               child: ClipOval(
-                child: Image.asset(item.brandImageUrl, fit: BoxFit.cover),
+                child: smartImage(item.brandImageUrl, fit: BoxFit.cover,
+                    placeholder: Container(
+                        color: AppColors.primary.withOpacity(0.1),
+                        child: const Icon(Icons.storefront_outlined,
+                            size: 14, color: AppColors.primary))),
               ),
             ),
           ),
@@ -457,9 +462,7 @@ class _ProductCartCard extends StatelessWidget {
           child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: p.imageUrl.isNotEmpty
-                  ? Image.asset(p.imageUrl, width: 70, height: 70, fit: BoxFit.cover)
-                  : Container(width: 70, height: 70, color: const Color(0xFFF0F0F0)),
+              child: smartImage(p.imageUrl, width: 70, height: 70, fit: BoxFit.cover),
             ),
             const SizedBox(width: 10),
             Expanded(

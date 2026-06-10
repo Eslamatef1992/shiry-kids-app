@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import 'network_image.dart';
 
 /// Ticket-style coupon card matching Figma design.
 /// Left: product image. Middle: brand + title + countdown + pink price area.
@@ -65,10 +66,10 @@ class CouponTicketCard extends StatelessWidget {
                     padding: const EdgeInsets.fromLTRB(10, 12, 0, 12),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(10),
-                      child: Image.asset(
+                      child: smartImage(
                         imageUrl,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
+                        placeholder: Container(
                           color: const Color(0xFFF0F0F0),
                           child: const Icon(Icons.image_outlined,
                               color: Color(0xFFCCCCCC), size: 32),
@@ -188,10 +189,10 @@ class CouponTicketCard extends StatelessWidget {
                   ],
                 ),
                 child: ClipOval(
-                  child: Image.asset(
+                  child: smartImage(
                     brandImageUrl,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
+                    placeholder: Container(
                       color: AppColors.primary.withOpacity(0.1),
                       child: const Icon(Icons.storefront_outlined,
                           size: 16, color: AppColors.primary),

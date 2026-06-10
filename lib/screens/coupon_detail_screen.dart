@@ -5,6 +5,7 @@ import '../theme/app_colors.dart';
 import '../models/product.dart';
 import '../providers/cart_provider.dart';
 import '../widgets/wavy_app_bar.dart';
+import '../widgets/network_image.dart';
 
 class CouponDetailScreen extends StatefulWidget {
   final CouponProduct coupon;
@@ -89,8 +90,8 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
               // ── Hero image ──
               AspectRatio(
                 aspectRatio: 16 / 9,
-                child: Image.asset(c.imageUrl, fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
+                child: smartImage(c.imageUrl, fit: BoxFit.cover,
+                    placeholder: Container(
                         color: const Color(0xFFF0F0F0),
                         child: const Icon(Icons.image_outlined,
                             color: Color(0xFFCCCCCC), size: 64))),
@@ -102,8 +103,12 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
                   // ── Brand ──
                   Row(children: [
                     ClipOval(
-                      child: Image.asset(c.brandImageUrl,
-                          width: 32, height: 32, fit: BoxFit.cover),
+                      child: smartImage(c.brandImageUrl,
+                          width: 32, height: 32, fit: BoxFit.cover,
+                          placeholder: Container(
+                              color: AppColors.primary.withOpacity(0.1),
+                              child: const Icon(Icons.storefront_outlined,
+                                  size: 16, color: AppColors.primary))),
                     ),
                     const SizedBox(width: 10),
                     Text(c.brandName,
