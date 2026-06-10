@@ -105,11 +105,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           // ── App Information (text only) ───────────────────────
           _Label('App Information'),
           _Card(children: [
-            _TextRow(label: 'About Us',            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AppInfoScreen(title: 'About Us')))),
+            _TextRow(label: 'About Us',            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AppInfoScreen(title: 'About Us', slug: 'about-us')))),
             _Divider(),
-            _TextRow(label: 'Privacy Policy',      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AppInfoScreen(title: 'Privacy Policy')))),
+            _TextRow(label: 'Privacy Policy',      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AppInfoScreen(title: 'Privacy Policy', slug: 'privacy-policy')))),
             _Divider(),
-            _TextRow(label: 'Terms & Conditions',  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AppInfoScreen(title: 'Terms&Conditions')))),
+            _TextRow(label: 'Terms & Conditions',  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AppInfoScreen(title: 'Terms & Conditions', slug: 'terms-conditions')))),
           ]),
           const SizedBox(height: 16),
 

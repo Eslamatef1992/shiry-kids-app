@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import '../theme/app_colors.dart';
 import '../models/product.dart';
 import '../providers/cart_provider.dart';
 import '../widgets/wavy_app_bar.dart';
 import '../widgets/coupon_ticket_card.dart';
+import '../widgets/category_image.dart';
 import 'search_screen.dart';
 import 'coupon_detail_screen.dart';
 import '../services/api_service.dart';
@@ -285,18 +285,12 @@ class _CategoriesRow extends StatelessWidget {
           child: Row(
             children: [
               ClipOval(
-                child: (cat.imageUrl != null && cat.imageUrl!.startsWith('http'))
-                    ? (cat.imageUrl!.toLowerCase().endsWith('.svg')
-                        ? SvgPicture.network(cat.imageUrl!, width: 44, height: 44, fit: BoxFit.cover,
-                            placeholderBuilder: (_) => Container(width: 44, height: 44, color: const Color(0xFFFFDDDD),
-                                child: Center(child: Text(cat.emoji.isNotEmpty ? cat.emoji : '🎁', style: const TextStyle(fontSize: 22)))))
-                        : Image.network(cat.imageUrl!, width: 44, height: 44, fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(width: 44, height: 44, color: const Color(0xFFFFDDDD),
-                                child: Center(child: Text(cat.emoji.isNotEmpty ? cat.emoji : '🎁', style: const TextStyle(fontSize: 22))))))
-                    : cat.imagePath != null
-                    ? Image.asset(cat.imagePath!, width: 44, height: 44, fit: BoxFit.cover)
-                    : Container(width: 44, height: 44, color: const Color(0xFFFFDDDD),
-                        child: Center(child: Text(cat.emoji.isNotEmpty ? cat.emoji : '🎁', style: const TextStyle(fontSize: 22)))),
+                child: CategoryImage(
+                  imageUrl: cat.imageUrl,
+                  imagePath: cat.imagePath,
+                  emoji: cat.emoji,
+                  size: 44,
+                ),
               ),
               const SizedBox(width: 8),
               Text(cat.name,

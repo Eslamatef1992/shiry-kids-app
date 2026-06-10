@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import '../theme/app_colors.dart';
 import '../models/product.dart';
 import '../providers/cart_provider.dart';
 import '../widgets/wavy_app_bar.dart';
+import '../widgets/category_image.dart';
 import 'product_detail_screen.dart';
 import '../services/api_service.dart';
 
@@ -108,13 +108,14 @@ class _ProductsScreenState extends State<ProductsScreen> {
                           ),
                         ),
                         child: ClipOval(
-                          child: cat.imageUrl != null && cat.imageUrl!.startsWith('http')
-                              ? (cat.imageUrl!.toLowerCase().endsWith('.svg')
-                                  ? SvgPicture.network(cat.imageUrl!, fit: BoxFit.cover, width: 52, height: 52,
-                                      placeholderBuilder: (_) => Center(child: Text(cat.emoji, style: const TextStyle(fontSize: 22))))
-                                  : Image.network(cat.imageUrl!, fit: BoxFit.cover, width: 52, height: 52, errorBuilder: (_, __, ___) => Center(child: Text(cat.emoji, style: const TextStyle(fontSize: 22)))))
-                              : cat.imagePath != null
-                              ? Image.asset(cat.imagePath!, fit: BoxFit.cover, width: 52, height: 52)
+                          child: (cat.imageUrl != null && cat.imageUrl!.startsWith('http')) || cat.imagePath != null
+                              ? CategoryImage(
+                                  imageUrl: cat.imageUrl,
+                                  imagePath: cat.imagePath,
+                                  emoji: cat.emoji,
+                                  size: 52,
+                                  placeholderColor: isSelected ? AppColors.primary.withOpacity(0.08) : AppColors.white,
+                                )
                               : Container(
                                   color: isSelected ? AppColors.primary.withOpacity(0.08) : AppColors.white,
                                   child: Center(child: Text(cat.emoji, style: const TextStyle(fontSize: 22))),

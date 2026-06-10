@@ -1,23 +1,62 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/wavy_app_bar.dart';
+import '../../services/api_service.dart';
 
-class AppInfoScreen extends StatelessWidget {
+/// Generic CMS-backed page (About Us, Privacy Policy, Terms & Conditions).
+/// Fetches `/cms/:slug` and renders the bilingual HTML content set by the
+/// admin (rich text editor), choosing the Arabic or English copy based on
+/// the device locale.
+class AppInfoScreen extends StatefulWidget {
   final String title;
-  const AppInfoScreen({super.key, required this.title});
+  final String slug;
+  const AppInfoScreen({super.key, required this.title, required this.slug});
 
-  static const _body = [
-    _Section(heading: 'Overview:', points: [
-      'Shiry Kids is a fun e-commerce platform dedicated to bringing the best toys, books, art kits, and more to children across Kuwait.',
-      'Our platform allows parents to discover curated collections, apply exclusive coupons, and enjoy fast, safe delivery right to their door.',
-      'We partner with trusted local and international brands to ensure every product meets our safety and quality standards.',
-    ]),
-    _Section(heading: 'Agreement:', points: [
-      'By using Shiry Kids, you agree to our terms of service and privacy policy.',
-      'All purchases are subject to availability and our return policy. Items may be returned within 14 days of delivery.',
-      'We reserve the right to update our terms at any time. Continued use of the app constitutes acceptance of the updated terms.',
-    ]),
-  ];
+  @override
+  State<AppInfoScreen> createState() => _AppInfoScreenState();
+}
+
+class _AppInfoScreenState extends State<AppInfoScreen> {
+  bool _loading = true;
+  bool _error = false;
+  String _title = '';
+  String _html = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _title = widget.title;
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final res = await ApiService.getCmsPage(widget.slug);
+      final data = res['data'] as Map<String, dynamic>?;
+      if (data == null) {
+        if (mounted) setState(() { _loading = false; _error = true; });
+        return;
+      }
+      final isAr = mounted && Localizations.localeOf(context).languageCode == 'ar';
+
+      String pick(String enKey, String arKey, String fallback) {
+        final ar = data[arKey]?.toString() ?? '';
+        final en = data[enKey]?.toString() ?? '';
+        if (isAr && ar.isNotEmpty) return ar;
+        return en.isNotEmpty ? en : fallback;
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _title = pick('title', 'title_ar', widget.title);
+        _html = pick('content', 'content_ar', '');
+        _loading = false;
+      });
+    } catch (_) {
+      if (mounted) setState(() { _loading = false; _error = true; });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,50 +66,45 @@ class AppInfoScreen extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ProfileBreadcrumb(section: title),
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(16),
-              children: _body.map((s) => _SectionWidget(section: s)).toList(),
-            ),
+          ProfileBreadcrumb(section: _title),
+          Expanded(child: _buildBody()),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+    }
+    if (_error || _html.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            'Content for this page hasn\'t been added yet.',
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 13, color: AppColors.textMedium),
           ),
-        ],
-      ),
+        ),
+      );
+    }
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Html(
+          data: _html,
+          style: {
+            'body': Style(fontSize: FontSize(13), color: AppColors.textDark),
+            'p': Style(fontSize: FontSize(13), color: AppColors.textDark),
+            'li': Style(fontSize: FontSize(13), color: AppColors.textDark),
+            'h1': Style(fontSize: FontSize(20), fontWeight: FontWeight.w800, color: AppColors.textDark),
+            'h2': Style(fontSize: FontSize(17), fontWeight: FontWeight.w700, color: AppColors.textDark),
+            'h3': Style(fontSize: FontSize(15), fontWeight: FontWeight.w700, color: AppColors.textDark),
+            'a': Style(color: AppColors.primary),
+          },
+        ),
+      ],
     );
   }
-}
-
-class _SectionWidget extends StatelessWidget {
-  final _Section section;
-  const _SectionWidget({super.key, required this.section});
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(section.heading,
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textDark)),
-          const SizedBox(height: 10),
-          ...section.points.map((p) => Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('• ', style: TextStyle(color: AppColors.textDark, fontSize: 14)),
-                Expanded(child: Text(p, style: const TextStyle(fontSize: 13, color: AppColors.textDark, height: 1.6))),
-              ],
-            ),
-          )),
-        ],
-      ),
-    );
-  }
-}
-
-class _Section {
-  final String heading;
-  final List<String> points;
-  const _Section({required this.heading, required this.points});
 }
