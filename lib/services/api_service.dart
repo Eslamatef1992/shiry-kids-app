@@ -49,13 +49,14 @@ class ApiService {
 
     http.Response response;
     final bodyStr = body != null ? jsonEncode(body) : null;
+    const timeout = Duration(seconds: 15);
 
     switch (method.toUpperCase()) {
-      case 'POST':   response = await http.post(uri, headers: headers, body: bodyStr); break;
-      case 'PUT':    response = await http.put(uri, headers: headers, body: bodyStr); break;
-      case 'PATCH':  response = await http.patch(uri, headers: headers, body: bodyStr); break;
-      case 'DELETE': response = await http.delete(uri, headers: headers); break;
-      default:       response = await http.get(uri, headers: headers);
+      case 'POST':   response = await http.post(uri, headers: headers, body: bodyStr).timeout(timeout); break;
+      case 'PUT':    response = await http.put(uri, headers: headers, body: bodyStr).timeout(timeout); break;
+      case 'PATCH':  response = await http.patch(uri, headers: headers, body: bodyStr).timeout(timeout); break;
+      case 'DELETE': response = await http.delete(uri, headers: headers).timeout(timeout); break;
+      default:       response = await http.get(uri, headers: headers).timeout(timeout);
     }
 
     if (response.statusCode == 401) {
@@ -66,9 +67,9 @@ class ApiService {
           : (await SharedPreferences.getInstance()).getString('auth_token');
       if (newToken != null) headers['Authorization'] = 'Bearer $newToken';
       switch (method.toUpperCase()) {
-        case 'POST':   response = await http.post(uri, headers: headers, body: bodyStr); break;
-        case 'PUT':    response = await http.put(uri, headers: headers, body: bodyStr); break;
-        default:       response = await http.get(uri, headers: headers);
+        case 'POST':   response = await http.post(uri, headers: headers, body: bodyStr).timeout(timeout); break;
+        case 'PUT':    response = await http.put(uri, headers: headers, body: bodyStr).timeout(timeout); break;
+        default:       response = await http.get(uri, headers: headers).timeout(timeout);
       }
     }
 
@@ -120,12 +121,14 @@ class ApiService {
   }
 
   // ── Products ──────────────────────────────────────────────────────────────
-  static Future<Map<String, dynamic>> getProducts({int page = 1, int limit = 20, String? search, String? categoryId, String? vendorId, bool? featured, String? sortBy}) async {
+  static Future<Map<String, dynamic>> getProducts({int page = 1, int limit = 20, String? search, String? categoryId, String? vendorId, bool? featured, bool? isNewArrival, bool? isWeeklyOffer, String? sortBy}) async {
     var path = '/products?page=$page&limit=$limit&status=active';
     if (search != null) path += '&search=$search';
     if (categoryId != null) path += '&category_id=$categoryId';
     if (vendorId != null) path += '&vendor_id=$vendorId';
     if (featured == true) path += '&featured=true';
+    if (isNewArrival == true) path += '&is_new_arrival=true';
+    if (isWeeklyOffer == true) path += '&is_weekly_offer=true';
     if (sortBy != null) path += '&sort_by=$sortBy';
     return _request('GET', path);
   }

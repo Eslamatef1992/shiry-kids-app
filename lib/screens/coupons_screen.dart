@@ -5,6 +5,7 @@ import '../models/product.dart';
 import '../providers/cart_provider.dart';
 import '../widgets/wavy_app_bar.dart';
 import '../widgets/coupon_ticket_card.dart';
+import '../widgets/skeleton_loader.dart';
 import 'coupon_detail_screen.dart';
 import '../services/api_service.dart';
 
@@ -20,6 +21,7 @@ class _CouponsScreenState extends State<CouponsScreen> {
   List<CouponProduct> _allCoupons = [];
   String _selected = 'all';
   bool _loading = true;
+  bool _error = false;
 
   @override
   void initState() {
@@ -28,6 +30,7 @@ class _CouponsScreenState extends State<CouponsScreen> {
   }
 
   Future<void> _loadCoupons() async {
+    if (mounted) setState(() { _loading = true; _error = false; });
     try {
       final res = await ApiService.getCoupons();
       if (mounted) {
@@ -37,8 +40,9 @@ class _CouponsScreenState extends State<CouponsScreen> {
           _loading = false;
         });
       }
-    } catch (_) {
-      if (mounted) setState(() => _loading = false);
+    } catch (e) {
+      debugPrint('CouponsScreen._loadCoupons error: $e');
+      if (mounted) setState(() { _loading = false; _error = true; });
     }
   }
 
@@ -91,7 +95,9 @@ class _CouponsScreenState extends State<CouponsScreen> {
         // ── Coupon list ───────────────────────────────────────────
         Expanded(
           child: _loading
-              ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+              ? const CouponListSkeleton()
+              : _error
+              ? LoadErrorView(onRetry: _loadCoupons)
               : _filtered.isEmpty
               ? const Center(child: Text('No coupons found',
                   style: TextStyle(color: AppColors.textMedium)))

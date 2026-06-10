@@ -17,11 +17,20 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   Map<String, dynamic>? _user;
+  Map<String, dynamic> _settings = {};
+  bool _loggedIn = false;
 
   @override
   void initState() {
     super.initState();
     _loadUser();
+    _loadSettings();
+    _checkAuth();
+  }
+
+  Future<void> _checkAuth() async {
+    final loggedIn = await ApiService.isLoggedIn();
+    if (mounted) setState(() => _loggedIn = loggedIn);
   }
 
   Future<void> _loadUser() async {
@@ -29,6 +38,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final res = await ApiService.getUser();
       if (mounted && res != null) {
         setState(() => _user = res);
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _loadSettings() async {
+    try {
+      final res = await ApiService.getSettings();
+      if (mounted && res['success'] == true && res['data'] != null) {
+        setState(() => _settings = Map<String, dynamic>.from(res['data']));
       }
     } catch (_) {}
   }
@@ -70,10 +88,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          Center(child: Text(name.isNotEmpty ? name : 'My Profile',
+          Center(child: Text(
+              _loggedIn ? (name.isNotEmpty ? name : 'My Profile') : 'Guest',
               style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.textDark))),
           const SizedBox(height: 4),
-          Center(child: Text(email,
+          Center(child: Text(
+              _loggedIn ? email : 'Log in to access your account',
               style: const TextStyle(fontSize: 13, color: AppColors.textMedium))),
           const SizedBox(height: 24),
 
@@ -120,21 +140,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               child: Column(
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.phone, color: AppColors.primary, size: 16),
-                      const SizedBox(width: 6),
-                      const Text('+9876122323', style: TextStyle(fontSize: 12, color: AppColors.textDark)),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        child: Text('|', style: TextStyle(color: AppColors.divider)),
-                      ),
-                      const Icon(Icons.email, color: AppColors.primary, size: 16),
-                      const SizedBox(width: 6),
-                      const Text('Shirykids@Gmail.Com', style: TextStyle(fontSize: 12, color: AppColors.textDark)),
-                    ],
-                  ),
+                  Builder(builder: (context) {
+                    final phone = (_settings['contact_phone']?.toString().trim().isNotEmpty == true)
+                        ? _settings['contact_phone'].toString()
+                        : '+9876122323';
+                    final email = (_settings['contact_email']?.toString().trim().isNotEmpty == true)
+                        ? _settings['contact_email'].toString()
+                        : 'Shirykids@Gmail.Com';
+                    return Wrap(
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      runSpacing: 8,
+                      children: [
+                        const Icon(Icons.phone, color: AppColors.primary, size: 16),
+                        const SizedBox(width: 6),
+                        Text(phone, style: const TextStyle(fontSize: 12, color: AppColors.textDark)),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          child: Text('|', style: TextStyle(color: AppColors.divider)),
+                        ),
+                        const Icon(Icons.email, color: AppColors.primary, size: 16),
+                        const SizedBox(width: 6),
+                        Text(email, style: const TextStyle(fontSize: 12, color: AppColors.textDark)),
+                      ],
+                    );
+                  }),
                   const SizedBox(height: 16),
                   // Social icons from Figma SVGs
                   Row(
@@ -157,9 +187,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ]),
           const SizedBox(height: 16),
 
-          // ── Logout ───────────────────────────────────────────
+          // ── Logout / Login ────────────────────────────────────
           _Card(children: [
-            _TextRow(label: 'Logout', onTap: () => _showLogoutDialog(context)),
+            _loggedIn
+                ? _TextRow(label: 'Logout', onTap: () => _showLogoutDialog(context))
+                : _TextRow(label: 'Log In', onTap: () =>
+                    Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false)),
           ]),
           const SizedBox(height: 40),
         ],

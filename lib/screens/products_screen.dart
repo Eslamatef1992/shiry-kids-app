@@ -5,6 +5,7 @@ import '../models/product.dart';
 import '../providers/cart_provider.dart';
 import '../widgets/wavy_app_bar.dart';
 import '../widgets/category_image.dart';
+import '../widgets/skeleton_loader.dart';
 import 'product_detail_screen.dart';
 import '../services/api_service.dart';
 
@@ -22,6 +23,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
   ];
   List<Product> _allProducts = [];
   bool _loading = true;
+  bool _error = false;
 
   @override
   void initState() {
@@ -31,6 +33,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
   }
 
   Future<void> _loadData() async {
+    if (mounted) setState(() { _loading = true; _error = false; });
     try {
       final catRes = await ApiService.getCategories();
       final prodRes = await ApiService.getProducts();
@@ -47,8 +50,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
           _loading = false;
         });
       }
-    } catch (_) {
-      if (mounted) setState(() => _loading = false);
+    } catch (e) {
+      debugPrint('ProductsScreen._loadData error: $e');
+      if (mounted) setState(() { _loading = false; _error = true; });
     }
   }
 
@@ -155,7 +159,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
           // ── Grid ─────────────────────────────────────────────
           Expanded(
             child: _loading
-                ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                ? const ProductGridSkeleton()
+                : _error
+                ? LoadErrorView(onRetry: _loadData)
                 : _filtered.isEmpty
                 ? const Center(child: Text('No products found', style: TextStyle(color: AppColors.textMedium)))
                 : GridView.builder(

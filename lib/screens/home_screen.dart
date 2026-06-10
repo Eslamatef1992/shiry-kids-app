@@ -6,6 +6,7 @@ import '../providers/cart_provider.dart';
 import '../widgets/wavy_app_bar.dart';
 import '../widgets/coupon_ticket_card.dart';
 import '../widgets/category_image.dart';
+import '../widgets/skeleton_loader.dart';
 import 'search_screen.dart';
 import 'coupon_detail_screen.dart';
 import '../services/api_service.dart';
@@ -25,12 +26,14 @@ class _HomeScreenState extends State<HomeScreen> {
   final _bannerCtrl = PageController();
   int _bannerPage = 0;
   bool _loading = true;
+  bool _error = false;
 
   List<AppBanner> _banners = [];
   List<ProductCategory> _categories = [];
   List<CouponProduct> _featuredCoupons = [];
   List<Product> _featuredProducts = [];
   List<Product> _newArrivals = [];
+  List<Product> _weeklyOffers = [];
 
   @override
   void initState() {
@@ -39,13 +42,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadAll() async {
+    if (mounted) setState(() { _loading = true; _error = false; });
     try {
       final results = await Future.wait([
         ApiService.getBanners(),
         ApiService.getCategories(),
         ApiService.getCoupons(featured: true, limit: 5),
         ApiService.getProducts(featured: true, limit: 6),
-        ApiService.getProducts(limit: 6, sortBy: 'created_at'),
+        ApiService.getProducts(isNewArrival: true, limit: 6, sortBy: 'created_at'),
+        ApiService.getProducts(isWeeklyOffer: true, limit: 6),
       ]);
 
       if (mounted) {
@@ -62,11 +67,15 @@ class _HomeScreenState extends State<HomeScreen> {
           final prodRows1 = (results[4]['data'] != null && results[4]['data']['rows'] != null)
               ? results[4]['data']['rows'] as List : (results[4]['data'] as List? ?? []);
           _newArrivals = prodRows1.map((j) => Product.fromJson(j as Map<String, dynamic>)).toList();
+          final prodRows2 = (results[5]['data'] != null && results[5]['data']['rows'] != null)
+              ? results[5]['data']['rows'] as List : (results[5]['data'] as List? ?? []);
+          _weeklyOffers = prodRows2.map((j) => Product.fromJson(j as Map<String, dynamic>)).toList();
           _loading = false;
         });
       }
-    } catch (_) {
-      if (mounted) setState(() => _loading = false);
+    } catch (e) {
+      debugPrint('HomeScreen._loadAll error: $e');
+      if (mounted) setState(() { _loading = false; _error = true; });
     }
   }
 
@@ -84,7 +93,9 @@ class _HomeScreenState extends State<HomeScreen> {
           )),
           Expanded(
             child: _loading
-                ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                ? const HomeSkeleton()
+                : _error
+                ? LoadErrorView(onRetry: _loadAll)
                 : RefreshIndicator(
                     color: AppColors.primary,
                     onRefresh: _loadAll,
@@ -131,6 +142,14 @@ class _HomeScreenState extends State<HomeScreen> {
                             _sectionTitle('New Arrivals', null),
                             const SizedBox(height: 10),
                             _ProductRow(products: _newArrivals),
+                            const SizedBox(height: 20),
+                          ],
+
+                          // ── Weekly Offers ────────────────────────────────
+                          if (_weeklyOffers.isNotEmpty) ...[
+                            _sectionTitle('Weekly Offers', null),
+                            const SizedBox(height: 10),
+                            _ProductRow(products: _weeklyOffers),
                             const SizedBox(height: 36),
                           ],
                         ],
