@@ -143,6 +143,11 @@ class ApiService {
     return _request('GET', path);
   }
 
+  static Future<Map<String, dynamic>> getCoupon(int id) async => _request('GET', '/coupons/$id');
+
+  // ── Ads ───────────────────────────────────────────────────────────────────
+  static Future<Map<String, dynamic>> getAds() async => _request('GET', '/ads');
+
   // ── Discount coupon validation ────────────────────────────────────────────
   static Future<Map<String, dynamic>> validateDiscountCode(String code) async =>
       _request('GET', '/discount-coupons/validate/$code');

@@ -24,6 +24,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
   List<Product> _allProducts = [];
   bool _loading = true;
   bool _error = false;
+  String? _errorMsg;
 
   @override
   void initState() {
@@ -33,7 +34,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
   }
 
   Future<void> _loadData() async {
-    if (mounted) setState(() { _loading = true; _error = false; });
+    if (mounted) setState(() { _loading = true; _error = false; _errorMsg = null; });
     try {
       final catRes = await ApiService.getCategories();
       final prodRes = await ApiService.getProducts();
@@ -52,7 +53,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
       }
     } catch (e) {
       debugPrint('ProductsScreen._loadData error: $e');
-      if (mounted) setState(() { _loading = false; _error = true; });
+      if (mounted) setState(() { _loading = false; _error = true; _errorMsg = e.toString(); });
     }
   }
 
@@ -161,7 +162,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
             child: _loading
                 ? const ProductGridSkeleton()
                 : _error
-                ? LoadErrorView(onRetry: _loadData)
+                ? LoadErrorView(onRetry: _loadData, detail: _errorMsg)
                 : _filtered.isEmpty
                 ? const Center(child: Text('No products found', style: TextStyle(color: AppColors.textMedium)))
                 : GridView.builder(

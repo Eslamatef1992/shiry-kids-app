@@ -27,6 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _bannerPage = 0;
   bool _loading = true;
   bool _error = false;
+  String? _errorMsg;
 
   List<AppBanner> _banners = [];
   List<ProductCategory> _categories = [];
@@ -42,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadAll() async {
-    if (mounted) setState(() { _loading = true; _error = false; });
+    if (mounted) setState(() { _loading = true; _error = false; _errorMsg = null; });
     try {
       final results = await Future.wait([
         ApiService.getBanners(),
@@ -75,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     } catch (e) {
       debugPrint('HomeScreen._loadAll error: $e');
-      if (mounted) setState(() { _loading = false; _error = true; });
+      if (mounted) setState(() { _loading = false; _error = true; _errorMsg = e.toString(); });
     }
   }
 
@@ -95,7 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: _loading
                 ? const HomeSkeleton()
                 : _error
-                ? LoadErrorView(onRetry: _loadAll)
+                ? LoadErrorView(onRetry: _loadAll, detail: _errorMsg)
                 : RefreshIndicator(
                     color: AppColors.primary,
                     onRefresh: _loadAll,

@@ -22,6 +22,7 @@ class _CouponsScreenState extends State<CouponsScreen> {
   String _selected = 'all';
   bool _loading = true;
   bool _error = false;
+  String? _errorMsg;
 
   @override
   void initState() {
@@ -30,7 +31,7 @@ class _CouponsScreenState extends State<CouponsScreen> {
   }
 
   Future<void> _loadCoupons() async {
-    if (mounted) setState(() { _loading = true; _error = false; });
+    if (mounted) setState(() { _loading = true; _error = false; _errorMsg = null; });
     try {
       final res = await ApiService.getCoupons();
       if (mounted) {
@@ -42,7 +43,7 @@ class _CouponsScreenState extends State<CouponsScreen> {
       }
     } catch (e) {
       debugPrint('CouponsScreen._loadCoupons error: $e');
-      if (mounted) setState(() { _loading = false; _error = true; });
+      if (mounted) setState(() { _loading = false; _error = true; _errorMsg = e.toString(); });
     }
   }
 
@@ -97,7 +98,7 @@ class _CouponsScreenState extends State<CouponsScreen> {
           child: _loading
               ? const CouponListSkeleton()
               : _error
-              ? LoadErrorView(onRetry: _loadCoupons)
+              ? LoadErrorView(onRetry: _loadCoupons, detail: _errorMsg)
               : _filtered.isEmpty
               ? const Center(child: Text('No coupons found',
                   style: TextStyle(color: AppColors.textMedium)))

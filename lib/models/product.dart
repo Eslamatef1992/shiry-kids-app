@@ -12,6 +12,38 @@ List<String> _strList(dynamic v) {
   return [];
 }
 
+class ProductVariant {
+  final String? id;
+  final String? size;
+  final String? color;
+  final String? sku;
+  final double? price;
+  final int stock;
+  final String imageUrl;
+
+  const ProductVariant({
+    this.id,
+    this.size,
+    this.color,
+    this.sku,
+    this.price,
+    this.stock = 0,
+    this.imageUrl = '',
+  });
+
+  factory ProductVariant.fromJson(Map<String, dynamic> j) {
+    return ProductVariant(
+      id: j['id']?.toString(),
+      size: j['size']?.toString(),
+      color: j['color']?.toString(),
+      sku: j['sku']?.toString(),
+      price: j['price'] != null ? double.tryParse(j['price'].toString()) : null,
+      stock: int.tryParse(j['stock']?.toString() ?? '0') ?? 0,
+      imageUrl: _imgUrl(j['image']),
+    );
+  }
+}
+
 class Product {
   final String id;
   final String name;
@@ -30,7 +62,10 @@ class Product {
   final List<String>? sizes;
   final List<String>? colors;
   final bool featured;
+  final bool isNewArrival;
+  final bool isWeeklyOffer;
   final int stock;
+  final List<ProductVariant> variants;
 
   const Product({
     required this.id,
@@ -50,13 +85,17 @@ class Product {
     this.sizes,
     this.colors,
     this.featured = false,
+    this.isNewArrival = false,
+    this.isWeeklyOffer = false,
     this.stock = 0,
+    this.variants = const [],
   });
 
   factory Product.fromJson(Map<String, dynamic> j) {
     final rawImages = j['images'] as List? ?? [];
     final imgList = rawImages.map((e) => _imgUrl(e)).where((e) => e.isNotEmpty).toList();
     final firstImg = imgList.isNotEmpty ? imgList.first : '';
+    final rawVariants = j['variants'] as List? ?? [];
 
     return Product(
       id: j['id'].toString(),
@@ -75,14 +114,29 @@ class Product {
       sizes: _strList(j['sizes']),
       colors: _strList(j['colors']),
       featured: j['featured'] == true || j['featured'] == 1,
+      isNewArrival: j['is_new_arrival'] == true || j['is_new_arrival'] == 1,
+      isWeeklyOffer: j['is_weekly_offer'] == true || j['is_weekly_offer'] == 1,
       stock: int.tryParse(j['stock']?.toString() ?? '0') ?? 0,
+      variants: rawVariants.map((v) => ProductVariant.fromJson(v as Map<String, dynamic>)).toList(),
     );
   }
 
   int get discountPercent =>
       originalPrice > price ? ((originalPrice - price) / originalPrice * 100).round() : 0;
 
-  bool get hasVariants => (sizes != null && sizes!.isNotEmpty) || (colors != null && colors!.isNotEmpty);
+  bool get hasVariants =>
+      (sizes != null && sizes!.isNotEmpty) || (colors != null && colors!.isNotEmpty) || variants.isNotEmpty;
+
+  /// Find a specific variant matching the selected size/color, if any.
+  ProductVariant? variantFor({String? size, String? color}) {
+    if (variants.isEmpty) return null;
+    for (final v in variants) {
+      final sizeMatches = size == null || v.size == null || v.size == size;
+      final colorMatches = color == null || v.color == null || v.color == color;
+      if (sizeMatches && colorMatches && (v.size == size || v.color == color)) return v;
+    }
+    return null;
+  }
 }
 
 class CartItem {
@@ -147,6 +201,7 @@ class CouponProduct {
   final String category;
   final DateTime expiresAt;
   final bool featured;
+  final int? discountPercentValue;
 
   const CouponProduct({
     required this.id,
@@ -165,6 +220,7 @@ class CouponProduct {
     required this.category,
     required this.expiresAt,
     this.featured = false,
+    this.discountPercentValue,
   });
 
   factory CouponProduct.fromJson(Map<String, dynamic> j) {
@@ -190,11 +246,18 @@ class CouponProduct {
       category: '',
       expiresAt: expiry,
       featured: j['featured'] == true || j['featured'] == 1,
+      discountPercentValue: j['discount_percent'] != null
+          ? int.tryParse(j['discount_percent'].toString())
+          : null,
     );
   }
 
-  int get discountPercent =>
-      originalPrice > price ? ((originalPrice - price) / originalPrice * 100).round() : 0;
+  /// Use the admin-set discount percentage when available; otherwise fall
+  /// back to computing it from price vs original price.
+  int get discountPercent {
+    if (discountPercentValue != null && discountPercentValue! > 0) return discountPercentValue!;
+    return originalPrice > price ? ((originalPrice - price) / originalPrice * 100).round() : 0;
+  }
 
   CartCouponItem toCartItem({int quantity = 1}) => CartCouponItem(
         id: id,
@@ -262,6 +325,41 @@ class AppBanner {
       titleAr: j['title_ar']?.toString() ?? '',
       imageUrl: _imgUrl(j['image']),
       link: j['link']?.toString(),
+    );
+  }
+}
+
+class AppAd {
+  final String id;
+  final String title;
+  final String titleAr;
+  final String imageUrl;
+  final String linkType; // none | product | coupon | external
+  final String? productId;
+  final String? couponId;
+  final String? externalLink;
+
+  const AppAd({
+    required this.id,
+    this.title = '',
+    this.titleAr = '',
+    required this.imageUrl,
+    this.linkType = 'none',
+    this.productId,
+    this.couponId,
+    this.externalLink,
+  });
+
+  factory AppAd.fromJson(Map<String, dynamic> j) {
+    return AppAd(
+      id: j['id'].toString(),
+      title: j['title']?.toString() ?? '',
+      titleAr: j['title_ar']?.toString() ?? '',
+      imageUrl: _imgUrl(j['image']),
+      linkType: j['link_type']?.toString() ?? 'none',
+      productId: j['product_id']?.toString(),
+      couponId: j['coupon_id']?.toString(),
+      externalLink: j['external_link']?.toString(),
     );
   }
 }

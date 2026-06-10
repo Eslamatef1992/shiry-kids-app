@@ -17,6 +17,7 @@ class ProductDetailScreen extends StatefulWidget {
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
   String? _selectedSize;
   String? _selectedColor;
+  int _imageIndex = 0;
 
   static const _colorMap = {
     'White': Color(0xFFFFFFFF),
@@ -64,13 +65,54 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
                   const SizedBox(height: 12),
 
-                  // Full-width product image
-                  AspectRatio(
-                    aspectRatio: 1.2,
-                    child: product.imageUrl.isNotEmpty
-                        ? Image.asset(product.imageUrl, fit: BoxFit.cover, width: double.infinity)
-                        : Image.asset('assets/images/product_detail.jpg', fit: BoxFit.cover, width: double.infinity),
-                  ),
+                  // Full-width product image (with thumbnail gallery if multiple)
+                  Builder(builder: (context) {
+                    final gallery = product.images.isNotEmpty ? product.images : [product.imageUrl];
+                    final current = (_imageIndex < gallery.length ? gallery[_imageIndex] : '');
+                    return Column(
+                      children: [
+                        AspectRatio(
+                          aspectRatio: 1.2,
+                          child: current.startsWith('http')
+                              ? Image.network(current, fit: BoxFit.cover, width: double.infinity,
+                                  errorBuilder: (_, __, ___) => Image.asset('assets/images/product_detail.jpg', fit: BoxFit.cover, width: double.infinity))
+                              : Image.asset(current.isNotEmpty ? current : 'assets/images/product_detail.jpg', fit: BoxFit.cover, width: double.infinity),
+                        ),
+                        if (gallery.length > 1) ...[
+                          const SizedBox(height: 8),
+                          SizedBox(
+                            height: 56,
+                            child: ListView.separated(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              scrollDirection: Axis.horizontal,
+                              itemCount: gallery.length,
+                              separatorBuilder: (_, __) => const SizedBox(width: 8),
+                              itemBuilder: (_, i) {
+                                final selected = i == _imageIndex;
+                                return GestureDetector(
+                                  onTap: () => setState(() => _imageIndex = i),
+                                  child: Container(
+                                    width: 56, height: 56,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: selected ? AppColors.primary : AppColors.divider, width: selected ? 2 : 1),
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(7),
+                                      child: gallery[i].startsWith('http')
+                                          ? Image.network(gallery[i], fit: BoxFit.cover,
+                                              errorBuilder: (_, __, ___) => Container(color: const Color(0xFFF5F5F5)))
+                                          : Image.asset(gallery[i], fit: BoxFit.cover),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ],
+                    );
+                  }),
                   const SizedBox(height: 16),
 
                   Padding(
@@ -102,15 +144,28 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         ),
                         const SizedBox(height: 14),
 
-                        // Price
-                        Text(
-                          '${product.price.toInt()} Kwd',
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.textDark,
-                          ),
-                        ),
+                        // Price (reflects selected variant if it has its own price)
+                        Builder(builder: (context) {
+                          final variant = product.variantFor(size: _selectedSize, color: _selectedColor);
+                          final price = variant?.price ?? product.price;
+                          return Row(
+                            children: [
+                              Text(
+                                '${price.toStringAsFixed(price.truncateToDouble() == price ? 0 : 3)} Kwd',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.textDark,
+                                ),
+                              ),
+                              if (variant != null && variant.stock == 0) ...[
+                                const SizedBox(width: 10),
+                                const Text('Out of stock',
+                                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.redAccent)),
+                              ],
+                            ],
+                          );
+                        }),
                         const SizedBox(height: 16),
 
                         // ── Size selector ─────────────────────────────────

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import '../theme/app_colors.dart';
@@ -135,7 +136,8 @@ class CouponListSkeleton extends StatelessWidget {
 class LoadErrorView extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;
-  const LoadErrorView({super.key, this.message = "Couldn't load data. Check your connection and try again.", required this.onRetry});
+  final String? detail;
+  const LoadErrorView({super.key, this.message = "Couldn't load data. Check your connection and try again.", required this.onRetry, this.detail});
 
   @override
   Widget build(BuildContext context) => Center(
@@ -149,6 +151,12 @@ class LoadErrorView extends StatelessWidget {
               Text(message,
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 13, color: AppColors.textMedium)),
+              if (kDebugMode && detail != null && detail!.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text(detail!,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 11, color: AppColors.textLight)),
+              ],
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: onRetry,

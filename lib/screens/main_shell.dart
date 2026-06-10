@@ -8,6 +8,7 @@ import 'products_screen.dart';
 import 'coupons_screen.dart';
 import 'cart_screen.dart';
 import 'profile_screen.dart';
+import '../widgets/ad_popup.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -17,6 +18,14 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) showAdPopup(context);
+    });
+  }
 
   final List<Widget> _screens = const [
     HomeScreen(),
