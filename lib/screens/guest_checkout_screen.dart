@@ -5,7 +5,7 @@ import '../widgets/wavy_app_bar.dart';
 import 'location_picker_screen.dart';
 
 class GuestCheckoutScreen extends StatefulWidget {
-  final VoidCallback? onSaved;
+  final void Function(Map<String, String?> data)? onSaved;
   const GuestCheckoutScreen({super.key, this.onSaved});
   @override
   State<GuestCheckoutScreen> createState() => _GuestCheckoutScreenState();
@@ -227,7 +227,28 @@ class _GuestCheckoutScreenState extends State<GuestCheckoutScreen> {
               width: double.infinity,
               height: 52,
               child: ElevatedButton(
-                onPressed: () { if (widget.onSaved != null) widget.onSaved!(); },
+                onPressed: () {
+                  if (_name.trim().isEmpty || _phone.trim().isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Please enter your name and phone number'), backgroundColor: Colors.red),
+                    );
+                    return;
+                  }
+                  if (_locationDetail == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Please set your delivery location'), backgroundColor: Colors.red),
+                    );
+                    return;
+                  }
+                  if (widget.onSaved != null) {
+                    widget.onSaved!({
+                      'name': _name.trim(),
+                      'email': _email.trim().isNotEmpty ? _email.trim() : null,
+                      'phone': '+965${_phone.trim()}',
+                      'address': _locationDetail,
+                    });
+                  }
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFFEDED),
                   foregroundColor: AppColors.primary,

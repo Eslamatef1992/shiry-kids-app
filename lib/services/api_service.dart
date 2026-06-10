@@ -221,6 +221,9 @@ class ApiService {
   static Future<Map<String, dynamic>> search(String query) async =>
       _request('GET', '/products?search=\${Uri.encodeComponent(query)}&limit=30');
 
+  // Get fresh profile (includes saved address)
+  static Future<Map<String, dynamic>> getProfile() async => _request('GET', '/auth/me', auth: true);
+
   // Update profile
   static Future<Map<String, dynamic>> updateProfile({String? name, String? phone, String? address}) async =>
       _request('PUT', '/auth/me', auth: true, body: {

@@ -7,6 +7,7 @@ import '../providers/cart_provider.dart';
 import '../services/api_service.dart';
 import '../widgets/wavy_app_bar.dart';
 import '../widgets/network_image.dart';
+import 'location_picker_screen.dart';
 import 'payment_success_screen.dart';
 import 'payment_failed_screen.dart';
 
@@ -14,11 +15,21 @@ class CheckoutScreen extends StatefulWidget {
   final List<CartCouponItem> coupons;
   final List<CartItem> products;
   final bool hasCoupons;
+  // Guest checkout details (only set when the user checked out as a guest)
+  final String? guestName;
+  final String? guestEmail;
+  final String? guestPhone;
+  // Address picked before reaching this screen (guest flow), if any
+  final String? initialAddress;
   const CheckoutScreen({
     super.key,
     required this.coupons,
     required this.products,
     this.hasCoupons = false,
+    this.guestName,
+    this.guestEmail,
+    this.guestPhone,
+    this.initialAddress,
   });
   @override
   State<CheckoutScreen> createState() => _CheckoutScreenState();
@@ -29,6 +40,61 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   String _payment = 'knet';    // 'knet' | 'cod'
   bool _paying = false;
 
+  String? _address;
+  String? _name;
+  String? _phone;
+  bool _loadingProfile = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _address = widget.initialAddress;
+    _name = widget.guestName;
+    _phone = widget.guestPhone;
+    if (_address == null) {
+      _loadProfileAddress();
+    }
+  }
+
+  Future<void> _loadProfileAddress() async {
+    final loggedIn = await ApiService.isLoggedIn();
+    if (!loggedIn) return;
+    setState(() => _loadingProfile = true);
+    try {
+      final res = await ApiService.getProfile();
+      if (!mounted) return;
+      if (res['success'] == true) {
+        final user = res['user'] as Map<String, dynamic>?;
+        if (user != null) {
+          setState(() {
+            _name = user['name'] as String?;
+            _phone = user['phone'] as String?;
+            _address = user['address'] as String?;
+          });
+        }
+      }
+    } catch (_) {
+      // Keep null address; user can still set it manually.
+    } finally {
+      if (mounted) setState(() => _loadingProfile = false);
+    }
+  }
+
+  Future<void> _pickLocation() async {
+    final result = await Navigator.push<Map<String, dynamic>>(
+      context,
+      MaterialPageRoute(builder: (_) => const LocationPickerScreen()),
+    );
+    if (result == null || !mounted) return;
+    final detail = result['detail'] as String?;
+    setState(() => _address = detail);
+
+    final loggedIn = await ApiService.isLoggedIn();
+    if (loggedIn && detail != null) {
+      await ApiService.updateProfile(address: detail);
+    }
+  }
+
   double get _subtotal =>
       widget.coupons.fold(0.0, (s, c) => s + c.total) +
       widget.products.fold(0.0, (s, p) => s + p.total);
@@ -38,6 +104,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       widget.products.fold(0, (s, p) => s + p.quantity);
 
   Future<void> _payNow() async {
+    // Require a real address when delivering to the customer's address.
+    if (_delivery == 'address' && (_address == null || _address!.trim().isEmpty)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please set your delivery address'), backgroundColor: Colors.red),
+      );
+      await _pickLocation();
+      return;
+    }
+
     setState(() => _paying = true);
     try {
       final items = [
@@ -53,12 +128,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           items: items,
           paymentMethod: _payment,
           deliveryMethod: _delivery,
+          address: _address,
         );
       } else {
         res = await ApiService.createGuestOrder(
           items: items,
           paymentMethod: _payment,
           deliveryMethod: _delivery,
+          name: widget.guestName,
+          phone: widget.guestPhone,
+          address: _address,
         );
       }
 
@@ -110,7 +189,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           // ── Shipping Details ──────────────────────────────────
           _SectionLabel('Shipping Details'),
           const SizedBox(height: 8),
-          _ShippingCard(),
+          _ShippingCard(
+            name: _name,
+            phone: _phone,
+            address: _address,
+            loading: _loadingProfile,
+            onTap: _pickLocation,
+          ),
           const SizedBox(height: 18),
 
           // ── Cart Items ────────────────────────────────────────
@@ -249,31 +334,95 @@ class _SubLabel extends StatelessWidget {
 }
 
 class _ShippingCard extends StatelessWidget {
+  final String? name;
+  final String? phone;
+  final String? address;
+  final bool loading;
+  final VoidCallback onTap;
+  const _ShippingCard({this.name, this.phone, this.address, this.loading = false, required this.onTap});
+
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(14),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      boxShadow: const [BoxShadow(color: Color(0x0A000000), blurRadius: 4, offset: Offset(0, 2))],
-    ),
-    child: Row(children: [
-      Container(
-        width: 40, height: 40,
+  Widget build(BuildContext context) {
+    if (loading) {
+      return Container(
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: AppColors.primary.withOpacity(0.1),
-          shape: BoxShape.circle,
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: const [BoxShadow(color: Color(0x0A000000), blurRadius: 4, offset: Offset(0, 2))],
         ),
-        child: const Icon(Icons.location_on, color: AppColors.primary, size: 22),
+        child: const Center(
+          child: SizedBox(width: 18, height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary)),
+        ),
+      );
+    }
+
+    if (address == null || address!.trim().isEmpty) {
+      return GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFEDED),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Stack(children: [
+              const Icon(Icons.location_on, color: AppColors.primary, size: 22),
+              Positioned(
+                right: 0, bottom: 0,
+                child: Container(
+                  width: 10, height: 10,
+                  decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.primary),
+                  child: const Icon(Icons.add, size: 8, color: Colors.white),
+                ),
+              ),
+            ]),
+            const SizedBox(width: 8),
+            const Text('Set Your Location',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primary)),
+          ]),
+        ),
+      );
+    }
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: const [BoxShadow(color: Color(0x0A000000), blurRadius: 4, offset: Offset(0, 2))],
+        ),
+        child: Row(children: [
+          Container(
+            width: 40, height: 40,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.location_on, color: AppColors.primary, size: 22),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              if (name != null && name!.isNotEmpty)
+                Text(name!, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textDark)),
+              Text(address!,
+                  maxLines: 2, overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 12, color: AppColors.textMedium)),
+              if (phone != null && phone!.isNotEmpty)
+                Text(phone!, style: const TextStyle(fontSize: 12, color: AppColors.textMedium)),
+            ]),
+          ),
+          const Icon(Icons.chevron_right, color: AppColors.textMedium, size: 20),
+        ]),
       ),
-      const SizedBox(width: 12),
-      const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('Kuwait', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textDark)),
-        Text('Kuwait City ,Kuwait', style: TextStyle(fontSize: 12, color: AppColors.textMedium)),
-        Text('+956123456', style: TextStyle(fontSize: 12, color: AppColors.textMedium)),
-      ]),
-    ]),
-  );
+    );
+  }
 }
 
 class _CheckoutCouponCard extends StatelessWidget {

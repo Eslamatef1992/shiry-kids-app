@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../theme/app_colors.dart';
 import '../models/product.dart';
 import '../providers/cart_provider.dart';
+import '../services/api_service.dart';
 import '../widgets/wavy_app_bar.dart';
 import '../widgets/network_image.dart';
 import 'checkout_screen.dart';
@@ -21,7 +22,22 @@ class _CartScreenState extends State<CartScreen> {
   final Map<int, bool> _sizeOpen = {};
   final Map<int, bool> _colorOpen = {};
 
-  void _onCheckout(List<CartCouponItem> coupons, List<CartItem> products) {
+  void _onCheckout(List<CartCouponItem> coupons, List<CartItem> products) async {
+    final loggedIn = await ApiService.isLoggedIn();
+    if (!mounted) return;
+
+    if (loggedIn) {
+      // Logged-in users go straight to checkout (their saved address is loaded there).
+      Navigator.push(context, MaterialPageRoute(
+        builder: (_) => CheckoutScreen(
+          coupons: coupons,
+          products: products,
+          hasCoupons: coupons.isNotEmpty,
+        ),
+      ));
+      return;
+    }
+
     showDialog(
       context: context,
       barrierColor: Colors.black45,
@@ -37,11 +53,15 @@ class _CartScreenState extends State<CartScreen> {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             Navigator.push(context, MaterialPageRoute(
               builder: (_) => GuestCheckoutScreen(
-                onSaved: () => Navigator.push(context, MaterialPageRoute(
+                onSaved: (data) => Navigator.push(context, MaterialPageRoute(
                   builder: (_) => CheckoutScreen(
                     coupons: coupons,
                     products: products,
                     hasCoupons: coupons.isNotEmpty,
+                    guestName: data['name'],
+                    guestEmail: data['email'],
+                    guestPhone: data['phone'],
+                    initialAddress: data['address'],
                   ),
                 )),
               ),
