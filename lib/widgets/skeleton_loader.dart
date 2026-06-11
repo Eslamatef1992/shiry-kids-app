@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import '../theme/app_colors.dart';
+import '../l10n/app_strings.dart';
 
 /// Wraps [child] in a shimmer animation. Use with [SkeletonBox] placeholders.
 Widget shimmerWrap({required Widget child}) => Shimmer.fromColors(
@@ -148,7 +149,7 @@ class LoadErrorView extends StatelessWidget {
             children: [
               const Icon(Icons.cloud_off_outlined, size: 48, color: AppColors.textLight),
               const SizedBox(height: 12),
-              Text(message,
+              Text(message.tr(context),
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 13, color: AppColors.textMedium)),
               if (kDebugMode && detail != null && detail!.isNotEmpty) ...[
@@ -165,9 +166,9 @@ class LoadErrorView extends StatelessWidget {
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                  child: Text('Retry', style: TextStyle(fontWeight: FontWeight.w700)),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                  child: Text('Retry'.tr(context), style: const TextStyle(fontWeight: FontWeight.w700)),
                 ),
               ),
             ],

@@ -8,6 +8,7 @@ import '../widgets/category_image.dart';
 import '../widgets/skeleton_loader.dart';
 import 'product_detail_screen.dart';
 import '../services/api_service.dart';
+import '../l10n/app_strings.dart';
 
 class ProductsScreen extends StatefulWidget {
   const ProductsScreen({super.key});
@@ -75,7 +76,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: WavyAppBar(title: 'Products', showBack: false),
+      appBar: WavyAppBar(title: 'Products'.tr(context), showBack: false),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -83,7 +84,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
             child: Text(
-              'All Categories(${_allProducts.length})',
+              '${'All Categories'.tr(context)}(${_allProducts.length})',
               style: const TextStyle(fontSize: 13, color: AppColors.textMedium),
             ),
           ),
@@ -147,7 +148,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
-                hintText: 'Search',
+                hintText: 'Search'.tr(context),
                 prefixIcon: const Icon(Icons.search, color: AppColors.textLight),
                 filled: true,
                 fillColor: AppColors.white,
@@ -163,7 +164,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                 : _error
                 ? LoadErrorView(onRetry: _loadData, detail: _errorMsg)
                 : _filtered.isEmpty
-                ? const Center(child: Text('No products found', style: TextStyle(color: AppColors.textMedium)))
+                ? Center(child: Text('No products found'.tr(context), style: const TextStyle(color: AppColors.textMedium)))
                 : GridView.builder(
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -181,7 +182,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                 onAddToCart: () {
                   context.read<CartProvider>().addProduct(CartItem(product: _filtered[i]));
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text('${_filtered[i].name} added to cart!'),
+                    content: Text('${_filtered[i].name} ${'added to cart!'.tr(context)}'),
                     backgroundColor: AppColors.primary,
                     behavior: SnackBarBehavior.floating,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -206,7 +207,7 @@ class _ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final catLabel = product.category.isNotEmpty ? product.category : 'Product';
+    final catLabel = (product.category.isNotEmpty ? product.category : 'Product').tr(context);
 
     return GestureDetector(
       onTap: onTap,
@@ -294,7 +295,7 @@ class _ProductCard extends StatelessWidget {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         padding: EdgeInsets.zero,
                       ),
-                      child: const Text('Add To Cart', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+                      child: Text('Add To Cart'.tr(context), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
                     ),
                   ),
                 ],

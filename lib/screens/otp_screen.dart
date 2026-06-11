@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../theme/app_colors.dart';
+import '../l10n/app_strings.dart';
 
 class OtpScreen extends StatefulWidget {
   const OtpScreen({super.key});
@@ -115,22 +116,22 @@ class _OtpScreenState extends State<OtpScreen> {
                 child: const Icon(Icons.chevron_left, size: 28, color: AppColors.textDark),
               ),
               const SizedBox(height: 16),
-              const Text('OTP CODE',
-                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.textDark)),
+              Text('OTP CODE'.tr(context),
+                  style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.textDark)),
               const SizedBox(height: 12),
               RichText(
                 text: TextSpan(
                   style: const TextStyle(fontSize: 13, color: AppColors.textMedium, height: 1.5),
                   children: [
-                    const TextSpan(text: 'A 4-Digit Verification Code Has Been Sent To This Phone Number. '),
+                    TextSpan(text: 'A 4-Digit Verification Code Has Been Sent To This Phone Number. '.tr(context)),
                     TextSpan(text: id, style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.textDark)),
                   ],
                 ),
               ),
               const SizedBox(height: 32),
 
-              const Text('Enter 4-Digit Code',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textDark)),
+              Text('Enter 4-Digit Code'.tr(context),
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textDark)),
               const SizedBox(height: 12),
 
               // OTP boxes
@@ -169,14 +170,14 @@ class _OtpScreenState extends State<OtpScreen> {
 
               if (_hasError) ...[
                 const SizedBox(height: 6),
-                const Text('Invalid Verification Code.',
-                    style: TextStyle(color: Colors.red, fontSize: 12)),
+                Text('Invalid Verification Code.'.tr(context),
+                    style: const TextStyle(color: Colors.red, fontSize: 12)),
               ],
 
               // TEMP: testing hint until real SMS OTP is integrated.
               const SizedBox(height: 6),
-              const Text('Testing mode: enter 1234 to continue.',
-                  style: TextStyle(color: AppColors.textLight, fontSize: 11, fontStyle: FontStyle.italic)),
+              Text('Testing mode: enter 1234 to continue.'.tr(context),
+                  style: const TextStyle(color: AppColors.textLight, fontSize: 11, fontStyle: FontStyle.italic)),
 
               const SizedBox(height: 12),
               Row(
@@ -184,7 +185,7 @@ class _OtpScreenState extends State<OtpScreen> {
                 children: [
                   if (!_hasError)
                     Row(children: [
-                      const Text('Remaining ', style: TextStyle(fontSize: 12, color: AppColors.textMedium)),
+                      Text('Remaining '.tr(context), style: const TextStyle(fontSize: 12, color: AppColors.textMedium)),
                       Text(
                         '${(_seconds ~/ 60).toString().padLeft(2, '0')}:${(_seconds % 60).toString().padLeft(2, '0')} S',
                         style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textDark),
@@ -194,8 +195,8 @@ class _OtpScreenState extends State<OtpScreen> {
                     const SizedBox(),
                   GestureDetector(
                     onTap: _resend,
-                    child: const Text('Resend Code?',
-                        style: TextStyle(fontSize: 13, color: AppColors.primary,
+                    child: Text('Resend Code?'.tr(context),
+                        style: const TextStyle(fontSize: 13, color: AppColors.primary,
                             fontWeight: FontWeight.w600,
                             decoration: TextDecoration.underline,
                             decorationColor: AppColors.primary)),
@@ -216,7 +217,7 @@ class _OtpScreenState extends State<OtpScreen> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     elevation: 0,
                   ),
-                  child: const Text('Confirm', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                  child: Text('Confirm'.tr(context), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                 ),
               ),
             ],

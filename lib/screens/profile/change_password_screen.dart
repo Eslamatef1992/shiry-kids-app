@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/wavy_app_bar.dart';
 import '../../services/api_service.dart';
+import '../../l10n/app_strings.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -19,7 +20,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   Future<void> _changePassword() async {
     if (_newCtrl.text != _confirmCtrl.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('New passwords do not match')));
+          SnackBar(content: Text('New passwords do not match'.tr(context))));
       return;
     }
     setState(() => _saving = true);
@@ -28,7 +29,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       if (mounted) {
         if (res['success'] == true) {
           ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Password updated'), backgroundColor: Colors.green));
+              SnackBar(content: Text('Password updated'.tr(context)), backgroundColor: Colors.green));
           Navigator.pop(context);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -64,11 +65,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 16),
-                  _PassField(label: 'Old Password',         ctrl: _oldCtrl,     show: _showOld,     onToggle: () => setState(() => _showOld = !_showOld)),
+                  _PassField(label: 'Old Password'.tr(context),         ctrl: _oldCtrl,     show: _showOld,     onToggle: () => setState(() => _showOld = !_showOld)),
                   const SizedBox(height: 20),
-                  _PassField(label: 'New Password',         ctrl: _newCtrl,     show: _showNew,     onToggle: () => setState(() => _showNew = !_showNew)),
+                  _PassField(label: 'New Password'.tr(context),         ctrl: _newCtrl,     show: _showNew,     onToggle: () => setState(() => _showNew = !_showNew)),
                   const SizedBox(height: 20),
-                  _PassField(label: 'Confirm New Password', ctrl: _confirmCtrl, show: _showConfirm, onToggle: () => setState(() => _showConfirm = !_showConfirm),
+                  _PassField(label: 'Confirm New Password'.tr(context), ctrl: _confirmCtrl, show: _showConfirm, onToggle: () => setState(() => _showConfirm = !_showConfirm),
                     onChanged: (_) => setState(() {})),
                   const SizedBox(height: 32),
                   SizedBox(
@@ -84,7 +85,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       ),
                       child: _saving
                           ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                          : const Text('Update Password', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                          : Text('Update Password'.tr(context), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                     ),
                   ),
                 ],
@@ -117,7 +118,7 @@ class _PassField extends StatelessWidget {
           obscureText: !show,
           onChanged: onChanged,
           decoration: InputDecoration(
-            hintText: 'Enter Password',
+            hintText: 'Enter Password'.tr(context),
             suffixIcon: IconButton(
               icon: Icon(show ? Icons.visibility_outlined : Icons.visibility_off_outlined, color: AppColors.textLight),
               onPressed: onToggle,

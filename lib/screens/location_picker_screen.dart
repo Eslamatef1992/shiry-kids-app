@@ -3,6 +3,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../theme/app_colors.dart';
+import '../l10n/app_strings.dart';
 
 class LocationPickerScreen extends StatefulWidget {
   const LocationPickerScreen({super.key});
@@ -96,7 +97,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Address not found')),
+          SnackBar(content: Text('Address not found'.tr(context))),
         );
       }
     }
@@ -226,8 +227,8 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                       ),
                     ]),
                     const SizedBox(width: 8),
-                    const Text('Set Your Location',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+                    Text('Set Your Location'.tr(context),
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
                   ]),
                 ),
               ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../services/api_service.dart';
 import 'admin/admin_login_screen.dart';
+import '../l10n/app_strings.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -34,7 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (_) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Network error. Please try again.'), backgroundColor: Colors.red),
+        SnackBar(content: Text('Network error. Please try again.'.tr(context)), backgroundColor: Colors.red),
       );
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -61,12 +62,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: const Icon(Icons.chevron_left, size: 28, color: AppColors.textDark),
               ),
               const SizedBox(height: 16),
-              const Text('LOGIN',
-                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.textDark)),
+              Text('LOGIN'.tr(context),
+                  style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.textDark)),
               const SizedBox(height: 12),
-              const Text(
-                'We Provide You With The Latest Products At The Best Price.',
-                style: TextStyle(fontSize: 13, color: AppColors.textMedium, height: 1.5),
+              Text(
+                'We Provide You With The Latest Products At The Best Price.'.tr(context),
+                style: const TextStyle(fontSize: 13, color: AppColors.textMedium, height: 1.5),
               ),
               const SizedBox(height: 32),
 
@@ -77,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 controller: _emailCtrl,
                 keyboardType: TextInputType.emailAddress,
                 onChanged: (_) => setState(() {}),
-                decoration: const InputDecoration(hintText: 'Enter Your Email'),
+                decoration: InputDecoration(hintText: 'Enter Your Email'.tr(context)),
               ),
               const SizedBox(height: 20),
 
@@ -89,7 +90,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 obscureText: _obscure,
                 onChanged: (_) => setState(() {}),
                 decoration: InputDecoration(
-                  hintText: 'Enter Password',
+                  hintText: 'Enter Password'.tr(context),
                   suffixIcon: IconButton(
                     icon: Icon(_obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
                         color: AppColors.textLight),
@@ -118,15 +119,15 @@ class _LoginScreenState extends State<LoginScreen> {
                               : null,
                         ),
                         const SizedBox(width: 8),
-                        const Text('Remember Me', style: TextStyle(fontSize: 13, color: AppColors.textDark)),
+                        Text('Remember Me'.tr(context), style: const TextStyle(fontSize: 13, color: AppColors.textDark)),
                       ],
                     ),
                   ),
                   const Spacer(),
                   GestureDetector(
                     onTap: () => Navigator.pushNamed(context, '/forgot-password'),
-                    child: const Text('Forget Password?',
-                        style: TextStyle(fontSize: 13, color: AppColors.primary,
+                    child: Text('Forget Password?'.tr(context),
+                        style: const TextStyle(fontSize: 13, color: AppColors.primary,
                             fontWeight: FontWeight.w600, decoration: TextDecoration.underline,
                             decorationColor: AppColors.primary)),
                   ),
@@ -149,7 +150,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: _loading
                       ? const SizedBox(width: 20, height: 20,
                           child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                      : const Text('Log In', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                      : Text('Log In'.tr(context), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                 ),
               ),
               const SizedBox(height: 32),
@@ -159,8 +160,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: GestureDetector(
                   onTap: () => Navigator.push(context,
                       MaterialPageRoute(builder: (_) => const AdminLoginScreen())),
-                  child: const Text('Login as Super Admin',
-                      style: TextStyle(fontSize: 12, color: AppColors.textLight,
+                  child: Text('Login as Super Admin'.tr(context),
+                      style: const TextStyle(fontSize: 12, color: AppColors.textLight,
                           decoration: TextDecoration.underline,
                           decorationColor: AppColors.textLight)),
                 ),
@@ -178,6 +179,6 @@ class _FieldLabel extends StatelessWidget {
   final String text;
   const _FieldLabel(this.text);
   @override
-  Widget build(BuildContext context) => Text(text,
+  Widget build(BuildContext context) => Text(text.tr(context),
       style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textDark));
 }

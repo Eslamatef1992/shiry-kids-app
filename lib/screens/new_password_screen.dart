@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import '../l10n/app_strings.dart';
 
 class NewPasswordScreen extends StatefulWidget {
   const NewPasswordScreen({super.key});
@@ -35,19 +36,19 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                 child: const Icon(Icons.chevron_left, size: 28, color: AppColors.textDark),
               ),
               const SizedBox(height: 16),
-              const Text('NEW PASSWORD',
-                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.textDark)),
+              Text('NEW PASSWORD'.tr(context),
+                  style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.textDark)),
               const SizedBox(height: 32),
 
-              const Text('New Password',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textDark)),
+              Text('New Password'.tr(context),
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textDark)),
               const SizedBox(height: 8),
               TextField(
                 controller: _newCtrl,
                 obscureText: !_showNew,
                 onChanged: (_) => setState(() {}),
                 decoration: InputDecoration(
-                  hintText: 'Enter Password',
+                  hintText: 'Enter Password'.tr(context),
                   suffixIcon: IconButton(
                     icon: Icon(_showNew ? Icons.visibility_outlined : Icons.visibility_off_outlined,
                         color: AppColors.textLight),
@@ -57,15 +58,15 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
               ),
               const SizedBox(height: 20),
 
-              const Text('Confirm New Password',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textDark)),
+              Text('Confirm New Password'.tr(context),
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textDark)),
               const SizedBox(height: 8),
               TextField(
                 controller: _confirmCtrl,
                 obscureText: !_showConfirm,
                 onChanged: (_) => setState(() {}),
                 decoration: InputDecoration(
-                  hintText: 'Enter Password',
+                  hintText: 'Enter Password'.tr(context),
                   suffixIcon: IconButton(
                     icon: Icon(_showConfirm ? Icons.visibility_outlined : Icons.visibility_off_outlined,
                         color: AppColors.textLight),
@@ -88,7 +89,7 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     elevation: 0,
                   ),
-                  child: const Text('Confirm', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                  child: Text('Confirm'.tr(context), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                 ),
               ),
             ],

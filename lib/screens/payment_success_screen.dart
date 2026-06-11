@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../theme/app_colors.dart';
 import '../widgets/network_image.dart';
+import '../l10n/app_strings.dart';
 
 class PaymentSuccessScreen extends StatelessWidget {
   final String orderId;
@@ -16,6 +17,10 @@ class PaymentSuccessScreen extends StatelessWidget {
   /// generated order QR code.
   final List<String> couponQrImages;
 
+  /// Whether this order included any coupons. The QR section is only shown
+  /// for coupon purchases — product-only orders don't get a QR code.
+  final bool hasCoupons;
+
   const PaymentSuccessScreen({
     super.key,
     this.orderId = '#12345',
@@ -24,6 +29,7 @@ class PaymentSuccessScreen extends StatelessWidget {
     this.shippingFees = 0.0,
     this.deliveryFees = 1.5,
     this.couponQrImages = const [],
+    this.hasCoupons = false,
   });
 
   double get _total => subtotal - discount + shippingFees + deliveryFees;
@@ -59,9 +65,9 @@ class PaymentSuccessScreen extends StatelessWidget {
                     const SizedBox(height: 20),
 
                     // Heading
-                    const Text(
-                      'Successful Payment',
-                      style: TextStyle(
+                    Text(
+                      'Successful Payment'.tr(context),
+                      style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w800,
                         color: Color(0xFF34C759),
@@ -69,7 +75,7 @@ class PaymentSuccessScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Order $orderId has been placed',
+                      '${'Order'.tr(context)} $orderId ${'has been placed'.tr(context)}',
                       style: const TextStyle(
                         fontSize: 13,
                         color: AppColors.textMedium,
@@ -86,9 +92,12 @@ class PaymentSuccessScreen extends StatelessWidget {
                     if (couponQrImages.isNotEmpty)
                       Column(
                         children: [
-                          const Text(
-                            'Your Coupon QR Code${couponQrImages.length > 1 ? 's' : ''}',
-                            style: TextStyle(
+                          Text(
+                            (couponQrImages.length > 1
+                                    ? 'Your Coupon QR Codes'
+                                    : 'Your Coupon QR Code')
+                                .tr(context),
+                            style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
                               color: AppColors.textDark,
@@ -106,7 +115,7 @@ class PaymentSuccessScreen extends StatelessWidget {
                           ),
                         ],
                       )
-                    else
+                    else if (hasCoupons)
                       QrImageView(
                         data: 'SHIRY-ORDER-$orderId',
                         version: QrVersions.auto,
@@ -120,7 +129,8 @@ class PaymentSuccessScreen extends StatelessWidget {
                           color: Color(0xFF000508),
                         ),
                       ),
-                    const SizedBox(height: 8),
+                    if (couponQrImages.isNotEmpty || hasCoupons)
+                      const SizedBox(height: 8),
                     Text(
                       orderId,
                       style: const TextStyle(
@@ -141,24 +151,24 @@ class PaymentSuccessScreen extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: Column(
                         children: [
-                          _TotalRow('Subtotal',
+                          _TotalRow('Subtotal'.tr(context),
                               '${subtotal.toStringAsFixed(2)} KD'),
                           const SizedBox(height: 10),
-                          _TotalRow('Discount',
+                          _TotalRow('Discount'.tr(context),
                               '-${discount.toStringAsFixed(2)} KD',
                               valueColor: AppColors.primary),
                           const SizedBox(height: 10),
-                          _TotalRow('Shipping Fees',
+                          _TotalRow('Shipping Fees'.tr(context),
                               '${shippingFees.toStringAsFixed(2)} KD'),
                           const SizedBox(height: 10),
-                          _TotalRow('Delivery Fees',
+                          _TotalRow('Delivery Fees'.tr(context),
                               '${deliveryFees.toStringAsFixed(2)} KD'),
                           const SizedBox(height: 14),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text('Total',
-                                  style: TextStyle(
+                              Text('Total'.tr(context),
+                                  style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w800,
                                       color: AppColors.textDark)),
@@ -193,8 +203,8 @@ class PaymentSuccessScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12)),
                     elevation: 0,
                   ),
-                  child: const Text('Back To Home',
-                      style: TextStyle(
+                  child: Text('Back To Home'.tr(context),
+                      style: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.w700)),
                 ),
               ),
@@ -215,8 +225,8 @@ class PaymentSuccessScreen extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text('View Order',
-                      style: TextStyle(
+                  child: Text('View Order'.tr(context),
+                      style: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.w600)),
                 ),
               ),

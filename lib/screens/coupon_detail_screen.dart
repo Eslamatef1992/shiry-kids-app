@@ -6,6 +6,7 @@ import '../models/product.dart';
 import '../providers/cart_provider.dart';
 import '../widgets/wavy_app_bar.dart';
 import '../widgets/network_image.dart';
+import '../l10n/app_strings.dart';
 
 class CouponDetailScreen extends StatefulWidget {
   final CouponProduct coupon;
@@ -36,7 +37,7 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
     // Confirm locks in the qty — nothing visible to do here since Add To Cart is bottom btn
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Quantity set to $_qty'),
+        content: Text('${'Quantity set to'.tr(context)} $_qty'),
         backgroundColor: AppColors.primary,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -50,7 +51,7 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
     cart.addCoupon(widget.coupon.toCartItem(quantity: _qty));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Added to cart!'),
+        content: Text('Added to cart!'.tr(context)),
         backgroundColor: AppColors.primary,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -72,13 +73,13 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
           child: Row(children: [
             GestureDetector(
               onTap: () => Navigator.pop(context),
-              child: const Text('Coupons',
-                  style: TextStyle(fontSize: 12, color: AppColors.textMedium)),
+              child: Text('Coupons'.tr(context),
+                  style: const TextStyle(fontSize: 12, color: AppColors.textMedium)),
             ),
             const Text('  »  ',
                 style: TextStyle(fontSize: 12, color: AppColors.textMedium)),
-            const Text('Coupons Details',
-                style: TextStyle(fontSize: 12, color: AppColors.textDark,
+            Text('Coupons Details'.tr(context),
+                style: const TextStyle(fontSize: 12, color: AppColors.textDark,
                     fontWeight: FontWeight.w600)),
           ]),
         ),
@@ -142,9 +143,9 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
                           const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
                       labelColor: AppColors.primary,
                       unselectedLabelColor: AppColors.textMedium,
-                      tabs: const [
-                        Tab(text: 'Description'),
-                        Tab(text: 'Terms & Conditions'),
+                      tabs: [
+                        Tab(text: 'Description'.tr(context)),
+                        Tab(text: 'Terms & Conditions'.tr(context)),
                       ],
                     ),
                   ),
@@ -196,8 +197,8 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
                     child: Row(children: [
                       Expanded(
                         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          const Text('Expire Date',
-                              style: TextStyle(fontSize: 11, color: AppColors.textLight)),
+                          Text('Expire Date'.tr(context),
+                              style: const TextStyle(fontSize: 11, color: AppColors.textLight)),
                           const SizedBox(height: 4),
                           Text(c.expiryDate,
                               style: const TextStyle(
@@ -208,8 +209,8 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
                       Container(width: 1, height: 36, color: const Color(0xFFEEEEEE)),
                       Expanded(
                         child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                          const Text('Coupons Left',
-                              style: TextStyle(fontSize: 11, color: AppColors.textLight)),
+                          Text('Coupons Left'.tr(context),
+                              style: const TextStyle(fontSize: 11, color: AppColors.textLight)),
                           const SizedBox(height: 4),
                           Text('${c.couponsLeft}',
                               style: const TextStyle(
@@ -222,8 +223,8 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
                   const SizedBox(height: 20),
 
                   // ── Quantity picker ────────────────────────────
-                  const Text('Number Of Cpouons You Want:',
-                      style: TextStyle(
+                  Text('Number Of Cpouons You Want:'.tr(context),
+                      style: const TextStyle(
                           fontSize: 14, fontWeight: FontWeight.w700,
                           color: AppColors.textDark)),
                   const SizedBox(height: 14),
@@ -259,8 +260,8 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)),
                       ),
-                      child: const Text('Confirm',
-                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                      child: Text('Confirm'.tr(context),
+                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
                     ),
                   ),
                   const SizedBox(height: 100),
@@ -286,8 +287,8 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text('Add To Cart',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+            child: Text('Add To Cart'.tr(context),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
           ),
         ),
       ),
@@ -331,7 +332,7 @@ class _CountdownRowState extends State<_CountdownRow> {
     final h = _remaining.inHours.remainder(24);
     final s = _remaining.inSeconds.remainder(60);
     return Text(
-      '$d Days : ${h.toString().padLeft(2, '0')} Hours : ${s.toString().padLeft(2, '0')} Sec',
+      '$d ${'Days'.tr(context)} : ${h.toString().padLeft(2, '0')} ${'Hours'.tr(context)} : ${s.toString().padLeft(2, '0')} ${'Sec'.tr(context)}',
       style: const TextStyle(
           fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.primary),
     );

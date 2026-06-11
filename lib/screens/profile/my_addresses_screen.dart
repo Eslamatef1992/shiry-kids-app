@@ -3,6 +3,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/wavy_app_bar.dart';
 import '../../services/api_service.dart';
 import '../../widgets/address_method_sheet.dart';
+import '../../l10n/app_strings.dart';
 
 class MyAddressesScreen extends StatefulWidget {
   const MyAddressesScreen({super.key});
@@ -109,21 +110,21 @@ class _MyAddressesScreenState extends State<MyAddressesScreen> {
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Icon(Icons.add_location_alt_outlined, color: AppColors.primary, size: 20),
-                      SizedBox(width: 8),
-                      Text('Add New Address',
-                          style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600, fontSize: 14)),
+                    children: [
+                      const Icon(Icons.add_location_alt_outlined, color: AppColors.primary, size: 20),
+                      const SizedBox(width: 8),
+                      Text('Add New Address'.tr(context),
+                          style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600, fontSize: 14)),
                     ],
                   ),
                 ),
               ),
             ),
           if (_hasAddress)
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Text('My Address',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textDark)),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text('My Address'.tr(context),
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textDark)),
             ),
           const SizedBox(height: 12),
           Expanded(
@@ -149,10 +150,10 @@ class _MyAddressesScreenState extends State<MyAddressesScreen> {
                             children: [
                               const Icon(Icons.location_off_outlined, color: AppColors.textLight, size: 40),
                               const SizedBox(height: 12),
-                              const Text(
-                                'You haven\'t added an address yet.',
+                              Text(
+                                'You haven\'t added an address yet.'.tr(context),
                                 textAlign: TextAlign.center,
-                                style: TextStyle(fontSize: 13, color: AppColors.textMedium),
+                                style: const TextStyle(fontSize: 13, color: AppColors.textMedium),
                               ),
                             ],
                           ),
@@ -208,7 +209,7 @@ class _AddressCard extends StatelessWidget {
                       side: const BorderSide(color: AppColors.divider),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
-                    child: const Text('Edit', style: TextStyle(color: AppColors.textDark, fontSize: 13)),
+                    child: Text('Edit'.tr(context), style: const TextStyle(color: AppColors.textDark, fontSize: 13)),
                   ),
                 ),
               ],

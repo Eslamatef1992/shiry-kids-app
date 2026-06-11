@@ -5,6 +5,7 @@ import '../widgets/wavy_app_bar.dart';
 import 'order_invoice_screen.dart';
 import '../models/product.dart' show AppOrder;
 import '../services/api_service.dart';
+import '../l10n/app_strings.dart';
 
 // ── Screen ────────────────────────────────────────────────────────────────────
 
@@ -59,7 +60,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
           // Breadcrumb
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-            child: _Breadcrumb(parts: const ['My Profile', 'My Orders']),
+            child: _Breadcrumb(parts: const ['My Profile', 'My Orders'].map((e) => e.tr(context)).toList()),
           ),
 
           // Filter tabs
@@ -135,7 +136,7 @@ class _AppOrderCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  isPaid ? 'Paid' : 'Not Paid',
+                  (isPaid ? 'Paid' : 'Not Paid').tr(context),
                   style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700,
                       color: isPaid ? const Color(0xFF1DB76A) : AppColors.primary),
                 ),
@@ -146,8 +147,8 @@ class _AppOrderCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 10, 16, 2),
             child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              const Text('Order Id', style: TextStyle(fontSize: 12, color: AppColors.textLight)),
-              const Text('Order Date', style: TextStyle(fontSize: 12, color: AppColors.textLight)),
+              Text('Order Id'.tr(context), style: const TextStyle(fontSize: 12, color: AppColors.textLight)),
+              Text('Order Date'.tr(context), style: const TextStyle(fontSize: 12, color: AppColors.textLight)),
             ]),
           ),
           Padding(
@@ -159,12 +160,12 @@ class _AppOrderCard extends StatelessWidget {
           ),
           _DashedDivider(),
           Padding(padding: const EdgeInsets.fromLTRB(16, 10, 16, 2),
-              child: const Text('Order Status', style: TextStyle(fontSize: 12, color: AppColors.textLight))),
+              child: Text('Order Status'.tr(context), style: const TextStyle(fontSize: 12, color: AppColors.textLight))),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 2, 16, 14),
             child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               const SizedBox(),
-              Text(_statusLabel, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textDark)),
+              Text(_statusLabel.tr(context), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textDark)),
             ]),
           ),
           Padding(
@@ -172,8 +173,8 @@ class _AppOrderCard extends StatelessWidget {
             child: Container(
               width: double.infinity, height: 44,
               decoration: BoxDecoration(color: const Color(0xFFFFE9E3), borderRadius: BorderRadius.circular(10)),
-              child: const Center(
-                child: Text('View', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primary)),
+              child: Center(
+                child: Text('View'.tr(context), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primary)),
               ),
             ),
           ),
@@ -193,8 +194,8 @@ class _EmptyState extends StatelessWidget {
       children: [
         SvgPicture.asset('assets/icons/no_order.svg', width: 100, height: 100),
         const SizedBox(height: 16),
-        const Text('You Have Not Any Order',
-            style: TextStyle(fontSize: 14, color: AppColors.textLight, fontWeight: FontWeight.w500)),
+        Text('You Have Not Any Order'.tr(context),
+            style: const TextStyle(fontSize: 14, color: AppColors.textLight, fontWeight: FontWeight.w500)),
       ],
     ),
   );
@@ -220,7 +221,7 @@ class _FilterTab extends StatelessWidget {
           borderRadius: BorderRadius.circular(24),
           boxShadow: isSelected ? null : [const BoxShadow(color: Color(0x0D000000), blurRadius: 4)],
         ),
-        child: Text(label,
+        child: Text(label.tr(context),
             style: TextStyle(
               fontSize: 13, fontWeight: FontWeight.w700,
               color: isSelected ? Colors.white : AppColors.textMedium,

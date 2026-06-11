@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../theme/app_colors.dart';
 import '../widgets/wavy_app_bar.dart';
+import '../l10n/app_strings.dart';
 import 'location_picker_screen.dart';
 
 class GuestCheckoutScreen extends StatefulWidget {
@@ -53,15 +54,15 @@ class _GuestCheckoutScreenState extends State<GuestCheckoutScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Subtitle
-            const Text(
-              'Enjoy The Best Shopping Experience\nThrough The App.',
-              style: TextStyle(fontSize: 13, color: AppColors.textMedium, height: 1.5),
+            Text(
+              'Enjoy The Best Shopping Experience\nThrough The App.'.tr(context),
+              style: const TextStyle(fontSize: 13, color: AppColors.textMedium, height: 1.5),
             ),
             const SizedBox(height: 28),
 
             // ── Full Name ─────────────────────────────────────────
-            const Text('Full Name',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textDark)),
+            Text('Full Name'.tr(context),
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textDark)),
             const SizedBox(height: 8),
             TextField(
               focusNode: _nameFocus,
@@ -70,7 +71,7 @@ class _GuestCheckoutScreenState extends State<GuestCheckoutScreen> {
               onSubmitted: (_) => FocusScope.of(context).requestFocus(_emailFocus),
               style: const TextStyle(fontSize: 14, color: AppColors.textDark),
               decoration: InputDecoration(
-                hintText: 'Enter Full Name',
+                hintText: 'Enter Full Name'.tr(context),
                 hintStyle: const TextStyle(color: AppColors.textLight, fontSize: 13),
                 filled: true,
                 fillColor: const Color(0xFFF5F5F5),
@@ -85,8 +86,8 @@ class _GuestCheckoutScreenState extends State<GuestCheckoutScreen> {
             const SizedBox(height: 20),
 
             // ── Email ─────────────────────────────────────────────
-            const Text('Email',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textDark)),
+            Text('Email'.tr(context),
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textDark)),
             const SizedBox(height: 8),
             TextField(
               focusNode: _emailFocus,
@@ -96,7 +97,7 @@ class _GuestCheckoutScreenState extends State<GuestCheckoutScreen> {
               onSubmitted: (_) => FocusScope.of(context).requestFocus(_phoneFocus),
               style: const TextStyle(fontSize: 14, color: AppColors.textDark),
               decoration: InputDecoration(
-                hintText: 'Enter Email',
+                hintText: 'Enter Email'.tr(context),
                 hintStyle: const TextStyle(color: AppColors.textLight, fontSize: 13),
                 filled: true,
                 fillColor: const Color(0xFFF5F5F5),
@@ -111,8 +112,8 @@ class _GuestCheckoutScreenState extends State<GuestCheckoutScreen> {
             const SizedBox(height: 20),
 
             // ── Phone ─────────────────────────────────────────────
-            const Text('Phone Number',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textDark)),
+            Text('Phone Number'.tr(context),
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textDark)),
             const SizedBox(height: 8),
             Container(
               decoration: BoxDecoration(
@@ -148,14 +149,14 @@ class _GuestCheckoutScreenState extends State<GuestCheckoutScreen> {
                     keyboardType: TextInputType.phone,
                     textInputAction: TextInputAction.done,
                     style: const TextStyle(fontSize: 14, color: AppColors.textDark),
-                    decoration: const InputDecoration(
-                      hintText: 'Enter Phone Number',
-                      hintStyle: TextStyle(color: AppColors.textLight, fontSize: 13),
+                    decoration: InputDecoration(
+                      hintText: 'Enter Phone Number'.tr(context),
+                      hintStyle: const TextStyle(color: AppColors.textLight, fontSize: 13),
                       filled: false,
                       border: InputBorder.none,
                       enabledBorder: InputBorder.none,
                       focusedBorder: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                     ),
                   ),
                 ),
@@ -188,8 +189,8 @@ class _GuestCheckoutScreenState extends State<GuestCheckoutScreen> {
                       ),
                     ]),
                     const SizedBox(width: 8),
-                    const Text('Set Your Location',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700,
+                    Text('Set Your Location'.tr(context),
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700,
                             color: AppColors.primary)),
                   ]),
                 ),
@@ -230,13 +231,13 @@ class _GuestCheckoutScreenState extends State<GuestCheckoutScreen> {
                 onPressed: () {
                   if (_name.trim().isEmpty || _phone.trim().isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Please enter your name and phone number'), backgroundColor: Colors.red),
+                      SnackBar(content: Text('Please enter your name and phone number'.tr(context)), backgroundColor: Colors.red),
                     );
                     return;
                   }
                   if (_locationDetail == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Please set your delivery location'), backgroundColor: Colors.red),
+                      SnackBar(content: Text('Please set your delivery location'.tr(context)), backgroundColor: Colors.red),
                     );
                     return;
                   }
@@ -255,8 +256,8 @@ class _GuestCheckoutScreenState extends State<GuestCheckoutScreen> {
                   elevation: 0,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text('Save',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                child: Text('Save'.tr(context),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
               ),
             ),
           ],

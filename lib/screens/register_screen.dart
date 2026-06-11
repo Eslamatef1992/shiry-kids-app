@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../theme/app_colors.dart';
 import '../services/api_service.dart';
+import '../l10n/app_strings.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -32,7 +33,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (!_canSubmit) return;
     if (_passCtrl.text != _confirmCtrl.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match'), backgroundColor: Colors.red),
+        SnackBar(content: Text('Passwords do not match'.tr(context)), backgroundColor: Colors.red),
       );
       return;
     }
@@ -57,7 +58,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       }
     } catch (_) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Network error. Please try again.'), backgroundColor: Colors.red),
+        SnackBar(content: Text('Network error. Please try again.'.tr(context)), backgroundColor: Colors.red),
       );
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -87,26 +88,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: const Icon(Icons.chevron_left, size: 28, color: AppColors.textDark),
               ),
               const SizedBox(height: 16),
-              const Text('SIGN UP',
-                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.textDark)),
+              Text('SIGN UP'.tr(context),
+                  style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.textDark)),
               const SizedBox(height: 12),
-              const Text(
-                'Enjoy The Best Shopping Experience Through The App.',
-                style: TextStyle(fontSize: 13, color: AppColors.textMedium, height: 1.5),
+              Text(
+                'Enjoy The Best Shopping Experience Through The App.'.tr(context),
+                style: const TextStyle(fontSize: 13, color: AppColors.textMedium, height: 1.5),
               ),
               const SizedBox(height: 32),
 
               _FieldLabel('Full Name'),
               const SizedBox(height: 8),
               TextField(controller: _nameCtrl, onChanged: (_) => setState(() {}),
-                  decoration: const InputDecoration(hintText: 'Enter Full Name')),
+                  decoration: InputDecoration(hintText: 'Enter Full Name'.tr(context))),
               const SizedBox(height: 20),
 
               _FieldLabel('Email'),
               const SizedBox(height: 8),
               TextField(controller: _emailCtrl, onChanged: (_) => setState(() {}),
                   keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(hintText: 'Enter Email')),
+                  decoration: InputDecoration(hintText: 'Enter Email'.tr(context))),
               const SizedBox(height: 20),
 
               _FieldLabel('Phone Number'),
@@ -147,7 +148,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       controller: _phoneCtrl,
                       keyboardType: TextInputType.phone,
                       onChanged: (_) => setState(() {}),
-                      decoration: const InputDecoration(hintText: 'Enter Phone Number'),
+                      decoration: InputDecoration(hintText: 'Enter Phone Number'.tr(context)),
                     ),
                   ),
                 ],
@@ -161,7 +162,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 obscureText: _obscurePass,
                 onChanged: (_) => setState(() {}),
                 decoration: InputDecoration(
-                  hintText: 'Enter Password',
+                  hintText: 'Enter Password'.tr(context),
                   suffixIcon: IconButton(
                     icon: Icon(_obscurePass ? Icons.visibility_off_outlined : Icons.visibility_outlined,
                         color: AppColors.textLight),
@@ -178,7 +179,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 obscureText: _obscureConfirm,
                 onChanged: (_) => setState(() {}),
                 decoration: InputDecoration(
-                  hintText: 'Enter Password',
+                  hintText: 'Enter Password'.tr(context),
                   suffixIcon: IconButton(
                     icon: Icon(_obscureConfirm ? Icons.visibility_off_outlined : Icons.visibility_outlined,
                         color: AppColors.textLight),
@@ -207,8 +208,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(width: 8),
                     GestureDetector(
                       onTap: () {},
-                      child: const Text('Accept The Terms And Conditions.',
-                          style: TextStyle(fontSize: 13, color: AppColors.primary,
+                      child: Text('Accept The Terms And Conditions.'.tr(context),
+                          style: const TextStyle(fontSize: 13, color: AppColors.primary,
                               fontWeight: FontWeight.w600,
                               decoration: TextDecoration.underline,
                               decorationColor: AppColors.primary)),
@@ -231,7 +232,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   child: _loading
                       ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                      : const Text('Sign Up', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                      : Text('Sign Up'.tr(context), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                 ),
               ),
               const SizedBox(height: 32),
@@ -247,6 +248,6 @@ class _FieldLabel extends StatelessWidget {
   final String text;
   const _FieldLabel(this.text);
   @override
-  Widget build(BuildContext context) => Text(text,
+  Widget build(BuildContext context) => Text(text.tr(context),
       style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textDark));
 }

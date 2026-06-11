@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/wavy_app_bar.dart';
+import '../../l10n/app_strings.dart';
 
 /// Manual address entry form. Returns a map shaped like
 /// `{'detail': <combined address string>, 'name': <recipient name>, 'phone': <phone>}`
@@ -85,7 +86,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                         )),
                       ),
                       child: Text(
-                        _tabs[i],
+                        _tabs[i].tr(context),
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 13,
@@ -114,8 +115,8 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                   const SizedBox(height: 24),
 
                   // Recipient Details
-                  const Text('Recipient Details',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textDark)),
+                  Text('Recipient Details'.tr(context),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textDark)),
                   const SizedBox(height: 16),
                   _FormField(label: 'First Name', hint: 'First Name', controller: _firstNameCtrl, required: true),
                   const SizedBox(height: 16),
@@ -147,18 +148,18 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                           controller: _phoneCtrl,
                           keyboardType: TextInputType.phone,
                           decoration: const InputDecoration(hintText: '123455'),
-                          validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                          validator: (v) => (v == null || v.trim().isEmpty) ? 'Required'.tr(context) : null,
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'A Verification Code Will Be Sent Via WhatsApp To This Mobile Number.',
-                    style: TextStyle(fontSize: 11, color: AppColors.textMedium),
+                  Text(
+                    'A Verification Code Will Be Sent Via WhatsApp To This Mobile Number.'.tr(context),
+                    style: const TextStyle(fontSize: 11, color: AppColors.textMedium),
                   ),
                   const SizedBox(height: 32),
-                  ElevatedButton(onPressed: _save, child: const Text('Save Address')),
+                  ElevatedButton(onPressed: _save, child: Text('Save Address'.tr(context))),
                   const SizedBox(height: 24),
                 ],
               ),
@@ -185,8 +186,8 @@ class _FormField extends StatelessWidget {
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
-          decoration: InputDecoration(hintText: hint),
-          validator: required ? (v) => (v == null || v.trim().isEmpty) ? 'Required' : null : null,
+          decoration: InputDecoration(hintText: hint.tr(context)),
+          validator: required ? (v) => (v == null || v.trim().isEmpty) ? 'Required'.tr(context) : null : null,
         ),
       ],
     );
@@ -202,7 +203,7 @@ class _RequiredLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(text, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textDark)),
+        Text(text.tr(context), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textDark)),
         if (required) const Text(' *', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w700)),
       ],
     );

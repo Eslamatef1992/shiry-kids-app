@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import '../l10n/app_strings.dart';
 
 /// Red AppBar with scalloped/wavy bottom edge — used across all profile screens
 class WavyAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -37,7 +38,7 @@ class WavyAppBar extends StatelessWidget implements PreferredSizeWidget {
                 if (!showBack) const SizedBox(width: 16),
                 Expanded(
                   child: Text(
-                    title,
+                    title.tr(context),
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -99,9 +100,9 @@ class ProfileBreadcrumb extends StatelessWidget {
         children: [
           GestureDetector(
             onTap: () => Navigator.pop(context),
-            child: const Text(
-              'My Profile',
-              style: TextStyle(color: AppColors.textMedium, fontSize: 13),
+            child: Text(
+              'My Profile'.tr(context),
+              style: const TextStyle(color: AppColors.textMedium, fontSize: 13),
             ),
           ),
           const Padding(
@@ -109,7 +110,7 @@ class ProfileBreadcrumb extends StatelessWidget {
             child: Icon(Icons.chevron_right, size: 16, color: AppColors.textMedium),
           ),
           Text(
-            section,
+            section.tr(context),
             style: const TextStyle(
               color: AppColors.primary,
               fontSize: 13,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../theme/app_colors.dart';
+import '../l10n/app_strings.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -85,7 +86,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     height: 52,
                     child: ElevatedButton(
                       onPressed: () => Navigator.pushNamed(context, '/login'),
-                      child: const Text('Log In', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                      child: Text('Log In'.tr(context), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -102,7 +103,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         elevation: 0,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
-                      child: const Text('Sign Up', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                      child: Text('Sign Up'.tr(context), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -110,9 +111,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   // Continue As Guest
                   GestureDetector(
                     onTap: () => Navigator.pushReplacementNamed(context, '/location'),
-                    child: const Text(
-                      'Continue As Guest',
-                      style: TextStyle(
+                    child: Text(
+                      'Continue As Guest'.tr(context),
+                      style: const TextStyle(
                         color: AppColors.primary,
                         fontSize: 14,
                         fontWeight: FontWeight.w600,

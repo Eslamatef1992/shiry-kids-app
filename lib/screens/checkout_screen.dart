@@ -10,6 +10,7 @@ import '../widgets/network_image.dart';
 import '../widgets/address_method_sheet.dart';
 import 'payment_success_screen.dart';
 import 'payment_failed_screen.dart';
+import '../l10n/app_strings.dart';
 
 class CheckoutScreen extends StatefulWidget {
   final List<CartCouponItem> coupons;
@@ -144,7 +145,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         if (_subtotal < minOrder) {
           setState(() {
             _couponError = true;
-            _couponMessage = 'This coupon requires a minimum order of ${minOrder.toStringAsFixed(2)} KD';
+            _couponMessage = '${'This coupon requires a minimum order of'.tr(context)} ${minOrder.toStringAsFixed(2)} KD';
             _discount = 0;
             _discountCode = null;
           });
@@ -152,7 +153,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           final discount = type == 'percentage' ? _subtotal * value / 100 : value;
           setState(() {
             _couponError = false;
-            _couponMessage = 'Coupon applied successfully';
+            _couponMessage = 'Coupon applied successfully'.tr(context);
             _discount = discount.clamp(0, _subtotal);
             _discountCode = code;
           });
@@ -160,7 +161,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       } else {
         setState(() {
           _couponError = true;
-          _couponMessage = res['message']?.toString() ?? 'Invalid coupon code';
+          _couponMessage = res['message']?.toString() ?? 'Invalid coupon code'.tr(context);
           _discount = 0;
           _discountCode = null;
         });
@@ -169,7 +170,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       if (!mounted) return;
       setState(() {
         _couponError = true;
-        _couponMessage = 'Invalid or expired coupon code';
+        _couponMessage = 'Invalid or expired coupon code'.tr(context);
         _discount = 0;
         _discountCode = null;
       });
@@ -182,7 +183,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     // Require a real address when delivering to the customer's address.
     if (_delivery == 'address' && (_address == null || _address!.trim().isEmpty)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please set your delivery address'), backgroundColor: Colors.red),
+        SnackBar(content: Text('Please set your delivery address'.tr(context)), backgroundColor: Colors.red),
       );
       await _pickLocation();
       return;
@@ -249,6 +250,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             shippingFees: shipping,
             deliveryFees: delivery,
             couponQrImages: couponQrImages,
+            hasCoupons: widget.hasCoupons,
           ),
         ));
       } else {
@@ -284,11 +286,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 controller: _couponController,
                 textInputAction: TextInputAction.done,
                 onSubmitted: (_) => _applyCoupon(),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   border: InputBorder.none,
                   isCollapsed: true,
-                  hintText: 'Enter Coupon Discount',
-                  hintStyle: TextStyle(fontSize: 13, color: AppColors.textLight),
+                  hintText: 'Enter Coupon Discount'.tr(context),
+                  hintStyle: const TextStyle(fontSize: 13, color: AppColors.textLight),
                 ),
                 style: const TextStyle(fontSize: 13, color: AppColors.textDark),
               ),
@@ -309,7 +311,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               child: _applyingCoupon
                   ? const SizedBox(width: 16, height: 16,
                       child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : const Text('Submit', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                  : Text('Submit'.tr(context), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
             ),
           ),
         ]),
@@ -328,7 +330,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: WavyAppBar(title: 'Checkout', showBack: true),
+      appBar: WavyAppBar(title: 'Checkout'.tr(context), showBack: true),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 100),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -346,7 +348,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           const SizedBox(height: 18),
 
           // ── Cart Items ────────────────────────────────────────
-          _SectionLabel('Cart Item($_totalQty)'),
+          _SectionLabel('${'Cart Item'.tr(context)}($_totalQty)'),
           const SizedBox(height: 8),
 
           if (widget.coupons.isNotEmpty) ...[
@@ -423,10 +425,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
               const Icon(Icons.campaign_outlined, color: AppColors.primary, size: 20),
               const SizedBox(width: 8),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'The QR Code Will Be Displayed Immediately After The Payment Is Completed.',
-                  style: TextStyle(fontSize: 12, color: AppColors.textMedium, height: 1.4),
+                  'The QR Code Will Be Displayed Immediately After The Payment Is Completed.'.tr(context),
+                  style: const TextStyle(fontSize: 12, color: AppColors.textMedium, height: 1.4),
                 ),
               ),
             ]),
@@ -450,8 +452,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             child: _paying
                 ? const SizedBox(width: 22, height: 22,
                     child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
-                : const Text('Pay Now',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                : Text('Pay Now'.tr(context),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
           ),
         ),
       ),
@@ -466,7 +468,7 @@ class _SectionLabel extends StatelessWidget {
   final bool primary;
   const _SectionLabel(this.text, {this.primary = false});
   @override
-  Widget build(BuildContext context) => Text(text,
+  Widget build(BuildContext context) => Text(text.tr(context),
       style: TextStyle(
         fontSize: 14, fontWeight: FontWeight.w700,
         color: primary ? AppColors.primary : AppColors.textMedium,
@@ -479,7 +481,7 @@ class _SubLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.only(bottom: 6),
-    child: Text(text,
+    child: Text(text.tr(context),
         style: const TextStyle(fontSize: 12, color: AppColors.textLight, fontWeight: FontWeight.w500)),
   );
 }
@@ -532,7 +534,7 @@ class _ShippingCard extends StatelessWidget {
               ),
             ]),
             const SizedBox(width: 8),
-            const Text('Set Your Location',
+            Text('Set Your Location'.tr(context),
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primary)),
           ]),
         ),
@@ -621,7 +623,7 @@ class _CheckoutCouponCard extends StatelessWidget {
             Text(item.discount,
                 style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w600)),
           ]),
-          Text('Qty: ${item.quantity}',
+          Text('${'Qty:'.tr(context)} ${item.quantity}',
               style: const TextStyle(fontSize: 11, color: AppColors.textMedium)),
         ]),
       ),
@@ -636,7 +638,7 @@ class _CheckoutProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = item.product;
-    final catLabel = p.category == 'birthday' ? 'Birthday' : "Mother's Day";
+    final catLabel = (p.category == 'birthday' ? 'Birthday' : "Mother's Day").tr(context);
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -658,7 +660,7 @@ class _CheckoutProductCard extends StatelessWidget {
                 style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w600)),
             Text('${p.price.toInt()} Kwd',
                 style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textDark)),
-            Text('Qty: ${item.quantity}',
+            Text('${'Qty:'.tr(context)} ${item.quantity}',
                 style: const TextStyle(fontSize: 11, color: AppColors.textMedium)),
           ]),
         ),
@@ -705,7 +707,7 @@ class _Row extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 5),
     child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-      Text(label, style: const TextStyle(fontSize: 13, color: AppColors.textMedium)),
+      Text(label.tr(context), style: const TextStyle(fontSize: 13, color: AppColors.textMedium)),
       Text(value, style: TextStyle(
         fontSize: 13,
         color: valueColor ?? AppColors.textDark,
@@ -773,7 +775,7 @@ class _RadioOption extends StatelessWidget {
                     : null,
           ),
           const SizedBox(width: 12),
-          Expanded(child: Text(label,
+          Expanded(child: Text(label.tr(context),
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: textColor))),
           // Radio
           Container(

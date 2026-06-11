@@ -4,6 +4,7 @@ import '../theme/app_colors.dart';
 import '../models/product.dart';
 import '../providers/cart_provider.dart';
 import '../widgets/wavy_app_bar.dart';
+import '../l10n/app_strings.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
@@ -160,8 +161,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               ),
                               if (variant != null && variant.stock == 0) ...[
                                 const SizedBox(width: 10),
-                                const Text('Out of stock',
-                                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.redAccent)),
+                                Text('Out of stock'.tr(context),
+                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.redAccent)),
                               ],
                             ],
                           );
@@ -170,8 +171,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                         // ── Size selector ─────────────────────────────────
                         if (hasSizes) ...[
-                          const Text('Size',
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textDark)),
+                          Text('Size'.tr(context),
+                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textDark)),
                           const SizedBox(height: 10),
                           Wrap(
                             spacing: 10,
@@ -206,8 +207,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                         // ── Color selector ────────────────────────────────
                         if (hasColors) ...[
-                          const Text('Color',
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textDark)),
+                          Text('Color'.tr(context),
+                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textDark)),
                           const SizedBox(height: 10),
                           Wrap(
                             spacing: 12,
@@ -267,7 +268,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   onPressed: () {
                     context.read<CartProvider>().addProduct(CartItem(product: widget.product));
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text('${widget.product.name} added to cart!'),
+                      content: Text('${widget.product.name} ${'added to cart!'.tr(context)}'),
                       backgroundColor: AppColors.primary,
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -280,8 +281,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     elevation: 0,
                   ),
-                  child: const Text('Add To Cart',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                  child: Text('Add To Cart'.tr(context),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                 ),
               ),
             ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import '../l10n/app_strings.dart';
 import '../screens/location_picker_screen.dart';
 import '../screens/profile/add_address_screen.dart';
 
@@ -18,22 +19,22 @@ Future<Map<String, dynamic>?> pickAddress(BuildContext context) async {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Text(
-              'Add New Address',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textDark),
+              'Add New Address'.tr(ctx),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textDark),
             ),
           ),
           ListTile(
             leading: const Icon(Icons.map_outlined, color: AppColors.primary),
-            title: const Text('Pick On Map', style: TextStyle(fontWeight: FontWeight.w600)),
+            title: Text('Pick On Map'.tr(ctx), style: const TextStyle(fontWeight: FontWeight.w600)),
             onTap: () => Navigator.pop(ctx, 'map'),
           ),
           const Divider(height: 1, indent: 16, endIndent: 16),
           ListTile(
             leading: const Icon(Icons.edit_location_alt_outlined, color: AppColors.primary),
-            title: const Text('Enter Manually', style: TextStyle(fontWeight: FontWeight.w600)),
+            title: Text('Enter Manually'.tr(ctx), style: const TextStyle(fontWeight: FontWeight.w600)),
             onTap: () => Navigator.pop(ctx, 'manual'),
           ),
           const SizedBox(height: 8),

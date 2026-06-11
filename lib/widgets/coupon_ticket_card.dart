@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import '../l10n/app_strings.dart';
 import 'network_image.dart';
 
 /// Ticket-style coupon card matching Figma design.
@@ -121,9 +122,9 @@ class CouponTicketCard extends StatelessWidget {
                           decoration: const BoxDecoration(
                             color: Color(0xFFFFE9E3),
                           ),
-                          child: const Center(
-                            child: Text('Add To Cart',
-                                style: TextStyle(
+                          child: Center(
+                            child: Text('Add To Cart'.tr(context),
+                                style: const TextStyle(
                                     fontSize: 13, fontWeight: FontWeight.w700,
                                     color: AppColors.primary)),
                           ),

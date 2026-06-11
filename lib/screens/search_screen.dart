@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../models/product.dart';
 import '../services/api_service.dart';
+import '../l10n/app_strings.dart';
 import 'product_detail_screen.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -50,8 +51,8 @@ class _SearchScreenState extends State<SearchScreen> {
                     icon: const Icon(Icons.chevron_left, size: 28, color: AppColors.textDark),
                     onPressed: () => Navigator.pop(context),
                   ),
-                  const Text('SEARCH',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.textDark)),
+                  Text('SEARCH'.tr(context),
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.textDark)),
                 ],
               ),
             ),
@@ -66,7 +67,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 onSubmitted: _search,
                 onChanged: (v) { if (v.isEmpty) setState(() { _results = []; _searched = false; }); },
                 decoration: InputDecoration(
-                  hintText: 'Search products...',
+                  hintText: 'Search products...'.tr(context),
                   hintStyle: const TextStyle(color: AppColors.textLight),
                   prefixIcon: const Icon(Icons.search, color: AppColors.textLight),
                   suffixIcon: _ctrl.text.isNotEmpty
@@ -97,7 +98,7 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget _buildBody() {
     if (_loading) return const Center(child: CircularProgressIndicator(color: AppColors.primary));
     if (!_searched) return const SizedBox.shrink();
-    if (_results.isEmpty) return const Center(child: Text('No results found', style: TextStyle(color: AppColors.textMedium)));
+    if (_results.isEmpty) return Center(child: Text('No results found'.tr(context), style: const TextStyle(color: AppColors.textMedium)));
 
     return GridView.builder(
       padding: const EdgeInsets.all(16),

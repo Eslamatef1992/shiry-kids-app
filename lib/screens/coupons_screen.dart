@@ -8,6 +8,7 @@ import '../widgets/coupon_ticket_card.dart';
 import '../widgets/skeleton_loader.dart';
 import 'coupon_detail_screen.dart';
 import '../services/api_service.dart';
+import '../l10n/app_strings.dart';
 
 // ── Screen ────────────────────────────────────────────────────────────────────
 
@@ -55,14 +56,14 @@ class _CouponsScreenState extends State<CouponsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: WavyAppBar(title: 'Coupons', showBack: false),
+      appBar: WavyAppBar(title: 'Coupons'.tr(context), showBack: false),
       body: Column(children: [
         // ── Category header ──────────────────────────────────────
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
           child: Align(
             alignment: Alignment.centerLeft,
-            child: Text('All Categories(${_allCoupons.length})',
+            child: Text('${'All Categories'.tr(context)}(${_allCoupons.length})',
                 style: const TextStyle(fontSize: 13, color: AppColors.textMedium,
                     fontWeight: FontWeight.w500)),
           ),
@@ -100,8 +101,8 @@ class _CouponsScreenState extends State<CouponsScreen> {
               : _error
               ? LoadErrorView(onRetry: _loadCoupons, detail: _errorMsg)
               : _filtered.isEmpty
-              ? const Center(child: Text('No coupons found',
-                  style: TextStyle(color: AppColors.textMedium)))
+              ? Center(child: Text('No coupons found'.tr(context),
+                  style: const TextStyle(color: AppColors.textMedium)))
               : ListView.separated(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
                   itemCount: _filtered.length,
@@ -148,7 +149,7 @@ class _CategoryChip extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          Text(label,
+          Text(label.tr(context),
               style: TextStyle(
                   fontSize: 13, fontWeight: FontWeight.w600,
                   color: selected ? AppColors.primary : AppColors.textDark)),
@@ -189,7 +190,7 @@ class _CouponCard extends StatelessWidget {
       onAddToCart: () {
         context.read<CartProvider>().addCoupon(item.toCartItem(quantity: 1));
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('${item.title} added to cart!'),
+          content: Text('${item.title} ${'added to cart!'.tr(context)}'),
           backgroundColor: AppColors.primary,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

@@ -11,6 +11,7 @@ import 'search_screen.dart';
 import 'coupon_detail_screen.dart';
 import '../services/api_service.dart';
 import 'product_detail_screen.dart';
+import '../l10n/app_strings.dart';
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
@@ -116,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           // ── Categories ──────────────────────────────────
                           if (_categories.isNotEmpty) ...[
-                            _sectionTitle('Categories', null),
+                            _sectionTitle(context, 'Categories', null),
                             const SizedBox(height: 10),
                             _CategoriesRow(categories: _categories),
                             const SizedBox(height: 20),
@@ -124,7 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           // ── Featured Coupons ─────────────────────────────
                           if (_featuredCoupons.isNotEmpty) ...[
-                            _sectionTitle('Coupons', null),
+                            _sectionTitle(context, 'Coupons', null),
                             const SizedBox(height: 10),
                             _CouponsList(coupons: _featuredCoupons),
                             const SizedBox(height: 20),
@@ -132,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           // ── Best Sellers ────────────────────────────────
                           if (_featuredProducts.isNotEmpty) ...[
-                            _sectionTitle('Best Sellers', null),
+                            _sectionTitle(context, 'Best Sellers', null),
                             const SizedBox(height: 10),
                             _ProductRow(products: _featuredProducts),
                             const SizedBox(height: 20),
@@ -140,7 +141,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           // ── New Arrivals ────────────────────────────────
                           if (_newArrivals.isNotEmpty) ...[
-                            _sectionTitle('New Arrivals', null),
+                            _sectionTitle(context, 'New Arrivals', null),
                             const SizedBox(height: 10),
                             _ProductRow(products: _newArrivals),
                             const SizedBox(height: 20),
@@ -148,7 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           // ── Weekly Offers ────────────────────────────────
                           if (_weeklyOffers.isNotEmpty) ...[
-                            _sectionTitle('Weekly Offers', null),
+                            _sectionTitle(context, 'Weekly Offers', null),
                             const SizedBox(height: 10),
                             _ProductRow(products: _weeklyOffers),
                             const SizedBox(height: 36),
@@ -164,16 +165,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-Widget _sectionTitle(String title, VoidCallback? onSeeAll) => Padding(
+Widget _sectionTitle(BuildContext context, String title, VoidCallback? onSeeAll) => Padding(
   padding: const EdgeInsets.symmetric(horizontal: 16),
   child: Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
-      Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textDark)),
+      Text(title.tr(context), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textDark)),
       if (onSeeAll != null)
         GestureDetector(
           onTap: onSeeAll,
-          child: const Text('See All', style: TextStyle(fontSize: 13, color: AppColors.primary, fontWeight: FontWeight.w600)),
+          child: Text('See All'.tr(context), style: const TextStyle(fontSize: 13, color: AppColors.primary, fontWeight: FontWeight.w600)),
         ),
     ],
   ),
@@ -358,7 +359,7 @@ class _CouponsList extends StatelessWidget {
             onAddToCart: () {
               context.read<CartProvider>().addCoupon(item.toCartItem(quantity: 1));
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text('${item.title} added to cart!'),
+                content: Text('${item.title} ${'added to cart!'.tr(context)}'),
                 backgroundColor: AppColors.primary,
                 behavior: SnackBarBehavior.floating,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -387,7 +388,7 @@ class _ProductRow extends StatelessWidget {
       separatorBuilder: (_, __) => const SizedBox(width: 12),
       itemBuilder: (_, i) {
         final p = products[i];
-        final catLabel = p.category.isNotEmpty ? p.category : 'Product';
+        final catLabel = (p.category.isNotEmpty ? p.category : 'Product').tr(context);
         return GestureDetector(
           onTap: () => Navigator.push(context, MaterialPageRoute(
             builder: (_) => ProductDetailScreen(product: p, categoryName: catLabel),
@@ -451,7 +452,7 @@ class _ProductRow extends StatelessWidget {
                         onTap: () {
                           context.read<CartProvider>().addProduct(CartItem(product: p));
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text('${p.name} added to cart!'),
+                            content: Text('${p.name} ${'added to cart!'.tr(context)}'),
                             backgroundColor: AppColors.primary,
                             behavior: SnackBarBehavior.floating,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -464,9 +465,9 @@ class _ProductRow extends StatelessWidget {
                             color: const Color(0xFFFFEDED),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Center(
-                            child: Text('Add To Cart',
-                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                          child: Center(
+                            child: Text('Add To Cart'.tr(context),
+                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary)),
                           ),
                         ),
                       ),
@@ -552,7 +553,7 @@ class _WeeklyCard extends StatelessWidget {
                   width: double.infinity, height: 26,
                   decoration: BoxDecoration(color: const Color(0xFFFFEDED), borderRadius: BorderRadius.circular(8)),
                   child: const Center(
-                    child: Text('Details', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                    child: Text('Details'.tr(context), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary)),
                   ),
                 ),
               ),

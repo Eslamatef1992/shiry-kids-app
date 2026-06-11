@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../theme/app_colors.dart';
 import '../widgets/wavy_app_bar.dart';
+import '../providers/locale_provider.dart';
+import '../l10n/app_strings.dart';
 import 'profile/my_addresses_screen.dart';
 import 'profile/change_password_screen.dart';
 import 'profile/app_info_screen.dart';
@@ -58,7 +61,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final email = _user?['email']?.toString() ?? '';
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: WavyAppBar(title: 'My Profile', showBack: false),
+      appBar: WavyAppBar(title: 'My Profile'.tr(context), showBack: false),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         children: [
@@ -90,11 +93,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 12),
           Center(child: Text(
-              _loggedIn ? (name.isNotEmpty ? name : 'My Profile') : 'Guest',
+              _loggedIn ? (name.isNotEmpty ? name : 'My Profile'.tr(context)) : 'Guest'.tr(context),
               style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.textDark))),
           const SizedBox(height: 4),
           Center(child: Text(
-              _loggedIn ? email : 'Log in to access your account',
+              _loggedIn ? email : 'Log in to access your account'.tr(context),
               style: const TextStyle(fontSize: 13, color: AppColors.textMedium))),
           const SizedBox(height: 24),
 
@@ -117,7 +120,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _SvgRow(
               asset: 'assets/icons/icon_language.svg',
               label: 'Change Language',
-              trailing: const Text('AR', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700, fontSize: 13)),
+              trailing: Text(
+                Localizations.localeOf(context).languageCode.toUpperCase(),
+                style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700, fontSize: 13),
+              ),
               onTap: () => _showLanguagePicker(context),
             ),
           ]),
@@ -195,7 +201,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 : _TextRow(label: 'Log In', onTap: () =>
                     Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false)),
           ]),
-          const SizedBox(height: 40),
+          const SizedBox(height: 24),
+
+          // ── Footer ──────────────────────────────────────────
+          Center(
+            child: Text(
+              'Powered By Teknulugy.'.tr(context),
+              style: const TextStyle(fontSize: 12, color: AppColors.textLight),
+            ),
+          ),
+          const SizedBox(height: 16),
         ],
       ),
     );
@@ -298,10 +313,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'Are You Sure You\nWant Logout?',
+              Text(
+                'Are You Sure You\nWant Logout?'.tr(context),
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.textDark, height: 1.3),
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.textDark, height: 1.3),
               ),
               const SizedBox(height: 28),
               Row(children: [
@@ -316,7 +331,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         elevation: 0,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: const Text('No', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                      child: Text('No'.tr(context), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                     ),
                   ),
                 ),
@@ -335,7 +350,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         elevation: 0,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: const Text('Yes', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                      child: Text('Yes'.tr(context), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                     ),
                   ),
                 ),
@@ -356,7 +371,7 @@ class _Label extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.only(bottom: 8),
-    child: Text(text, style: const TextStyle(fontSize: 13, color: AppColors.textMedium, fontWeight: FontWeight.w600)),
+    child: Text(text.tr(context), style: const TextStyle(fontSize: 13, color: AppColors.textMedium, fontWeight: FontWeight.w600)),
   );
 }
 
@@ -396,7 +411,7 @@ class _SvgRow extends StatelessWidget {
         padding: const EdgeInsets.all(6),
         child: SvgPicture.asset(asset, colorFilter: const ColorFilter.mode(AppColors.primary, BlendMode.srcIn)),
       ),
-      title: Text(label, style: const TextStyle(
+      title: Text(label.tr(context), style: const TextStyle(
           fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primary)),
       trailing: trailing ?? const Icon(Icons.chevron_right, color: AppColors.primary, size: 20),
       dense: true,
@@ -413,7 +428,7 @@ class _TextRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListTile(
-    title: Text(label, style: const TextStyle(
+    title: Text(label.tr(context), style: const TextStyle(
         fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primary)),
     trailing: const Icon(Icons.chevron_right, color: AppColors.primary, size: 20),
     dense: true,
@@ -422,25 +437,28 @@ class _TextRow extends StatelessWidget {
 }
 
 // ─── Language picker ──────────────────────────────────────────────────────────
-class _LanguagePicker extends StatefulWidget {
+// Selecting a language immediately switches the app's locale (and direction
+// for Arabic/RTL) via LocaleProvider, then closes the sheet.
+class _LanguagePicker extends StatelessWidget {
   const _LanguagePicker();
-  @override
-  State<_LanguagePicker> createState() => _LanguagePickerState();
-}
-
-class _LanguagePickerState extends State<_LanguagePicker> {
-  String _selected = 'en';
 
   @override
   Widget build(BuildContext context) {
+    final selected = Localizations.localeOf(context).languageCode;
+
+    void selectLanguage(String code) {
+      context.read<LocaleProvider>().setLocale(code);
+      Navigator.pop(context);
+    }
+
     return Container(
       padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _LangOption(flag: 'assets/icons/flag_kuwait.svg', label: 'Arabic',  value: 'ar', selected: _selected, onTap: (v) => setState(() => _selected = v)),
+          _LangOption(flag: 'assets/icons/flag_kuwait.svg', label: 'Arabic',  value: 'ar', selected: selected, onTap: selectLanguage),
           const Divider(height: 1, indent: 16, endIndent: 16),
-          _LangOption(flag: 'assets/icons/flag_us.svg',     label: 'English', value: 'en', selected: _selected, onTap: (v) => setState(() => _selected = v)),
+          _LangOption(flag: 'assets/icons/flag_us.svg',     label: 'English', value: 'en', selected: selected, onTap: selectLanguage),
           const Divider(height: 1),
           // Cancel — plain text button matching Figma
           GestureDetector(
@@ -449,9 +467,9 @@ class _LanguagePickerState extends State<_LanguagePicker> {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 16),
               color: const Color(0xFFF5F5F5),
-              child: const Center(
-                child: Text('Cancel',
-                    style: TextStyle(fontSize: 15, color: AppColors.textMedium, fontWeight: FontWeight.w500)),
+              child: Center(
+                child: Text('Cancel'.tr(context),
+                    style: const TextStyle(fontSize: 15, color: AppColors.textMedium, fontWeight: FontWeight.w500)),
               ),
             ),
           ),
@@ -479,7 +497,7 @@ class _LangOption extends StatelessWidget {
             SvgPicture.asset(flag, width: 36, height: 36),
             const SizedBox(width: 14),
             Expanded(
-              child: Text(label, style: TextStyle(
+              child: Text(label.tr(context), style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
                 color: isSelected ? AppColors.primary : AppColors.textDark,

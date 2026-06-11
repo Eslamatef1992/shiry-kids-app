@@ -8,6 +8,7 @@ import '../widgets/wavy_app_bar.dart';
 import '../widgets/network_image.dart';
 import 'checkout_screen.dart';
 import 'guest_checkout_screen.dart';
+import '../l10n/app_strings.dart';
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
@@ -78,7 +79,7 @@ class _CartScreenState extends State<CartScreen> {
       builder: (context, cart, _) {
         return Scaffold(
           backgroundColor: AppColors.background,
-          appBar: WavyAppBar(title: 'Cart', showBack: false),
+          appBar: WavyAppBar(title: 'Cart'.tr(context), showBack: false),
           body: cart.isEmpty ? _emptyState() : _filledState(cart),
         );
       },
@@ -89,8 +90,8 @@ class _CartScreenState extends State<CartScreen> {
     child: Column(mainAxisSize: MainAxisSize.min, children: [
       Icon(Icons.shopping_cart_outlined, size: 80, color: AppColors.primary.withOpacity(0.25)),
       const SizedBox(height: 16),
-      const Text('You Have Not Any Item In Cart',
-          style: TextStyle(fontSize: 15, color: AppColors.textMedium, fontWeight: FontWeight.w500)),
+      Text('You Have Not Any Item In Cart'.tr(context),
+          style: const TextStyle(fontSize: 15, color: AppColors.textMedium, fontWeight: FontWeight.w500)),
     ]),
   );
 
@@ -103,7 +104,7 @@ class _CartScreenState extends State<CartScreen> {
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('Cart Item($totalItems)',
+            Text('${'Cart Item'.tr(context)}($totalItems)',
                 style: const TextStyle(fontSize: 13, color: AppColors.textMedium)),
             const SizedBox(height: 10),
 
@@ -170,8 +171,8 @@ class _CartScreenState extends State<CartScreen> {
               elevation: 0,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text('Checkout',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+            child: Text('Checkout'.tr(context),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
           ),
         ),
       ),
@@ -264,7 +265,7 @@ class _CouponCartCard extends StatelessWidget {
                     // Coupon count
                     Padding(
                       padding: const EdgeInsets.fromLTRB(22, 4, 8, 0),
-                      child: Text('Coupons: ${item.couponCount}',
+                      child: Text('${'Coupons:'.tr(context)} ${item.couponCount}',
                           style: const TextStyle(
                               fontSize: 11, color: AppColors.textLight)),
                     ),
@@ -327,8 +328,8 @@ class _CouponCartCard extends StatelessWidget {
                             fontSize: 22, fontWeight: FontWeight.w900,
                             color: AppColors.textDark)),
                     const SizedBox(height: 2),
-                    const Text('qty',
-                        style: TextStyle(
+                    Text('qty'.tr(context),
+                        style: const TextStyle(
                             fontSize: 10, color: AppColors.textLight)),
                     const SizedBox(height: 12),
                   ],
@@ -467,7 +468,7 @@ class _ProductCartCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = item.product;
-    final catLabel = p.category == 'birthday' ? 'Birthday' : "Mother's Day";
+    final catLabel = (p.category == 'birthday' ? 'Birthday' : "Mother's Day").tr(context);
 
     return Container(
       decoration: BoxDecoration(
@@ -517,7 +518,7 @@ class _ProductCartCard extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               child: Row(children: [
-                const Text('Size:', style: TextStyle(fontSize: 13, color: AppColors.textDark, fontWeight: FontWeight.w600)),
+                Text('Size:'.tr(context), style: const TextStyle(fontSize: 13, color: AppColors.textDark, fontWeight: FontWeight.w600)),
                 const Spacer(),
                 Text(item.selectedSize ?? 'M',
                     style: const TextStyle(fontSize: 13, color: AppColors.primary, fontWeight: FontWeight.w700)),
@@ -543,7 +544,7 @@ class _ProductCartCard extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               child: Row(children: [
-                const Text('Color:', style: TextStyle(fontSize: 13, color: AppColors.textDark, fontWeight: FontWeight.w600)),
+                Text('Color:'.tr(context), style: const TextStyle(fontSize: 13, color: AppColors.textDark, fontWeight: FontWeight.w600)),
                 const Spacer(),
                 Container(
                   width: 14, height: 14,
@@ -573,7 +574,7 @@ class _ProductCartCard extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           child: Center(
-            child: Text('Number Of Item 12',
+            child: Text('Number Of Item 12'.tr(context),
                 style: const TextStyle(fontSize: 11, color: AppColors.textLight)),
           ),
         ),
@@ -733,8 +734,8 @@ class _SummarySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-    const Text('Summary',
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.primary)),
+    Text('Summary'.tr(context),
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.primary)),
     const SizedBox(height: 10),
     Container(
       padding: const EdgeInsets.all(14),
@@ -744,12 +745,12 @@ class _SummarySection extends StatelessWidget {
         boxShadow: const [BoxShadow(color: Color(0x0A000000), blurRadius: 4, offset: Offset(0, 2))],
       ),
       child: Column(children: [
-        _SumRow('Subtotal', '${subtotal.toInt()} Kw'),
-        _SumRow('Discount', '0.00 Kw', valueColor: AppColors.primary),
-        _SumRow('Shipping Fees', '0.00 Kw'),
-        _SumRow('Delivery Fees', '0.00 Kw'),
+        _SumRow('Subtotal'.tr(context), '${subtotal.toInt()} Kw'),
+        _SumRow('Discount'.tr(context), '0.00 Kw', valueColor: AppColors.primary),
+        _SumRow('Shipping Fees'.tr(context), '0.00 Kw'),
+        _SumRow('Delivery Fees'.tr(context), '0.00 Kw'),
         const Divider(height: 16, color: Color(0xFFF0F0F0)),
-        _SumRow('Total', '${(subtotal).toInt()} Kwd',
+        _SumRow('Total'.tr(context), '${(subtotal).toInt()} Kwd',
             labelBold: true, valueColor: AppColors.primary, valueBold: true),
       ]),
     ),
@@ -797,9 +798,9 @@ class _GuestOrLoginDialog extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
       child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          const Expanded(
-            child: Text('Do You Want Login Or Continue As A Guest?',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textDark)),
+          Expanded(
+            child: Text('Do You Want Login Or Continue As A Guest?'.tr(context),
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textDark)),
           ),
           GestureDetector(
             onTap: () => Navigator.pop(context),
@@ -817,15 +818,15 @@ class _GuestOrLoginDialog extends StatelessWidget {
               elevation: 0,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: const Text('Log In', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+            child: Text('Log In'.tr(context), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
           ),
         ),
         const SizedBox(height: 12),
         GestureDetector(
           onTap: onGuest,
-          child: const Center(
-            child: Text('Continue As Guest',
-                style: TextStyle(fontSize: 14, color: AppColors.primary,
+          child: Center(
+            child: Text('Continue As Guest'.tr(context),
+                style: const TextStyle(fontSize: 14, color: AppColors.primary,
                     fontWeight: FontWeight.w700, decoration: TextDecoration.underline,
                     decorationColor: AppColors.primary)),
           ),

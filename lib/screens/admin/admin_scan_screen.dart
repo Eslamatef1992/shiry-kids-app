@@ -184,7 +184,7 @@ class _AdminScanScreenState extends State<AdminScanScreen>
           MobileScanner(
             controller: _controller,
             onDetect: _onDetect,
-            errorBuilder: (context, error) {
+            errorBuilder: (context, error, child) {
               // Surface camera/permission errors instead of a blank screen,
               // so it's clear why the scanner "isn't working" (e.g. denied
               // camera permission or no camera available on this device).

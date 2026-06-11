@@ -1,43 +1,90 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../widgets/wavy_app_bar.dart';
+import '../widgets/network_image.dart';
+import '../services/api_service.dart';
+import '../l10n/app_strings.dart';
+
+const String _baseUrl = 'https://back.sherykids.com';
+
+String _imgUrl(dynamic v) {
+  if (v == null || v.toString().isEmpty) return '';
+  final s = v.toString();
+  return s.startsWith('http') ? s : '$_baseUrl$s';
+}
 
 // ── Model ─────────────────────────────────────────────────────────────────────
 
 class _UserCoupon {
-  final String imageUrl, brandImageUrl, brandName, countdown, discount;
+  final String name, imageUrl;
+  final double price;
+  final int quantity;
   final bool used;
   const _UserCoupon({
-    required this.imageUrl, required this.brandImageUrl, required this.brandName,
-    required this.countdown, required this.discount, this.used = true,
+    required this.name, required this.imageUrl, required this.price,
+    required this.quantity, required this.used,
   });
 }
 
-final _myCoupons = const [
-  _UserCoupon(
-    imageUrl: 'assets/images/weekly_1.jpg',
-    brandImageUrl: 'assets/images/logo_cropped.png',
-    brandName: 'Kuwait Pool', countdown: '3 Days : 13 Hours : 30 Sec',
-    discount: '50 %', used: true,
-  ),
-  _UserCoupon(
-    imageUrl: 'assets/images/weekly_1.jpg',
-    brandImageUrl: 'assets/images/logo_cropped.png',
-    brandName: 'Kuwait Pool', countdown: '3 Days : 13 Hours : 30 Sec',
-    discount: '50 %', used: true,
-  ),
-  _UserCoupon(
-    imageUrl: 'assets/images/weekly_1.jpg',
-    brandImageUrl: 'assets/images/logo_cropped.png',
-    brandName: 'Kuwait Pool', countdown: '0 Days : 1 Hours : 00 Sec',
-    discount: '50 %', used: true,
-  ),
-];
-
 // ── Screen ────────────────────────────────────────────────────────────────────
 
-class MyCouponsScreen extends StatelessWidget {
+class MyCouponsScreen extends StatefulWidget {
   const MyCouponsScreen({super.key});
+  @override
+  State<MyCouponsScreen> createState() => _MyCouponsScreenState();
+}
+
+class _MyCouponsScreenState extends State<MyCouponsScreen> {
+  bool _loading = true;
+  List<_UserCoupon> _coupons = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCoupons();
+  }
+
+  Future<void> _loadCoupons() async {
+    setState(() => _loading = true);
+    try {
+      final res = await ApiService.getMyOrders();
+      final rows = (res['data'] != null && res['data']['rows'] != null)
+          ? res['data']['rows'] as List
+          : (res['data'] as List? ?? []);
+
+      final coupons = <_UserCoupon>[];
+      for (final o in rows) {
+        final order = o as Map<String, dynamic>;
+        final items = (order['items'] as List? ?? [])
+            .whereType<Map>()
+            .map((e) => e.cast<String, dynamic>())
+            .toList();
+        final qrCodes = (order['coupon_qr_codes'] as List? ?? [])
+            .whereType<Map>()
+            .map((e) => e.cast<String, dynamic>())
+            .toList();
+
+        for (final item in items) {
+          if (item['type'] != 'coupon') continue;
+          final couponId = item['id'];
+          final couponQrs = qrCodes.where((q) => q['coupon_id'] == couponId).toList();
+          final used = couponQrs.isNotEmpty &&
+              couponQrs.every((q) => q['status'] == 'used');
+          coupons.add(_UserCoupon(
+            name: item['name']?.toString() ?? '',
+            imageUrl: _imgUrl(item['image']),
+            price: double.tryParse(item['price']?.toString() ?? '0') ?? 0,
+            quantity: int.tryParse(item['quantity']?.toString() ?? '1') ?? 1,
+            used: used,
+          ));
+        }
+      }
+
+      if (mounted) setState(() { _coupons = coupons; _loading = false; });
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,19 +97,25 @@ class MyCouponsScreen extends StatelessWidget {
           // Breadcrumb
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-            child: _Breadcrumb(parts: const ['My Profile', 'My Coupons']),
+            child: _Breadcrumb(parts: ['My Profile'.tr(context), 'My Coupons'.tr(context)]),
           ),
           Expanded(
-            child: _myCoupons.isEmpty
-                ? const Center(
-                    child: Text('No coupons yet',
-                        style: TextStyle(color: AppColors.textLight, fontSize: 14)))
-                : ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-                    itemCount: _myCoupons.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
-                    itemBuilder: (_, i) => _CouponCard(coupon: _myCoupons[i]),
-                  ),
+            child: _loading
+                ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                : _coupons.isEmpty
+                    ? Center(
+                        child: Text('No coupons yet'.tr(context),
+                            style: const TextStyle(color: AppColors.textLight, fontSize: 14)))
+                    : RefreshIndicator(
+                        color: AppColors.primary,
+                        onRefresh: _loadCoupons,
+                        child: ListView.separated(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                          itemCount: _coupons.length,
+                          separatorBuilder: (_, __) => const SizedBox(height: 12),
+                          itemBuilder: (_, i) => _CouponCard(coupon: _coupons[i]),
+                        ),
+                      ),
           ),
         ],
       ),
@@ -92,11 +145,7 @@ class _CouponCard extends StatelessWidget {
           // Left image
           ClipRRect(
             borderRadius: const BorderRadius.horizontal(left: Radius.circular(14)),
-            child: Image.asset(coupon.imageUrl,
-                width: _imgW, height: 130, fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
-                    width: _imgW, color: const Color(0xFFF5F5F5),
-                    child: const Icon(Icons.image_outlined, color: Color(0xFFCCCCCC)))),
+            child: smartImage(coupon.imageUrl, width: _imgW, height: 130, fit: BoxFit.cover),
           ),
 
           // Middle content
@@ -106,31 +155,14 @@ class _CouponCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Countdown
-                  Text(coupon.countdown,
-                      style: const TextStyle(fontSize: 10, color: AppColors.textMedium)),
-                  const SizedBox(height: 6),
-
-                  // Brand logo + name row
-                  Row(children: [
-                    Container(
-                      width: 28, height: 28,
-                      decoration: const BoxDecoration(shape: BoxShape.circle),
-                      child: ClipOval(
-                        child: Image.asset(coupon.brandImageUrl, fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
-                                color: AppColors.primary.withOpacity(0.1),
-                                child: const Icon(Icons.storefront_outlined,
-                                    size: 14, color: AppColors.primary))),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(coupon.brandName,
-                          style: const TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.primary)),
-                    ),
-                  ]),
+                  Text(coupon.name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.primary)),
+                  const SizedBox(height: 4),
+                  Text('${'Qty'.tr(context)}: ${coupon.quantity}',
+                      style: const TextStyle(fontSize: 12, color: AppColors.textMedium)),
                   const Spacer(),
 
                   // Used / Active button
@@ -143,7 +175,7 @@ class _CouponCard extends StatelessWidget {
                     ),
                     child: Center(
                       child: Text(
-                        coupon.used ? 'Used' : 'Active',
+                        (coupon.used ? 'Used' : 'Active').tr(context),
                         style: const TextStyle(
                             fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary),
                       ),
@@ -154,12 +186,12 @@ class _CouponCard extends StatelessWidget {
             ),
           ),
 
-          // Right: discount
+          // Right: price
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 12, 14, 12),
-            child: Text(coupon.discount,
+            child: Text('${coupon.price.toInt()} Kd',
                 style: const TextStyle(
-                    fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.primary)),
+                    fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.primary)),
           ),
         ],
       ),
