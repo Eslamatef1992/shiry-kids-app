@@ -45,6 +45,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   String? _phone;
   bool _loadingProfile = false;
 
+  // ── Discount coupon ────────────────────────────────────────────
+  final TextEditingController _couponController = TextEditingController();
+  String? _discountCode;
+  double _discount = 0.0;
+  bool _applyingCoupon = false;
+  String? _couponMessage;
+  bool _couponError = false;
+
   @override
   void initState() {
     super.initState();
@@ -110,6 +118,66 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       widget.coupons.fold(0, (s, c) => s + c.quantity) +
       widget.products.fold(0, (s, p) => s + p.quantity);
 
+  @override
+  void dispose() {
+    _couponController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _applyCoupon() async {
+    final code = _couponController.text.trim();
+    if (code.isEmpty) return;
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _applyingCoupon = true;
+      _couponMessage = null;
+      _couponError = false;
+    });
+    try {
+      final res = await ApiService.validateDiscountCode(code);
+      if (!mounted) return;
+      if (res['success'] == true) {
+        final data = res['data'] as Map<String, dynamic>? ?? {};
+        final type = data['type']?.toString();
+        final value = double.tryParse('${data['value'] ?? 0}') ?? 0;
+        final minOrder = double.tryParse('${data['min_order'] ?? 0}') ?? 0;
+        if (_subtotal < minOrder) {
+          setState(() {
+            _couponError = true;
+            _couponMessage = 'This coupon requires a minimum order of ${minOrder.toStringAsFixed(2)} KD';
+            _discount = 0;
+            _discountCode = null;
+          });
+        } else {
+          final discount = type == 'percentage' ? _subtotal * value / 100 : value;
+          setState(() {
+            _couponError = false;
+            _couponMessage = 'Coupon applied successfully';
+            _discount = discount.clamp(0, _subtotal);
+            _discountCode = code;
+          });
+        }
+      } else {
+        setState(() {
+          _couponError = true;
+          _couponMessage = res['message']?.toString() ?? 'Invalid coupon code';
+          _discount = 0;
+          _discountCode = null;
+        });
+      }
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _couponError = true;
+        _couponMessage = 'Invalid or expired coupon code';
+        _discount = 0;
+        _discountCode = null;
+      });
+    } finally {
+      if (mounted) setState(() => _applyingCoupon = false);
+    }
+  }
+
   Future<void> _payNow() async {
     // Require a real address when delivering to the customer's address.
     if (_delivery == 'address' && (_address == null || _address!.trim().isEmpty)) {
@@ -135,6 +203,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           items: items,
           paymentMethod: _payment,
           deliveryMethod: _delivery,
+          discountCode: _discountCode,
           address: _address,
         );
       } else {
@@ -145,6 +214,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           name: widget.guestName,
           phone: widget.guestPhone,
           address: _address,
+          discountCode: _discountCode,
         );
       }
 
@@ -196,6 +266,64 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
   }
 
+  // ── Coupon discount input ───────────────────────────────────────
+  Widget _buildCouponField() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Expanded(
+            child: Container(
+              height: 44,
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F5F5),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: TextField(
+                controller: _couponController,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => _applyCoupon(),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  isCollapsed: true,
+                  hintText: 'Enter Coupon Discount',
+                  hintStyle: TextStyle(fontSize: 13, color: AppColors.textLight),
+                ),
+                style: const TextStyle(fontSize: 13, color: AppColors.textDark),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          SizedBox(
+            height: 44,
+            child: ElevatedButton(
+              onPressed: _applyingCoupon ? null : _applyCoupon,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 22),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              child: _applyingCoupon
+                  ? const SizedBox(width: 16, height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  : const Text('Submit', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+            ),
+          ),
+        ]),
+        if (_couponMessage != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: Text(_couponMessage!,
+                style: TextStyle(fontSize: 11,
+                    color: _couponError ? Colors.red : const Color(0xFF1DB76A))),
+          ),
+      ]),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -242,7 +370,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           // ── Summary ───────────────────────────────────────────
           _SectionLabel('Summary', primary: true),
           const SizedBox(height: 8),
-          _CheckoutSummary(subtotal: _subtotal),
+          _CheckoutSummary(
+            subtotal: _subtotal,
+            discount: _discount,
+            couponField: _buildCouponField(),
+          ),
           const SizedBox(height: 18),
 
           // ── Delivery Method ───────────────────────────────────
@@ -537,25 +669,31 @@ class _CheckoutProductCard extends StatelessWidget {
 
 class _CheckoutSummary extends StatelessWidget {
   final double subtotal;
-  const _CheckoutSummary({required this.subtotal});
+  final double discount;
+  final Widget? couponField;
+  const _CheckoutSummary({required this.subtotal, this.discount = 0, this.couponField});
 
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(14),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      boxShadow: const [BoxShadow(color: Color(0x0A000000), blurRadius: 4)],
-    ),
-    child: Column(children: [
-      _Row('Subtotal', '${subtotal.toInt()} Kw'),
-      _Row('Discount', '0.00 Kw', valueColor: AppColors.primary),
-      _Row('Shipping Fees', '0.00 Kw'),
-      _Row('Delivery Fees', '0.00 Kw'),
-      const Divider(height: 16, color: Color(0xFFF0F0F0)),
-      _Row('Total', '${subtotal.toInt()} Kwd', valueBold: true, valueColor: AppColors.primary),
-    ]),
-  );
+  Widget build(BuildContext context) {
+    final total = (subtotal - discount).clamp(0, double.infinity);
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [BoxShadow(color: Color(0x0A000000), blurRadius: 4)],
+      ),
+      child: Column(children: [
+        if (couponField != null) couponField!,
+        _Row('Subtotal', '${subtotal.toStringAsFixed(2)} Kw'),
+        _Row('Discount', '-${discount.toStringAsFixed(2)} Kw', valueColor: AppColors.primary),
+        _Row('Shipping Fees', '0.00 Kw'),
+        _Row('Delivery Fees', '0.00 Kw'),
+        const Divider(height: 16, color: Color(0xFFF0F0F0)),
+        _Row('Total', '${total.toStringAsFixed(2)} Kwd', valueBold: true, valueColor: AppColors.primary),
+      ]),
+    );
+  }
 }
 
 class _Row extends StatelessWidget {

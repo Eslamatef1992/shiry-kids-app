@@ -57,10 +57,13 @@ class _AdminScanScreenState extends State<AdminScanScreen>
       switch (apiStatus) {
         case 'valid':
           result = _ScanState.valid; qrStatus = QrStatus.valid;
+          break;
         case 'used':
           result = _ScanState.used; qrStatus = QrStatus.used;
+          break;
         default:
           result = _ScanState.notFound; qrStatus = QrStatus.notFound;
+          break;
       }
       setState(() => _state = result);
       widget.onResult(ScannedQr(code: code, scannedAt: DateTime.now(), status: qrStatus));
@@ -72,6 +75,17 @@ class _AdminScanScreenState extends State<AdminScanScreen>
   }
 
   void _reset() => setState(() { _state = _ScanState.idle; _scannedCode = null; });
+
+  String _cameraErrorMessage(MobileScannerErrorCode code) {
+    switch (code) {
+      case MobileScannerErrorCode.permissionDenied:
+        return 'Camera permission denied.\nPlease allow camera access in your device settings to scan QR codes.';
+      case MobileScannerErrorCode.unsupported:
+        return 'QR scanning is not supported on this device.';
+      default:
+        return 'Unable to access the camera.\nPlease make sure no other app is using the camera and try again.';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -167,7 +181,32 @@ class _AdminScanScreenState extends State<AdminScanScreen>
       borderRadius: BorderRadius.circular(12),
       child: Stack(
         children: [
-          MobileScanner(controller: _controller, onDetect: _onDetect),
+          MobileScanner(
+            controller: _controller,
+            onDetect: _onDetect,
+            errorBuilder: (context, error) {
+              // Surface camera/permission errors instead of a blank screen,
+              // so it's clear why the scanner "isn't working" (e.g. denied
+              // camera permission or no camera available on this device).
+              return Container(
+                color: Colors.black87,
+                alignment: Alignment.center,
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.camera_alt_outlined, color: Colors.white, size: 36),
+                    const SizedBox(height: 12),
+                    Text(
+                      _cameraErrorMessage(error.errorCode),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.white, fontSize: 13),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
           // Scan line
           if (_state == _ScanState.scanning || _state == _ScanState.idle)
             AnimatedBuilder(

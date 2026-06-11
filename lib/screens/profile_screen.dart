@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../theme/app_colors.dart';
 import '../widgets/wavy_app_bar.dart';
 import 'profile/my_addresses_screen.dart';
@@ -166,21 +167,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     );
                   }),
                   const SizedBox(height: 16),
-                  // Social icons from Figma SVGs
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _SvgSocial('assets/icons/social_facebook.svg'),
-                      _pipe(),
-                      _SvgSocial('assets/icons/social_instagram.svg'),
-                      _pipe(),
-                      _SvgSocial('assets/icons/social_tiktok.svg'),
-                      _pipe(),
-                      _SvgSocial('assets/icons/social_snapchat.svg'),
-                      _pipe(),
-                      _SvgSocial('assets/icons/social_whatsapp.svg'),
-                    ],
-                  ),
+                  // Social links — managed by the super admin in the
+                  // dashboard (Settings > Social). Only platforms with a
+                  // configured link are shown, and tapping opens the link.
+                  Builder(builder: (context) {
+                    const order = ['twitter', 'instagram', 'linkedin', 'snapchat', 'whatsapp'];
+                    final children = <Widget>[];
+                    for (final key in order) {
+                      final url = _settings[key]?.toString().trim() ?? '';
+                      if (url.isEmpty) continue;
+                      if (children.isNotEmpty) children.add(_pipe());
+                      children.add(_socialIcon(key, () => _openSocialLink(url, key)));
+                    }
+                    if (children.isEmpty) return const SizedBox.shrink();
+                    return Row(mainAxisAlignment: MainAxisAlignment.center, children: children);
+                  }),
                 ],
               ),
             ),
@@ -204,6 +205,75 @@ class _ProfileScreenState extends State<ProfileScreen> {
     padding: EdgeInsets.symmetric(horizontal: 4),
     child: Text('|', style: TextStyle(color: AppColors.divider, fontSize: 18)),
   );
+
+  // Social icons — uses the existing Figma SVGs where available, and a
+  // simple branded badge for platforms without a bundled asset.
+  Widget _socialIcon(String platform, VoidCallback onTap) {
+    Widget icon;
+    switch (platform) {
+      case 'instagram':
+        icon = SvgPicture.asset('assets/icons/social_instagram.svg', width: 38, height: 38);
+        break;
+      case 'whatsapp':
+        icon = SvgPicture.asset('assets/icons/social_whatsapp.svg', width: 38, height: 38);
+        break;
+      case 'snapchat':
+        icon = SvgPicture.asset('assets/icons/social_snapchat.svg', width: 38, height: 38);
+        break;
+      case 'twitter':
+        icon = Container(
+          width: 38, height: 38,
+          decoration: const BoxDecoration(color: Colors.black, shape: BoxShape.circle),
+          alignment: Alignment.center,
+          child: const Text('X', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 16)),
+        );
+        break;
+      case 'linkedin':
+        icon = Container(
+          width: 38, height: 38,
+          decoration: const BoxDecoration(color: Color(0xFF0A66C2), shape: BoxShape.circle),
+          alignment: Alignment.center,
+          child: const Text('in', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 14)),
+        );
+        break;
+      default:
+        icon = const SizedBox(width: 38, height: 38);
+    }
+    return GestureDetector(onTap: onTap, child: icon);
+  }
+
+  // Opens a social link configured by the admin. If the admin entered a
+  // bare username/number rather than a full URL, build a sensible link for
+  // that platform.
+  Future<void> _openSocialLink(String value, String platform) async {
+    var link = value;
+    if (!link.startsWith('http://') && !link.startsWith('https://')) {
+      switch (platform) {
+        case 'whatsapp':
+          link = 'https://wa.me/${link.replaceAll(RegExp(r'[^0-9]'), '')}';
+          break;
+        case 'twitter':
+          link = 'https://twitter.com/${link.replaceAll('@', '')}';
+          break;
+        case 'instagram':
+          link = 'https://instagram.com/${link.replaceAll('@', '')}';
+          break;
+        case 'linkedin':
+          link = 'https://linkedin.com/in/$link';
+          break;
+        case 'snapchat':
+          link = 'https://snapchat.com/add/${link.replaceAll('@', '')}';
+          break;
+        default:
+          link = 'https://$link';
+      }
+    }
+    final uri = Uri.tryParse(link);
+    if (uri == null) return;
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {}
+  }
 
   void _showLanguagePicker(BuildContext context) {
     showModalBottomSheet(
@@ -349,16 +419,6 @@ class _TextRow extends StatelessWidget {
     dense: true,
     onTap: onTap,
   );
-}
-
-/// Social icon — full 40x40 orange circle SVG from Figma
-class _SvgSocial extends StatelessWidget {
-  final String asset;
-  const _SvgSocial(this.asset);
-
-  @override
-  Widget build(BuildContext context) =>
-      SvgPicture.asset(asset, width: 38, height: 38);
 }
 
 // ─── Language picker ──────────────────────────────────────────────────────────

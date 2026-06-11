@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import '../services/api_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -68,7 +69,13 @@ class _SplashScreenState extends State<SplashScreen>
         if (!mounted) return;
         _pulseCtrl.stop();
         await _exitCtrl.forward();
-        if (mounted) Navigator.pushReplacementNamed(context, '/onboarding');
+        if (!mounted) return;
+        // If the user already has a valid session, skip onboarding/login
+        // and go straight to the app so they stay logged in between
+        // app launches/backgrounds.
+        final loggedIn = await ApiService.isLoggedIn();
+        if (!mounted) return;
+        Navigator.pushReplacementNamed(context, loggedIn ? '/home' : '/onboarding');
       });
     });
   }

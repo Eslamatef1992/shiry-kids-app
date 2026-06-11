@@ -56,59 +56,68 @@ class _MainShellState extends State<MainShell> {
         child: SafeArea(
           top: false,
           child: SizedBox(
-            height: 60,
+            height: 72,
             child: Row(
               children: List.generate(_items.length, (i) {
                 final item = _items[i];
                 final isActive = _selectedIndex == i;
-                final color = isActive ? AppColors.primary : const Color(0xFFAAAAAA);
+                final color = isActive ? Colors.white : const Color(0xFFAAAAAA);
 
                 return Expanded(
                   child: GestureDetector(
                     onTap: () => setState(() => _selectedIndex = i),
                     behavior: HitTestBehavior.opaque,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            SvgPicture.asset(
-                              item.asset,
-                              width: 22, height: 22,
-                              colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+                    child: Semantics(
+                    label: item.label,
+                    selected: isActive,
+                    child: Center(
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        alignment: Alignment.center,
+                        children: [
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            width: isActive ? 50 : 40,
+                            height: isActive ? 50 : 40,
+                            decoration: BoxDecoration(
+                              color: isActive ? AppColors.primary : Colors.transparent,
+                              shape: BoxShape.circle,
                             ),
-                            if (item.showBadge && cartCount > 0)
-                              Positioned(
-                                top: -6, right: -8,
-                                child: Container(
-                                  width: 16, height: 16,
-                                  decoration: const BoxDecoration(
-                                    color: AppColors.primary,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      '$cartCount',
-                                      style: const TextStyle(
-                                          color: Colors.white, fontSize: 9,
-                                          fontWeight: FontWeight.w700),
-                                    ),
+                            alignment: Alignment.center,
+                            child: SvgPicture.asset(
+                              item.asset,
+                              width: isActive ? 24 : 22,
+                              height: isActive ? 24 : 22,
+                              colorFilter: ColorFilter.mode(
+                                isActive ? color : const Color(0xFFAAAAAA),
+                                BlendMode.srcIn,
+                              ),
+                            ),
+                          ),
+                          if (item.showBadge && cartCount > 0)
+                            Positioned(
+                              top: isActive ? -2 : 2, right: isActive ? 0 : 6,
+                              child: Container(
+                                width: 16, height: 16,
+                                decoration: BoxDecoration(
+                                  color: isActive ? Colors.white : AppColors.primary,
+                                  shape: BoxShape.circle,
+                                  border: isActive ? Border.all(color: AppColors.primary, width: 1.5) : null,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    '$cartCount',
+                                    style: TextStyle(
+                                        color: isActive ? AppColors.primary : Colors.white,
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w700),
                                   ),
                                 ),
                               ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          item.label,
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
-                            color: color,
-                          ),
-                        ),
-                      ],
+                            ),
+                        ],
+                      ),
+                    ),
                     ),
                   ),
                 );
