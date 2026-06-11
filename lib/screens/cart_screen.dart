@@ -281,16 +281,29 @@ class _CouponCartCard extends StatelessWidget {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text('${item.price.toInt()} Kd',
-                              style: const TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.w800,
-                                  color: AppColors.textDark)),
-                          const SizedBox(width: 6),
-                          Text('${item.originalPrice.toInt()} Kd',
-                              style: const TextStyle(
-                                  fontSize: 10, color: AppColors.textLight,
-                                  decoration: TextDecoration.lineThrough,
-                                  decorationColor: AppColors.textLight)),
+                          Flexible(
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Flexible(
+                                  child: Text('${item.price.toInt()} Kd',
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                          fontSize: 14, fontWeight: FontWeight.w800,
+                                          color: AppColors.textDark)),
+                                ),
+                                const SizedBox(width: 6),
+                                Flexible(
+                                  child: Text('${item.originalPrice.toInt()} Kd',
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                          fontSize: 10, color: AppColors.textLight,
+                                          decoration: TextDecoration.lineThrough,
+                                          decorationColor: AppColors.textLight)),
+                                ),
+                              ],
+                            ),
+                          ),
                           const Spacer(),
                           _QtyRow(qty: item.quantity, onQty: onQty),
                         ],
