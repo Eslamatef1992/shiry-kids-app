@@ -63,6 +63,13 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
   @override
   Widget build(BuildContext context) {
     final c = widget.coupon;
+    final isArabic = Localizations.maybeLocaleOf(context)?.languageCode == 'ar';
+    final description = isArabic && c.descriptionAr.trim().isNotEmpty
+        ? c.descriptionAr
+        : c.description;
+    final terms = isArabic && c.termsAndConditionsAr.trim().isNotEmpty
+        ? c.termsAndConditionsAr
+        : c.termsAndConditions;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: WavyAppBar(title: 'Coupons', showBack: true),
@@ -154,7 +161,7 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
                   // ── Tab content ──
                   _tabs.index == 0
                       ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          Text(c.description,
+                          Text(description,
                               style: const TextStyle(
                                   fontSize: 13, color: AppColors.textMedium,
                                   height: 1.6)),
@@ -181,7 +188,7 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
                                     color: AppColors.primary)),
                           ]),
                         ])
-                      : Text(c.termsAndConditions,
+                      : Text(terms,
                           style: const TextStyle(
                               fontSize: 13, color: AppColors.textMedium, height: 1.7)),
 

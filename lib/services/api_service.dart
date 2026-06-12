@@ -85,7 +85,7 @@ class ApiService {
         Uri.parse('$baseUrl/auth/refresh'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'refresh': refresh}),
-      );
+      ).timeout(const Duration(seconds: 10));
       final data = jsonDecode(res.body);
       if (data['success'] == true) {
         final key = adminAuth ? 'admin_token' : 'auth_token';

@@ -552,7 +552,7 @@ class _WeeklyCard extends StatelessWidget {
                 child: Container(
                   width: double.infinity, height: 26,
                   decoration: BoxDecoration(color: const Color(0xFFFFEDED), borderRadius: BorderRadius.circular(8)),
-                  child: const Center(
+                  child: Center(
                     child: Text('Details'.tr(context), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary)),
                   ),
                 ),

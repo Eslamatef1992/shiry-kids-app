@@ -198,6 +198,7 @@ class CouponProduct {
   final String description;
   final String descriptionAr;
   final String termsAndConditions;
+  final String termsAndConditionsAr;
   final String category;
   final DateTime expiresAt;
   final bool featured;
@@ -217,6 +218,7 @@ class CouponProduct {
     required this.description,
     this.descriptionAr = '',
     this.termsAndConditions = '',
+    this.termsAndConditionsAr = '',
     required this.category,
     required this.expiresAt,
     this.featured = false,
@@ -242,7 +244,8 @@ class CouponProduct {
       couponsLeft: int.tryParse(j['coupon_count']?.toString() ?? '0') ?? 0,
       description: j['description']?.toString() ?? '',
       descriptionAr: j['description_ar']?.toString() ?? '',
-      termsAndConditions: '',
+      termsAndConditions: j['terms_and_conditions']?.toString() ?? '',
+      termsAndConditionsAr: j['terms_and_conditions_ar']?.toString() ?? '',
       category: '',
       expiresAt: expiry,
       featured: j['featured'] == true || j['featured'] == 1,

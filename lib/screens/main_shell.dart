@@ -47,6 +47,10 @@ class _MainShellState extends State<MainShell> {
   @override
   Widget build(BuildContext context) {
     final cartCount = context.watch<CartProvider>().totalCount;
+    final isArabic = Localizations.maybeLocaleOf(context)?.languageCode == 'ar';
+    final order = isArabic
+        ? List.generate(_items.length, (i) => _items.length - 1 - i)
+        : List.generate(_items.length, (i) => i);
     return Scaffold(
       body: IndexedStack(index: _selectedIndex, children: _screens),
       bottomNavigationBar: Container(
@@ -61,7 +65,7 @@ class _MainShellState extends State<MainShell> {
             child: Directionality(
               textDirection: TextDirection.ltr,
               child: Row(
-                children: List.generate(_items.length, (i) {
+                children: order.map((i) {
                   final item = _items[i];
                   final isActive = _selectedIndex == i;
                   final color = isActive ? AppColors.primary : const Color(0xFFAAAAAA);
@@ -115,7 +119,7 @@ class _MainShellState extends State<MainShell> {
                       ),
                     ),
                   );
-                }),
+                }).toList(),
               ),
             ),
           ),

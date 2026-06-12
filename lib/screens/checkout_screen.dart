@@ -583,7 +583,8 @@ class _CheckoutCouponCard extends StatelessWidget {
   const _CheckoutCouponCard({required this.item});
 
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) {
+    return Container(
     padding: const EdgeInsets.all(12),
     decoration: BoxDecoration(
       color: Colors.white,
@@ -599,6 +600,7 @@ class _CheckoutCouponCard extends StatelessWidget {
       Expanded(
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(item.title,
+              maxLines: 2, overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textDark)),
           Row(children: [
             ClipOval(
@@ -609,19 +611,31 @@ class _CheckoutCouponCard extends StatelessWidget {
                           size: 10, color: AppColors.primary))),
             ),
             const SizedBox(width: 4),
-            Text(item.brandName,
-                style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w600)),
+            Flexible(
+              child: Text(item.brandName,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w600)),
+            ),
           ]),
           Row(children: [
-            Text('${item.price.toInt()} Kd',
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textDark)),
+            Flexible(
+              child: Text('${item.price.toInt()} Kd',
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textDark)),
+            ),
             const SizedBox(width: 6),
-            Text('${item.originalPrice.toInt()} Kd',
-                style: const TextStyle(fontSize: 11, color: AppColors.textLight,
-                    decoration: TextDecoration.lineThrough)),
+            Flexible(
+              child: Text('${item.originalPrice.toInt()} Kd',
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 11, color: AppColors.textLight,
+                      decoration: TextDecoration.lineThrough)),
+            ),
             const SizedBox(width: 4),
-            Text(item.discount,
-                style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w600)),
+            Flexible(
+              child: Text(item.discount,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w600)),
+            ),
           ]),
           Text('${'Qty:'.tr(context)} ${item.quantity}',
               style: const TextStyle(fontSize: 11, color: AppColors.textMedium)),
@@ -629,6 +643,7 @@ class _CheckoutCouponCard extends StatelessWidget {
       ),
     ]),
   );
+  }
 }
 
 class _CheckoutProductCard extends StatelessWidget {

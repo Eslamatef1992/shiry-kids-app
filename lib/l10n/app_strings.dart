@@ -189,7 +189,6 @@ class AppStrings {
     'Customer Information': 'بيانات العميل',
     'Invoice Id': 'رقم الفاتورة',
     'Payment Status': 'حالة الدفع',
-    'Payment Method': 'طريقة الدفع',
     'Product\nName': 'اسم\nالمنتج',
     'Qty': 'الكمية',
     'Size': 'المقاس',
@@ -256,8 +255,6 @@ class AppStrings {
 
     // Product detail screen
     'Out of stock': 'غير متوفر',
-    'Size': 'المقاس',
-    'Color': 'اللون',
 
     // Address method sheet
     'Pick On Map': 'تحديد على الخريطة',
