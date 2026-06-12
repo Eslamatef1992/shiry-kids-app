@@ -584,6 +584,15 @@ class _CheckoutCouponCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TEMP DEBUG: print the coupon data being rendered so we can see in the
+    // console exactly what's being loaded when the checkout screen freezes.
+    // Safe to remove once the freeze is diagnosed.
+    debugPrint(
+      '[CheckoutCouponCard] id=${item.id} title="${item.title}" '
+      'imageUrl="${item.imageUrl}" brandImageUrl="${item.brandImageUrl}" '
+      'price=${item.price} originalPrice=${item.originalPrice} '
+      'discount="${item.discount}" qty=${item.quantity}',
+    );
     return Container(
     padding: const EdgeInsets.all(12),
     decoration: BoxDecoration(
