@@ -6,6 +6,17 @@ String _imgUrl(dynamic v) {
   return s.startsWith('http') ? s : '$_baseUrl$s';
 }
 
+/// Parses [v] as a [double], guarding against backend values that
+/// round-trip to the strings "NaN"/"Infinity"/"-Infinity" (which
+/// [double.tryParse] happily accepts). A non-finite price would later
+/// crash `.toInt()` calls in the UI (e.g. the checkout coupon/product
+/// cards), producing a build-time exception that blanks that part of
+/// the screen — so any non-finite result is treated as 0 here instead.
+double _safeDouble(dynamic v) {
+  final d = double.tryParse(v?.toString() ?? '0') ?? 0;
+  return d.isFinite ? d : 0;
+}
+
 List<String> _strList(dynamic v) {
   if (v == null) return [];
   if (v is List) return v.map((e) => e.toString()).toList();
@@ -103,8 +114,8 @@ class Product {
       nameAr: j['name_ar']?.toString() ?? '',
       description: j['description']?.toString() ?? '',
       descriptionAr: j['description_ar']?.toString() ?? '',
-      price: double.tryParse(j['price']?.toString() ?? '0') ?? 0,
-      originalPrice: double.tryParse(j['original_price']?.toString() ?? '0') ?? 0,
+      price: _safeDouble(j['price']),
+      originalPrice: _safeDouble(j['original_price']),
       imageUrl: firstImg,
       images: imgList,
       category: (j['category'] as Map?)?['name']?.toString() ?? '',
@@ -238,8 +249,8 @@ class CouponProduct {
       brandName: vendor['name']?.toString() ?? '',
       brandImageUrl: _imgUrl(vendor['logo']),
       imageUrl: _imgUrl(j['image']),
-      price: double.tryParse(j['price']?.toString() ?? '0') ?? 0,
-      originalPrice: double.tryParse(j['original_price']?.toString() ?? '0') ?? 0,
+      price: _safeDouble(j['price']),
+      originalPrice: _safeDouble(j['original_price']),
       expiryDate: expiry.toLocal().toString().split(' ').first,
       couponsLeft: int.tryParse(j['coupon_count']?.toString() ?? '0') ?? 0,
       description: j['description']?.toString() ?? '',

@@ -12,6 +12,12 @@ import 'payment_success_screen.dart';
 import 'payment_failed_screen.dart';
 import '../l10n/app_strings.dart';
 
+/// `double.toInt()` throws (UnsupportedError) for NaN/Infinity. Coupon/product
+/// prices ultimately come from backend strings parsed with `double.tryParse`,
+/// which accepts "NaN"/"Infinity" — guard the display conversion so a bad
+/// backend value can't crash the build of the coupon/product cards below.
+int _safeInt(double v) => v.isFinite ? v.toInt() : 0;
+
 class CheckoutScreen extends StatefulWidget {
   final List<CartCouponItem> coupons;
   final List<CartItem> products;
@@ -619,13 +625,13 @@ class _CheckoutCouponCard extends StatelessWidget {
           ]),
           Row(children: [
             Flexible(
-              child: Text('${item.price.toInt()} Kd',
+              child: Text('${_safeInt(item.price)} Kd',
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textDark)),
             ),
             const SizedBox(width: 6),
             Flexible(
-              child: Text('${item.originalPrice.toInt()} Kd',
+              child: Text('${_safeInt(item.originalPrice)} Kd',
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 11, color: AppColors.textLight,
                       decoration: TextDecoration.lineThrough)),
@@ -673,7 +679,7 @@ class _CheckoutProductCard extends StatelessWidget {
                 style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textDark)),
             Text(catLabel,
                 style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w600)),
-            Text('${p.price.toInt()} Kwd',
+            Text('${_safeInt(p.price)} Kwd',
                 style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textDark)),
             Text('${'Qty:'.tr(context)} ${item.quantity}',
                 style: const TextStyle(fontSize: 11, color: AppColors.textMedium)),
