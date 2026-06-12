@@ -30,9 +30,10 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
     try {
       final res = await ApiService.getMyOrders();
       if (mounted) {
-        final rows = (res['data'] != null && res['data']['rows'] != null)
-            ? res['data']['rows'] as List
-            : (res['data'] as List? ?? []);
+        final data = res['data'];
+        final rows = data is List
+            ? data
+            : (data is Map && data['rows'] is List ? data['rows'] as List : <dynamic>[]);
         setState(() {
           _orders = rows.map((j) => AppOrder.fromJson(j as Map<String, dynamic>)).toList();
           _loading = false;

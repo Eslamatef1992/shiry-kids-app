@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -231,6 +232,25 @@ class ApiService {
         if (phone != null) 'phone': phone,
         if (address != null) 'address': address,
       });
+
+  // Upload / change profile avatar
+  static Future<Map<String, dynamic>> uploadAvatar(File file) async {
+    final token = await _getToken();
+    final uri = Uri.parse('$baseUrl/auth/me/avatar');
+    final request = http.MultipartRequest('POST', uri);
+    if (token != null) request.headers['Authorization'] = 'Bearer $token';
+    request.files.add(await http.MultipartFile.fromPath('avatar', file.path));
+
+    final streamed = await request.send().timeout(const Duration(seconds: 30));
+    final response = await http.Response.fromStream(streamed);
+    final res = jsonDecode(response.body) as Map<String, dynamic>;
+
+    if (res['success'] == true && res['user'] != null) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('user', jsonEncode(res['user']));
+    }
+    return res;
+  }
 
   // Change password
   static Future<Map<String, dynamic>> changePassword(String oldPassword, String newPassword) async =>

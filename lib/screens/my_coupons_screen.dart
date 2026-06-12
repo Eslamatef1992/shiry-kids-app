@@ -48,9 +48,10 @@ class _MyCouponsScreenState extends State<MyCouponsScreen> {
     setState(() => _loading = true);
     try {
       final res = await ApiService.getMyOrders();
-      final rows = (res['data'] != null && res['data']['rows'] != null)
-          ? res['data']['rows'] as List
-          : (res['data'] as List? ?? []);
+      final data = res['data'];
+      final rows = data is List
+          ? data
+          : (data is Map && data['rows'] is List ? data['rows'] as List : <dynamic>[]);
 
       final coupons = <_UserCoupon>[];
       for (final o in rows) {

@@ -1,6 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/wavy_app_bar.dart';
+import '../../widgets/network_image.dart';
 import '../../services/api_service.dart';
 import '../../l10n/app_strings.dart';
 
@@ -16,6 +19,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final _phoneCtrl = TextEditingController();
   bool _loading = true;
   bool _saving = false;
+  String _avatarUrl = '';
+  File? _pickedAvatar;
+  bool _uploadingAvatar = false;
+
+  static const String _mediaBase = 'https://back.sherykids.com';
+
+  String _imgUrl(String v) {
+    if (v.isEmpty) return '';
+    if (v.startsWith('http')) return v;
+    return '$_mediaBase$v';
+  }
 
   @override
   void initState() {
@@ -25,16 +39,56 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   Future<void> _loadUser() async {
     try {
-      final res = await ApiService.getUser();
-      if (mounted && res['success'] == true) {
-        final data = res['data'] as Map<String, dynamic>? ?? {};
+      final data = await ApiService.getUser();
+      if (mounted && data != null) {
         _nameCtrl.text  = data['name']?.toString() ?? '';
         _emailCtrl.text = data['email']?.toString() ?? '';
         _phoneCtrl.text = data['phone']?.toString() ?? '';
-        setState(() => _loading = false);
+        _avatarUrl = data['avatar']?.toString() ?? '';
       }
-    } catch (_) {
-      if (mounted) setState(() => _loading = false);
+    } catch (_) {}
+    if (mounted) setState(() => _loading = false);
+  }
+
+  Future<void> _pickAndUploadAvatar() async {
+    try {
+      final picked = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 800,
+        imageQuality: 85,
+      );
+      if (picked == null) return;
+
+      setState(() {
+        _pickedAvatar = File(picked.path);
+        _uploadingAvatar = true;
+      });
+
+      final res = await ApiService.uploadAvatar(_pickedAvatar!);
+
+      if (!mounted) return;
+      if (res['success'] == true) {
+        setState(() {
+          _avatarUrl = res['user']?['avatar']?.toString() ?? _avatarUrl;
+          _uploadingAvatar = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Profile photo updated'.tr(context)), backgroundColor: Colors.green));
+      } else {
+        setState(() {
+          _pickedAvatar = null;
+          _uploadingAvatar = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(res['message']?.toString() ?? 'Failed to update photo'.tr(context))));
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _pickedAvatar = null;
+        _uploadingAvatar = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
     }
   }
 
@@ -85,6 +139,59 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 16),
+                        Center(
+                          child: GestureDetector(
+                            onTap: _uploadingAvatar ? null : _pickAndUploadAvatar,
+                            child: Stack(
+                              children: [
+                                ClipOval(
+                                  child: SizedBox(
+                                    width: 96,
+                                    height: 96,
+                                    child: _pickedAvatar != null
+                                        ? Image.file(_pickedAvatar!, fit: BoxFit.cover)
+                                        : (_avatarUrl.isNotEmpty
+                                            ? smartImage(_imgUrl(_avatarUrl), width: 96, height: 96, fit: BoxFit.cover)
+                                            : Container(
+                                                width: 96,
+                                                height: 96,
+                                                color: const Color(0xFFF0F0F0),
+                                                child: const Icon(Icons.person, size: 48, color: Color(0xFFCCCCCC)),
+                                              )),
+                                  ),
+                                ),
+                                if (_uploadingAvatar)
+                                  Positioned.fill(
+                                    child: ClipOval(
+                                      child: Container(
+                                        color: Colors.black26,
+                                        child: const Center(
+                                          child: SizedBox(
+                                            width: 24, height: 24,
+                                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                Positioned(
+                                  right: 0,
+                                  bottom: 0,
+                                  child: Container(
+                                    width: 28,
+                                    height: 28,
+                                    decoration: const BoxDecoration(
+                                      color: AppColors.primary,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(Icons.camera_alt, size: 14, color: Colors.white),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
                         _FieldLabel('Full Name'),
                         const SizedBox(height: 8),
                         TextField(controller: _nameCtrl, onChanged: (_) => setState(() {}),

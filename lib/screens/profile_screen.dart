@@ -9,6 +9,8 @@ import '../l10n/app_strings.dart';
 import 'profile/my_addresses_screen.dart';
 import 'profile/change_password_screen.dart';
 import 'profile/app_info_screen.dart';
+import 'profile/edit_profile_screen.dart';
+import '../widgets/network_image.dart';
 import 'my_orders_screen.dart';
 import 'my_coupons_screen.dart';
 import '../services/api_service.dart';
@@ -55,10 +57,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } catch (_) {}
   }
 
+  static const String _mediaBase = 'https://back.sherykids.com';
+
+  String _imgUrl(String v) {
+    if (v.isEmpty) return '';
+    if (v.startsWith('http')) return v;
+    return '$_mediaBase$v';
+  }
+
+  Future<void> _openEditProfile() async {
+    if (!_loggedIn) return;
+    await Navigator.push(context, MaterialPageRoute(builder: (_) => const EditProfileScreen()));
+    _loadUser();
+  }
+
   @override
   Widget build(BuildContext context) {
     final name = _user?['name']?.toString() ?? '';
     final email = _user?['email']?.toString() ?? '';
+    final avatarUrl = _imgUrl(_user?['avatar']?.toString() ?? '');
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: WavyAppBar(title: 'My Profile'.tr(context), showBack: false),
@@ -69,26 +86,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           // ── Avatar ───────────────────────────────────────────
           Center(
-            child: Stack(
-              children: [
-                CircleAvatar(
-                  radius: 50,
-                  backgroundColor: AppColors.divider,
-                  child: Icon(Icons.person, size: 56, color: Colors.grey[500]),
-                ),
-                Positioned(
-                  bottom: 0, right: 0,
-                  child: Container(
-                    width: 28, height: 28,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
+            child: GestureDetector(
+              onTap: _openEditProfile,
+              child: Stack(
+                children: [
+                  ClipOval(
+                    child: SizedBox(
+                      width: 100,
+                      height: 100,
+                      child: avatarUrl.isNotEmpty
+                          ? smartImage(avatarUrl, width: 100, height: 100, fit: BoxFit.cover)
+                          : CircleAvatar(
+                              radius: 50,
+                              backgroundColor: AppColors.divider,
+                              child: Icon(Icons.person, size: 56, color: Colors.grey[500]),
+                            ),
                     ),
-                    child: const Icon(Icons.edit, color: Colors.white, size: 14),
                   ),
-                ),
-              ],
+                  Positioned(
+                    bottom: 0, right: 0,
+                    child: Container(
+                      width: 28, height: 28,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2),
+                      ),
+                      child: const Icon(Icons.edit, color: Colors.white, size: 14),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 12),
