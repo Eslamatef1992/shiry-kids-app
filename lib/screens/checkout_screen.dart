@@ -778,10 +778,18 @@ class _RadioOption extends StatelessWidget {
                 ? Padding(
                     padding: const EdgeInsets.all(6),
                     child: svgAsset!.endsWith('.svg')
-                        ? SvgPicture.asset(svgAsset!, fit: BoxFit.contain,
-                            colorFilter: disabled
-                                ? const ColorFilter.mode(AppColors.textLight, BlendMode.srcIn)
-                                : null)
+                        // NOTE: Don't pass `colorFilter` to SvgPicture here.
+                        // On the iOS Simulator, SvgPicture + a non-null
+                        // colorFilter can hang the raster thread while
+                        // compositing this asset, which froze the whole
+                        // Checkout screen whenever a coupon was in the cart
+                        // (that's the only time `disabled` becomes true for
+                        // this option). Opacity gives the same "greyed out"
+                        // look without touching the SVG's color filter.
+                        ? Opacity(
+                            opacity: disabled ? 0.4 : 1.0,
+                            child: SvgPicture.asset(svgAsset!, fit: BoxFit.contain),
+                          )
                         : Image.asset(svgAsset!, fit: BoxFit.contain,
                             color: disabled ? AppColors.textLight : null),
                   )

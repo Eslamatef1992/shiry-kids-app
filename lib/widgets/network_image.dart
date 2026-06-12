@@ -134,7 +134,7 @@ class _RemoteVectorImageState extends State<_RemoteVectorImage> {
     try {
       final res = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 8));
       if (res.statusCode == 200) return res.bodyBytes;
-    } catch (_) {
+    } catch (e) {
       // Network error / timeout — fall through to fallback below.
     }
     return null;
@@ -160,9 +160,13 @@ class _RemoteVectorImageState extends State<_RemoteVectorImage> {
           return widget.fallback;
         }
         final bytes = snapshot.data;
-        if (bytes == null || bytes.isEmpty) return widget.fallback;
+        if (bytes == null || bytes.isEmpty) {
+          return widget.fallback;
+        }
 
-        if (_looksLikeSvg(bytes)) {
+        final looksLikeSvg = _looksLikeSvg(bytes);
+
+        if (looksLikeSvg) {
           try {
             return SvgPicture.string(
               utf8.decode(bytes, allowMalformed: true),
