@@ -303,21 +303,29 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
           ),
           const SizedBox(width: 10),
-          SizedBox(
-            height: 44,
-            child: ElevatedButton(
-              onPressed: _applyingCoupon ? null : _applyCoupon,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(horizontal: 22),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          // NOTE: Don't use ElevatedButton here. On the iOS Simulator,
+          // an ElevatedButton (Material/InkWell + elevation machinery)
+          // placed in the same Row as an active TextField can hang the
+          // raster thread while compositing, which freezes the whole
+          // Checkout screen whenever a coupon is in the cart (the only
+          // time this coupon field is shown). A plain GestureDetector +
+          // Container gives the same look without the Material overlay
+          // that triggers the hang — same pattern as the SvgPicture
+          // colorFilter workaround in _RadioOption below.
+          GestureDetector(
+            onTap: _applyingCoupon ? null : _applyCoupon,
+            child: Container(
+              height: 44,
+              padding: const EdgeInsets.symmetric(horizontal: 22),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(10),
               ),
               child: _applyingCoupon
                   ? const SizedBox(width: 16, height: 16,
                       child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : Text('Submit'.tr(context), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                  : Text('Submit'.tr(context), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white)),
             ),
           ),
         ]),
