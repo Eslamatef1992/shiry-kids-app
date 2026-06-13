@@ -34,6 +34,34 @@ class NotificationService {
         sound: true,
       );
 
+      // On iOS, the FCM token can't be fetched until the APNS token has been
+      // set by the OS, which happens asynchronously after permission is
+      // granted. Without this wait, getToken() throws
+      // [firebase_messaging/apns-token-not-set] and registration silently fails.
+      if (Platform.isIOS) {
+        String? apnsToken = await _messaging.getAPNSToken();
+        int retries = 0;
+        while (apnsToken == null && retries < 30) {
+          await Future.delayed(const Duration(seconds: 1));
+          apnsToken = await _messaging.getAPNSToken();
+          retries++;
+        }
+        debugPrint('APNS token after $retries retries: $apnsToken');
+      }
+
+      // By default, iOS suppresses the system banner/alert for push
+      // notifications received while the app is in the foreground — the
+      // message still arrives (onMessage fires) but nothing is shown to the
+      // user. Opt in so foreground pushes display a banner just like
+      // background/terminated ones.
+      if (Platform.isIOS) {
+        await _messaging.setForegroundNotificationPresentationOptions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+      }
+
       // Register the current token with the backend.
       final token = await _messaging.getToken();
       if (token != null) {
