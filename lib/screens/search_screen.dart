@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../models/product.dart';
@@ -14,15 +15,68 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final _ctrl = TextEditingController();
   List<Product> _results = [];
+  List<String> _suggestions = [];
   bool _loading = false;
   bool _searched = false;
+  Timer? _debounce;
 
   @override
-  void dispose() { _ctrl.dispose(); super.dispose(); }
+  void dispose() {
+    _debounce?.cancel();
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  void _onChanged(String v) {
+    setState(() {
+      if (_searched) { _results = []; _searched = false; }
+    });
+    _debounce?.cancel();
+    if (v.trim().isEmpty) {
+      setState(() => _suggestions = []);
+      return;
+    }
+    _debounce = Timer(const Duration(milliseconds: 300), () => _fetchSuggestions(v.trim()));
+  }
+
+  Future<void> _fetchSuggestions(String q) async {
+    try {
+      final results = await Future.wait([
+        ApiService.search(q, limit: 5),
+        ApiService.searchCoupons(q, limit: 5),
+      ]);
+
+      final names = <String>{};
+
+      final productsRes = results[0];
+      if (productsRes['success'] == true) {
+        final data = productsRes['data'];
+        final list = data is List ? data : [];
+        for (final j in list) {
+          final name = (j as Map)['name']?.toString();
+          if (name != null && name.isNotEmpty) names.add(name);
+        }
+      }
+
+      final couponsRes = results[1];
+      if (couponsRes['success'] == true) {
+        final data = couponsRes['data'];
+        final list = data is List ? data : [];
+        for (final j in list) {
+          final title = (j as Map)['title']?.toString();
+          if (title != null && title.isNotEmpty) names.add(title);
+        }
+      }
+
+      if (mounted && _ctrl.text.trim() == q) {
+        setState(() => _suggestions = names.take(8).toList());
+      }
+    } catch (_) {}
+  }
 
   Future<void> _search(String q) async {
     if (q.trim().isEmpty) { setState(() { _results = []; _searched = false; }); return; }
-    setState(() { _loading = true; _searched = true; });
+    setState(() { _loading = true; _searched = true; _suggestions = []; });
     try {
       final res = await ApiService.search(q.trim());
       if (res['success'] == true) {
@@ -35,6 +89,15 @@ class _SearchScreenState extends State<SearchScreen> {
     } catch (_) {} finally {
       if (mounted) setState(() => _loading = false);
     }
+  }
+
+  void _selectSuggestion(String label) {
+    _ctrl.text = label;
+    _search(label);
+  }
+
+  void _removeSuggestion(String label) {
+    setState(() => _suggestions.remove(label));
   }
 
   @override
@@ -68,14 +131,15 @@ class _SearchScreenState extends State<SearchScreen> {
                 autofocus: true,
                 textInputAction: TextInputAction.search,
                 onSubmitted: _search,
-                onChanged: (v) { if (v.isEmpty) setState(() { _results = []; _searched = false; }); },
+                onChanged: _onChanged,
                 decoration: InputDecoration(
                   hintText: 'Search products...'.tr(context),
                   hintStyle: const TextStyle(color: AppColors.textLight),
                   prefixIcon: const Icon(Icons.search, color: AppColors.textLight),
                   suffixIcon: _ctrl.text.isNotEmpty
                       ? IconButton(icon: const Icon(Icons.close, size: 18), onPressed: () {
-                          _ctrl.clear(); setState(() { _results = []; _searched = false; });
+                          _ctrl.clear();
+                          setState(() { _results = []; _searched = false; _suggestions = []; });
                         })
                       : null,
                   filled: true,
@@ -90,7 +154,7 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
             const SizedBox(height: 12),
 
-            // Results
+            // Results / suggestions
             Expanded(child: _buildBody()),
           ],
         ),
@@ -99,10 +163,48 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget _buildBody() {
-    if (_loading) return const Center(child: CircularProgressIndicator(color: AppColors.primary));
-    if (!_searched) return const SizedBox.shrink();
-    if (_results.isEmpty) return Center(child: Text('No results found'.tr(context), style: const TextStyle(color: AppColors.textMedium)));
+    if (_searched) {
+      if (_loading) return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+      if (_results.isEmpty) return Center(child: Text('No results found'.tr(context), style: const TextStyle(color: AppColors.textMedium)));
+      return _buildResultsGrid();
+    }
 
+    if (_suggestions.isNotEmpty) return _buildSuggestions();
+
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildSuggestions() {
+    return ListView.separated(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      itemCount: _suggestions.length,
+      separatorBuilder: (_, __) => const Divider(height: 1, color: Color(0xFFF0F0F0)),
+      itemBuilder: (ctx, i) {
+        final label = _suggestions[i];
+        return ListTile(
+          contentPadding: EdgeInsets.zero,
+          onTap: () => _selectSuggestion(label),
+          leading: Container(
+            width: 36, height: 36,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.primary.withOpacity(0.08),
+            ),
+            child: const Icon(Icons.search, size: 18, color: AppColors.primary),
+          ),
+          title: Text(label,
+              maxLines: 1, overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.textDark)),
+          trailing: GestureDetector(
+            onTap: () => _removeSuggestion(label),
+            child: const Icon(Icons.close, size: 18, color: AppColors.primary),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildResultsGrid() {
     return GridView.builder(
       padding: const EdgeInsets.all(16),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

@@ -265,7 +265,7 @@ class CouponProduct {
       descriptionAr: j['description_ar']?.toString() ?? '',
       termsAndConditions: j['terms_and_conditions']?.toString() ?? '',
       termsAndConditionsAr: j['terms_and_conditions_ar']?.toString() ?? '',
-      category: '',
+      category: j['category']?.toString() ?? '',
       expiresAt: expiry,
       featured: j['featured'] == true || j['featured'] == 1,
       discountPercentValue: j['discount_percent'] != null
