@@ -4,6 +4,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../theme/app_colors.dart';
 import '../widgets/network_image.dart';
 import '../l10n/app_strings.dart';
+import 'my_orders_screen.dart';
 
 class PaymentSuccessScreen extends StatelessWidget {
   final String orderId;
@@ -216,8 +217,12 @@ class PaymentSuccessScreen extends StatelessWidget {
                 width: double.infinity,
                 height: 52,
                 child: OutlinedButton(
-                  onPressed: () =>
-                      Navigator.of(context).popUntil((r) => r.isFirst),
+                  onPressed: () {
+                    Navigator.of(context).popUntil((r) => r.isFirst);
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => const MyOrdersScreen(),
+                    ));
+                  },
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.primary,
                     side:
