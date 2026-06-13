@@ -231,8 +231,12 @@ class ApiService {
   static Future<Map<String, dynamic>> getBanners() async => _request('GET', '/banners');
 
   // Search
-  static Future<Map<String, dynamic>> search(String query) async =>
-      _request('GET', '/products?search=${Uri.encodeComponent(query)}&limit=30');
+  static Future<Map<String, dynamic>> search(String query, {int limit = 30}) async =>
+      _request('GET', '/products?search=${Uri.encodeComponent(query)}&limit=$limit');
+
+  // Search coupons (used for search suggestions/autocomplete)
+  static Future<Map<String, dynamic>> searchCoupons(String query, {int limit = 30}) async =>
+      _request('GET', '/coupons?search=${Uri.encodeComponent(query)}&limit=$limit&status=active');
 
   // Get fresh profile (includes saved address)
   static Future<Map<String, dynamic>> getProfile() async => _request('GET', '/auth/me', auth: true);
