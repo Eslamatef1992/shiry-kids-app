@@ -745,29 +745,37 @@ class _SummarySection extends StatelessWidget {
   final double subtotal;
   const _SummarySection({required this.subtotal});
 
+  // Flat delivery fee charged by the backend for every order
+  // (see order.controller.js: const delivery_fees = 1.5;). Shown here so the
+  // total displayed in the cart matches what's actually charged at checkout.
+  static const double deliveryFee = 1.5;
+
   @override
-  Widget build(BuildContext context) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-    Text('Summary'.tr(context),
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.primary)),
-    const SizedBox(height: 10),
-    Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: const [BoxShadow(color: Color(0x0A000000), blurRadius: 4, offset: Offset(0, 2))],
+  Widget build(BuildContext context) {
+    final total = subtotal + deliveryFee;
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text('Summary'.tr(context),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.primary)),
+      const SizedBox(height: 10),
+      Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: const [BoxShadow(color: Color(0x0A000000), blurRadius: 4, offset: Offset(0, 2))],
+        ),
+        child: Column(children: [
+          _SumRow('Subtotal'.tr(context), '${subtotal.toStringAsFixed(2)} Kw'),
+          _SumRow('Discount'.tr(context), '0.00 Kw', valueColor: AppColors.primary),
+          _SumRow('Shipping Fees'.tr(context), '0.00 Kw'),
+          _SumRow('Delivery Fees'.tr(context), '${deliveryFee.toStringAsFixed(2)} Kw'),
+          const Divider(height: 16, color: Color(0xFFF0F0F0)),
+          _SumRow('Total'.tr(context), '${total.toStringAsFixed(2)} Kwd',
+              labelBold: true, valueColor: AppColors.primary, valueBold: true),
+        ]),
       ),
-      child: Column(children: [
-        _SumRow('Subtotal'.tr(context), '${subtotal.toInt()} Kw'),
-        _SumRow('Discount'.tr(context), '0.00 Kw', valueColor: AppColors.primary),
-        _SumRow('Shipping Fees'.tr(context), '0.00 Kw'),
-        _SumRow('Delivery Fees'.tr(context), '0.00 Kw'),
-        const Divider(height: 16, color: Color(0xFFF0F0F0)),
-        _SumRow('Total'.tr(context), '${(subtotal).toInt()} Kwd',
-            labelBold: true, valueColor: AppColors.primary, valueBold: true),
-      ]),
-    ),
-  ]);
+    ]);
+  }
 }
 
 class _SumRow extends StatelessWidget {

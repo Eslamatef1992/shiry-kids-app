@@ -756,9 +756,14 @@ class _CheckoutSummary extends StatelessWidget {
   final Widget? couponField;
   const _CheckoutSummary({required this.subtotal, this.discount = 0, this.couponField});
 
+  // Flat delivery fee charged by the backend for every order
+  // (see order.controller.js: const delivery_fees = 1.5;). Included here so
+  // the total shown at checkout matches the amount actually charged.
+  static const double deliveryFee = 1.5;
+
   @override
   Widget build(BuildContext context) {
-    final total = (subtotal - discount).clamp(0, double.infinity);
+    final total = (subtotal - discount + deliveryFee).clamp(0, double.infinity);
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -771,7 +776,7 @@ class _CheckoutSummary extends StatelessWidget {
         _Row('Subtotal', '${subtotal.toStringAsFixed(2)} Kw'),
         _Row('Discount', '-${discount.toStringAsFixed(2)} Kw', valueColor: AppColors.primary),
         _Row('Shipping Fees', '0.00 Kw'),
-        _Row('Delivery Fees', '0.00 Kw'),
+        _Row('Delivery Fees', '${deliveryFee.toStringAsFixed(2)} Kw'),
         const Divider(height: 16, color: Color(0xFFF0F0F0)),
         _Row('Total', '${total.toStringAsFixed(2)} Kwd', valueBold: true, valueColor: AppColors.primary),
       ]),
