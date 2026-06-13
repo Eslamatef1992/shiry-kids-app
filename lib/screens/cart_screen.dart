@@ -152,7 +152,7 @@ class _CartScreenState extends State<CartScreen> {
 
             // Summary
             const SizedBox(height: 4),
-            _SummarySection(subtotal: cart.subtotal),
+            _SummarySection(subtotal: cart.subtotal, hasProducts: products.isNotEmpty),
           ]),
         ),
       ),
@@ -743,16 +743,17 @@ class _QtyBtn extends StatelessWidget {
 
 class _SummarySection extends StatelessWidget {
   final double subtotal;
-  const _SummarySection({required this.subtotal});
+  final bool hasProducts;
+  const _SummarySection({required this.subtotal, this.hasProducts = true});
 
-  // Flat delivery fee charged by the backend for every order
-  // (see order.controller.js: const delivery_fees = 1.5;). Shown here so the
-  // total displayed in the cart matches what's actually charged at checkout.
+  // Flat delivery fee charged by the backend when the order contains at
+  // least one product (see order.controller.js: delivery_fees). Coupon-only
+  // orders aren't shipped, so no delivery fee applies for them.
   static const double deliveryFee = 1.5;
 
   @override
   Widget build(BuildContext context) {
-    final total = subtotal + deliveryFee;
+    final total = subtotal + (hasProducts ? deliveryFee : 0);
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text('Summary'.tr(context),
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.primary)),
@@ -768,7 +769,7 @@ class _SummarySection extends StatelessWidget {
           _SumRow('Subtotal'.tr(context), '${subtotal.toStringAsFixed(2)} Kw'),
           _SumRow('Discount'.tr(context), '0.00 Kw', valueColor: AppColors.primary),
           _SumRow('Shipping Fees'.tr(context), '0.00 Kw'),
-          _SumRow('Delivery Fees'.tr(context), '${deliveryFee.toStringAsFixed(2)} Kw'),
+          if (hasProducts) _SumRow('Delivery Fees'.tr(context), '${deliveryFee.toStringAsFixed(2)} Kw'),
           const Divider(height: 16, color: Color(0xFFF0F0F0)),
           _SumRow('Total'.tr(context), '${total.toStringAsFixed(2)} Kwd',
               labelBold: true, valueColor: AppColors.primary, valueBold: true),

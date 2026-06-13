@@ -188,7 +188,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   Future<void> _payNow() async {
     // Require a real address when delivering to the customer's address.
-    if (_delivery == 'address' && (_address == null || _address!.trim().isEmpty)) {
+    if (widget.products.isNotEmpty && _delivery == 'address' && (_address == null || _address!.trim().isEmpty)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please set your delivery address'.tr(context)), backgroundColor: Colors.red),
       );
@@ -442,28 +442,31 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             subtotal: _subtotal,
             discount: _discount,
             couponField: _buildCouponField(),
+            hasProducts: widget.products.isNotEmpty,
           ),
           const SizedBox(height: 18),
 
-          // ── Delivery Method ───────────────────────────────────
-          _SectionLabel('Delivery Method', primary: true),
-          const SizedBox(height: 8),
-          _OptionCard(children: [
-            _RadioOption(
-              icon: Icons.local_shipping_outlined,
-              label: 'Delivery To My Address',
-              selected: _delivery == 'address',
-              onTap: () => setState(() => _delivery = 'address'),
-            ),
-            const Divider(height: 1, indent: 16, endIndent: 16, color: Color(0xFFF0F0F0)),
-            _RadioOption(
-              icon: Icons.store_outlined,
-              label: 'Pickup From Store',
-              selected: _delivery == 'store',
-              onTap: () => setState(() => _delivery = 'store'),
-            ),
-          ]),
-          const SizedBox(height: 18),
+          // ── Delivery Method (only when the cart has physical products) ──
+          if (widget.products.isNotEmpty) ...[
+            _SectionLabel('Delivery Method', primary: true),
+            const SizedBox(height: 8),
+            _OptionCard(children: [
+              _RadioOption(
+                icon: Icons.local_shipping_outlined,
+                label: 'Delivery To My Address',
+                selected: _delivery == 'address',
+                onTap: () => setState(() => _delivery = 'address'),
+              ),
+              const Divider(height: 1, indent: 16, endIndent: 16, color: Color(0xFFF0F0F0)),
+              _RadioOption(
+                icon: Icons.store_outlined,
+                label: 'Pickup From Store',
+                selected: _delivery == 'store',
+                onTap: () => setState(() => _delivery = 'store'),
+              ),
+            ]),
+            const SizedBox(height: 18),
+          ],
 
           // ── Payment Method ────────────────────────────────────
           _SectionLabel('Payment Method', primary: true),
@@ -754,16 +757,17 @@ class _CheckoutSummary extends StatelessWidget {
   final double subtotal;
   final double discount;
   final Widget? couponField;
-  const _CheckoutSummary({required this.subtotal, this.discount = 0, this.couponField});
+  final bool hasProducts;
+  const _CheckoutSummary({required this.subtotal, this.discount = 0, this.couponField, this.hasProducts = true});
 
-  // Flat delivery fee charged by the backend for every order
-  // (see order.controller.js: const delivery_fees = 1.5;). Included here so
-  // the total shown at checkout matches the amount actually charged.
+  // Flat delivery fee charged by the backend when the order contains at
+  // least one product (see order.controller.js: delivery_fees). Coupon-only
+  // orders aren't shipped, so no delivery fee applies for them.
   static const double deliveryFee = 1.5;
 
   @override
   Widget build(BuildContext context) {
-    final total = (subtotal - discount + deliveryFee).clamp(0, double.infinity);
+    final total = (subtotal - discount + (hasProducts ? deliveryFee : 0)).clamp(0, double.infinity);
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -776,7 +780,7 @@ class _CheckoutSummary extends StatelessWidget {
         _Row('Subtotal', '${subtotal.toStringAsFixed(2)} Kw'),
         _Row('Discount', '-${discount.toStringAsFixed(2)} Kw', valueColor: AppColors.primary),
         _Row('Shipping Fees', '0.00 Kw'),
-        _Row('Delivery Fees', '${deliveryFee.toStringAsFixed(2)} Kw'),
+        if (hasProducts) _Row('Delivery Fees', '${deliveryFee.toStringAsFixed(2)} Kw'),
         const Divider(height: 16, color: Color(0xFFF0F0F0)),
         _Row('Total', '${total.toStringAsFixed(2)} Kwd', valueBold: true, valueColor: AppColors.primary),
       ]),
