@@ -10,6 +10,7 @@ import '../widgets/network_image.dart';
 import '../widgets/address_method_sheet.dart';
 import 'payment_success_screen.dart';
 import 'payment_failed_screen.dart';
+import 'payment_webview_screen.dart';
 import '../l10n/app_strings.dart';
 
 /// `double.toInt()` throws (UnsupportedError) for NaN/Infinity. Coupon/product
@@ -235,6 +236,21 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         final shipping = double.tryParse('${order['shipping_fees'] ?? 0}') ?? 0.0;
         final delivery = double.tryParse('${order['delivery_fees'] ?? 0}') ?? 0.0;
 
+        // For KNET, send the user into Tap's KNET (bank-authentication)
+        // redirect flow before treating the order as paid.
+        if (_payment == 'knet') {
+          final dbId = order['id'];
+          final orderType = isLoggedIn ? 'order' : 'guest_order';
+          final paid = await _payWithTapKnet(orderId: dbId, orderType: orderType);
+          if (!mounted) return;
+          if (!paid) {
+            Navigator.push(context, MaterialPageRoute(
+              builder: (_) => PaymentFailedScreen(message: null),
+            ));
+            return;
+          }
+        }
+
         // Real per-unit QR codes uploaded by the admin for any purchased
         // coupons (assigned in upload order). Fall back to the generated
         // order QR if none were assigned.
@@ -271,6 +287,42 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       ));
     } finally {
       if (mounted) setState(() => _paying = false);
+    }
+  }
+
+  // Creates a Tap charge for the KNET source and opens Tap's hosted
+  // bank-authentication page in a WebView. Returns true only once the
+  // order's payment_status is confirmed as 'paid'.
+  Future<bool> _payWithTapKnet({required dynamic orderId, required String orderType}) async {
+    try {
+      final chargeRes = await ApiService.createTapCharge(
+        orderId: orderId,
+        orderType: orderType,
+        method: 'knet',
+        auth: orderType == 'order',
+      );
+      if (chargeRes['success'] != true) return false;
+
+      final data = chargeRes['data'] as Map<String, dynamic>? ?? {};
+      final redirectUrl = data['redirect_url'] as String?;
+      if (redirectUrl == null || redirectUrl.isEmpty) {
+        // Already settled without a redirect (unlikely for KNET).
+        return (data['status']?.toString().toUpperCase() == 'CAPTURED');
+      }
+
+      if (!mounted) return false;
+      await Navigator.push(context, MaterialPageRoute(
+        builder: (_) => PaymentWebviewScreen(
+          url: redirectUrl,
+          returnUrlPrefix: '${ApiService.baseUrl}/payments/tap/return',
+        ),
+      ));
+
+      if (!mounted) return false;
+      final statusRes = await ApiService.getPaymentStatus(orderId: orderId, orderType: orderType);
+      return statusRes['data']?['payment_status'] == 'paid';
+    } catch (_) {
+      return false;
     }
   }
 

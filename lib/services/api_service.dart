@@ -237,6 +237,9 @@ class ApiService {
   // Get fresh profile (includes saved address)
   static Future<Map<String, dynamic>> getProfile() async => _request('GET', '/auth/me', auth: true);
 
+  // Permanently deactivate the account (status -> 'terminated', blocks future logins)
+  static Future<Map<String, dynamic>> terminateAccount() async => _request('DELETE', '/auth/me', auth: true);
+
   // Update profile
   static Future<Map<String, dynamic>> updateProfile({String? name, String? phone, String? address}) async =>
       _request('PUT', '/auth/me', auth: true, body: {
@@ -284,6 +287,32 @@ class ApiService {
       if (platform != null) 'platform': platform,
     });
   }
+
+  // ── Payments (Tap) ────────────────────────────────────────────────────────
+
+  // Public payment config: { mode, configured, publishable_key }
+  static Future<Map<String, dynamic>> getPaymentConfig() async => _request('GET', '/payments/config');
+
+  // Creates a Tap charge for an existing order and returns a redirect URL to
+  // open in a WebView (used for KNET, and for card 3DS if needed).
+  static Future<Map<String, dynamic>> createTapCharge({
+    required dynamic orderId,
+    required String orderType, // 'order' | 'guest_order'
+    required String method,    // 'knet' | 'visa'
+    String? tokenId,
+    bool auth = false,
+  }) async => _request('POST', '/payments/tap/charge', auth: auth, body: {
+        'order_id': orderId,
+        'order_type': orderType,
+        'method': method,
+        if (tokenId != null) 'token_id': tokenId,
+      });
+
+  // Polls the final payment_status for an order after the payment WebView closes.
+  static Future<Map<String, dynamic>> getPaymentStatus({
+    required dynamic orderId,
+    required String orderType,
+  }) async => _request('GET', '/payments/tap/status?order_id=$orderId&order_type=$orderType');
 
   // ── Admin auth ────────────────────────────────────────────────────────────
   static Future<Map<String, dynamic>> adminLogin(String email, String password) async {
