@@ -353,6 +353,7 @@ class _CouponsList extends StatelessWidget {
             price: '${item.price.toStringAsFixed(3)} KD',
             originalPrice: '${item.originalPrice.toStringAsFixed(3)} KD',
             discount: '-${item.discountPercent}%',
+            isOutOfStock: item.isOutOfStock,
             onTap: () => Navigator.push(context, MaterialPageRoute(
               builder: (_) => CouponDetailScreen(coupon: item),
             )),

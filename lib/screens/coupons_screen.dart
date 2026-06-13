@@ -183,6 +183,7 @@ class _CouponCard extends StatelessWidget {
       price: '${item.price.toInt()} Kd',
       originalPrice: '${item.originalPrice.toInt()} Kd',
       discount: '-${item.discountPercent}%',
+      isOutOfStock: item.isOutOfStock,
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => CouponDetailScreen(coupon: item)),

@@ -26,7 +26,10 @@ class _SearchScreenState extends State<SearchScreen> {
     try {
       final res = await ApiService.search(q.trim());
       if (res['success'] == true) {
-        final list = (res['data']['rows'] as List?) ?? (res['data'] as List? ?? []);
+        final data = res['data'];
+        final list = data is List
+            ? data
+            : (data is Map ? (data['rows'] as List? ?? []) : []);
         setState(() => _results = list.map((j) => Product.fromJson(j as Map<String, dynamic>)).toList());
       }
     } catch (_) {} finally {

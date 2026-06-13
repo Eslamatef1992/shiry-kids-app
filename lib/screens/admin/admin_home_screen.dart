@@ -1,26 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../theme/app_colors.dart';
+import '../../services/api_service.dart';
 import 'admin_scan_screen.dart';
 
 // ── Model ─────────────────────────────────────────────────────────────────────
 
 enum QrStatus { valid, used, notFound }
 
+QrStatus _statusFromString(String? s) {
+  switch (s) {
+    case 'valid': return QrStatus.valid;
+    case 'used': return QrStatus.used;
+    default: return QrStatus.notFound;
+  }
+}
+
 class ScannedQr {
   final String code;
   final DateTime scannedAt;
   final QrStatus status;
   const ScannedQr({required this.code, required this.scannedAt, required this.status});
-}
 
-// Sample history
-final _sampleHistory = [
-  ScannedQr(code: 'COUPON-A1B2C3', scannedAt: DateTime(2026, 6, 9), status: QrStatus.notFound),
-  ScannedQr(code: 'COUPON-D4E5F6', scannedAt: DateTime(2026, 6, 9), status: QrStatus.valid),
-  ScannedQr(code: 'COUPON-G7H8I9', scannedAt: DateTime(2026, 6, 9), status: QrStatus.notFound),
-  ScannedQr(code: 'COUPON-J0K1L2', scannedAt: DateTime(2026, 6, 9), status: QrStatus.used),
-];
+  factory ScannedQr.fromJson(Map<String, dynamic> j) => ScannedQr(
+        code: j['qr_code']?.toString() ?? '',
+        scannedAt: DateTime.tryParse(j['created_at']?.toString() ?? '') ?? DateTime.now(),
+        status: _statusFromString(j['status']?.toString()),
+      );
+}
 
 // ── Screen ────────────────────────────────────────────────────────────────────
 
@@ -32,7 +39,32 @@ class AdminHomeScreen extends StatefulWidget {
 
 class _AdminHomeScreenState extends State<AdminHomeScreen> {
   String _filter = 'all';
-  List<ScannedQr> _history = List.from(_sampleHistory);
+  List<ScannedQr> _history = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHistory();
+  }
+
+  Future<void> _loadHistory() async {
+    setState(() => _loading = true);
+    try {
+      final res = await ApiService.getQRHistory();
+      if (res['success'] == true) {
+        final rows = (res['data'] as List? ?? [])
+            .whereType<Map<String, dynamic>>()
+            .map(ScannedQr.fromJson)
+            .toList();
+        setState(() => _history = rows);
+      }
+    } catch (_) {
+      // keep existing history on error
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
 
   List<ScannedQr> get _filtered {
     if (_filter == 'used')     return _history.where((q) => q.status == QrStatus.used).toList();
@@ -79,7 +111,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
 
           // Grid
           Expanded(
-            child: _filtered.isEmpty
+            child: _loading
+                ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                : _filtered.isEmpty
                 ? const Center(child: Text('No records', style: TextStyle(color: Color(0xFF999999))))
                 : GridView.builder(
                     padding: const EdgeInsets.all(16),

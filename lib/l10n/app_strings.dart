@@ -25,6 +25,7 @@ class AppStrings {
     'Weekly Offers': 'عروض أسبوعية',
     'See All': 'عرض الكل',
     'Add To Cart': 'أضف إلى السلة',
+    'Out of Stock': 'غير متوفر',
     'Details': 'التفاصيل',
     'added to cart!': 'أُضيف إلى السلة!',
 

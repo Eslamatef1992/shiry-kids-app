@@ -214,6 +214,8 @@ class CouponProduct {
   final DateTime expiresAt;
   final bool featured;
   final int? discountPercentValue;
+  final int qrTotal;
+  final int qrAvailable;
 
   const CouponProduct({
     required this.id,
@@ -234,7 +236,13 @@ class CouponProduct {
     required this.expiresAt,
     this.featured = false,
     this.discountPercentValue,
+    this.qrTotal = 0,
+    this.qrAvailable = 0,
   });
+
+  /// Coupon is sold out only if it uses the per-unit QR system (qrTotal > 0)
+  /// and all uploaded QR codes have already been assigned/used.
+  bool get isOutOfStock => qrTotal > 0 && qrAvailable <= 0;
 
   factory CouponProduct.fromJson(Map<String, dynamic> j) {
     final expiry = j['expiry_date'] != null
@@ -263,6 +271,8 @@ class CouponProduct {
       discountPercentValue: j['discount_percent'] != null
           ? int.tryParse(j['discount_percent'].toString())
           : null,
+      qrTotal: int.tryParse(j['qr_total']?.toString() ?? '0') ?? 0,
+      qrAvailable: int.tryParse(j['qr_available']?.toString() ?? '0') ?? 0,
     );
   }
 

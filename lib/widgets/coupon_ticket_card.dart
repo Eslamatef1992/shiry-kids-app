@@ -17,6 +17,7 @@ class CouponTicketCard extends StatelessWidget {
   final String discount;
   final VoidCallback? onTap;
   final VoidCallback? onAddToCart;
+  final bool isOutOfStock;
 
   static const double _cardH  = 172.0;
   static const double _imgW   = 118.0;
@@ -35,6 +36,7 @@ class CouponTicketCard extends StatelessWidget {
     required this.discount,
     this.onTap,
     this.onAddToCart,
+    this.isOutOfStock = false,
   });
 
   @override
@@ -113,20 +115,28 @@ class CouponTicketCard extends StatelessWidget {
                                 fontSize: 10, color: AppColors.textLight)),
                       ),
                       const Spacer(),
-                      // Pink bottom — Add To Cart button only
+                      // Pink bottom — Add To Cart button (or Out of Stock)
                       GestureDetector(
-                        onTap: onAddToCart,
+                        onTap: isOutOfStock ? null : onAddToCart,
                         child: Container(
                           width: double.infinity,
                           height: 40,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFFFE9E3),
+                          decoration: BoxDecoration(
+                            color: isOutOfStock
+                                ? const Color(0xFFEEEEEE)
+                                : const Color(0xFFFFE9E3),
                           ),
                           child: Center(
-                            child: Text('Add To Cart'.tr(context),
-                                style: const TextStyle(
-                                    fontSize: 13, fontWeight: FontWeight.w700,
-                                    color: AppColors.primary)),
+                            child: Text(
+                              isOutOfStock
+                                  ? 'Out of Stock'.tr(context)
+                                  : 'Add To Cart'.tr(context),
+                              style: TextStyle(
+                                  fontSize: 13, fontWeight: FontWeight.w700,
+                                  color: isOutOfStock
+                                      ? AppColors.textLight
+                                      : AppColors.primary),
+                            ),
                           ),
                         ),
                       ),

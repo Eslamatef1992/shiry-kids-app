@@ -329,11 +329,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _showLanguagePicker(BuildContext context) {
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
+      isScrollControlled: true,
       backgroundColor: AppColors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (_) => const _LanguagePicker(),
+      builder: (_) => SafeArea(
+        top: false,
+        child: const _LanguagePicker(),
+      ),
     );
   }
 

@@ -61,7 +61,7 @@ class _MainShellState extends State<MainShell> {
         child: SafeArea(
           top: false,
           child: SizedBox(
-            height: 60,
+            height: 66,
             child: Directionality(
               textDirection: TextDirection.ltr,
               child: Row(
@@ -82,12 +82,12 @@ class _MainShellState extends State<MainShell> {
                             children: [
                               SvgPicture.asset(
                                 item.asset,
-                                width: 22, height: 22,
+                                width: 26, height: 26,
                                 colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
                               ),
                               if (item.showBadge && cartCount > 0)
                                 Positioned(
-                                  top: -6, right: -8,
+                                  top: -8, right: -10,
                                   child: Container(
                                     width: 16, height: 16,
                                     decoration: const BoxDecoration(
