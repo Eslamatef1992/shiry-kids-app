@@ -58,7 +58,16 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 16),
               // Back
               GestureDetector(
-                onTap: () => Navigator.pop(context),
+                onTap: () {
+                  if (Navigator.canPop(context)) {
+                    Navigator.pop(context);
+                  } else {
+                    // Login is usually reached via pushReplacement (no route to
+                    // pop back to) — fall back to onboarding instead of
+                    // leaving an empty navigator stack (black screen).
+                    Navigator.pushReplacementNamed(context, '/onboarding');
+                  }
+                },
                 child: const Icon(Icons.chevron_left, size: 28, color: AppColors.textDark),
               ),
               const SizedBox(height: 16),

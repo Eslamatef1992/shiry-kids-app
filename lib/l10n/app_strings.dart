@@ -45,6 +45,8 @@ class AppStrings {
     'Logout': 'تسجيل الخروج',
     'Log In': 'تسجيل الدخول',
     'Are You Sure You\nWant Logout?': 'هل أنت متأكد أنك تريد\nتسجيل الخروج؟',
+    'Terminate Account': 'إنهاء الحساب',
+    'Are You Sure You Terminate Your Account?': 'هل أنت متأكد أنك تريد إنهاء حسابك؟',
     'No': 'لا',
     'Yes': 'نعم',
     'Arabic': 'العربية',

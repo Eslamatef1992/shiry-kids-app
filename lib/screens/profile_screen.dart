@@ -228,6 +228,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ? _TextRow(label: 'Logout', onTap: () => _showLogoutDialog(context))
                 : _TextRow(label: 'Log In', onTap: () =>
                     Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false)),
+            if (_loggedIn) ...[
+              _Divider(),
+              _TextRow(
+                label: 'Terminate Account',
+                color: Colors.red,
+                onTap: () => _showTerminateDialog(context),
+              ),
+            ],
           ]),
           const SizedBox(height: 24),
 
@@ -389,6 +397,95 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
+
+  void _showTerminateDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black26,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) {
+          bool loading = false;
+          return Dialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            backgroundColor: Colors.white,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 32, 20, 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Are You Sure You Terminate Your Account?'.tr(context),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.textDark, height: 1.3),
+                  ),
+                  const SizedBox(height: 28),
+                  Row(children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 50,
+                        child: ElevatedButton(
+                          onPressed: loading ? null : () => Navigator.pop(dialogContext),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFEEEEEE),
+                            foregroundColor: const Color(0xFF888888),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: Text('No'.tr(context), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: SizedBox(
+                        height: 50,
+                        child: ElevatedButton(
+                          onPressed: loading ? null : () async {
+                            setDialogState(() => loading = true);
+                            try {
+                              final res = await ApiService.terminateAccount();
+                              if (res['success'] == true) {
+                                await ApiService.clearToken();
+                                if (!context.mounted) return;
+                                Navigator.pop(dialogContext);
+                                Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false);
+                              } else {
+                                setDialogState(() => loading = false);
+                                if (!dialogContext.mounted) return;
+                                ScaffoldMessenger.of(dialogContext).showSnackBar(
+                                  SnackBar(content: Text(res['message'] ?? 'Something went wrong'.tr(context)), backgroundColor: Colors.red),
+                                );
+                              }
+                            } catch (_) {
+                              setDialogState(() => loading = false);
+                              if (!dialogContext.mounted) return;
+                              ScaffoldMessenger.of(dialogContext).showSnackBar(
+                                SnackBar(content: Text('Network error. Please try again.'.tr(context)), backgroundColor: Colors.red),
+                              );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: loading
+                              ? const SizedBox(width: 20, height: 20,
+                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                              : Text('Yes'.tr(context), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                        ),
+                      ),
+                    ),
+                  ]),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
 }
 
 // ─── Widgets ──────────────────────────────────────────────────────────────────
@@ -452,13 +549,14 @@ class _SvgRow extends StatelessWidget {
 class _TextRow extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
-  const _TextRow({required this.label, required this.onTap});
+  final Color? color;
+  const _TextRow({required this.label, required this.onTap, this.color});
 
   @override
   Widget build(BuildContext context) => ListTile(
-    title: Text(label.tr(context), style: const TextStyle(
-        fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primary)),
-    trailing: const Icon(Icons.chevron_right, color: AppColors.primary, size: 20),
+    title: Text(label.tr(context), style: TextStyle(
+        fontSize: 14, fontWeight: FontWeight.w700, color: color ?? AppColors.primary)),
+    trailing: Icon(Icons.chevron_right, color: color ?? AppColors.primary, size: 20),
     dense: true,
     onTap: onTap,
   );
