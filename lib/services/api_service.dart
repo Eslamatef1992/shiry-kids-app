@@ -116,6 +116,18 @@ class ApiService {
     return res;
   }
 
+  // Sends a 4-digit password-reset code to the given email via Mailgun.
+  static Future<Map<String, dynamic>> forgotPassword(String email) async =>
+      _request('POST', '/auth/forgot-password', body: {'email': email});
+
+  // Verifies a password-reset code without consuming it.
+  static Future<Map<String, dynamic>> verifyResetCode(String email, String code) async =>
+      _request('POST', '/auth/verify-reset-code', body: {'email': email, 'code': code});
+
+  // Verifies the code again and sets a new password.
+  static Future<Map<String, dynamic>> resetPassword(String email, String code, String password) async =>
+      _request('POST', '/auth/reset-password', body: {'email': email, 'code': code, 'password': password});
+
   static Future<void> logout() async => clearToken();
 
   static Future<Map<String, dynamic>?> getUser() async {

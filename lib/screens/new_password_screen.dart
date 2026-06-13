@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../l10n/app_strings.dart';
+import '../services/api_service.dart';
 
 class NewPasswordScreen extends StatefulWidget {
   const NewPasswordScreen({super.key});
@@ -13,15 +14,51 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
   final _confirmCtrl = TextEditingController();
   bool _showNew     = false;
   bool _showConfirm = false;
+  bool _loading = false;
+  String? _error;
+  late Map<String, dynamic> _args;
+  bool _argsLoaded = false;
 
   bool get _canConfirm =>
       _newCtrl.text.isNotEmpty && _confirmCtrl.text.isNotEmpty;
+
+  Future<void> _submit() async {
+    if (_newCtrl.text.length < 6) {
+      setState(() => _error = 'Password must be at least 6 characters.'.tr(context));
+      return;
+    }
+    if (_newCtrl.text != _confirmCtrl.text) {
+      setState(() => _error = 'Passwords do not match.'.tr(context));
+      return;
+    }
+    setState(() { _loading = true; _error = null; });
+    try {
+      final email = _args['email'] as String? ?? '';
+      final code = _args['code'] as String? ?? '';
+      final res = await ApiService.resetPassword(email, code, _newCtrl.text);
+      if (!mounted) return;
+      if (res['success'] == true) {
+        Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false);
+      } else {
+        setState(() => _error = res['message']?.toString() ?? 'Something went wrong'.tr(context));
+      }
+    } catch (_) {
+      if (mounted) setState(() => _error = 'Network error. Please try again.'.tr(context));
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
 
   @override
   void dispose() { _newCtrl.dispose(); _confirmCtrl.dispose(); super.dispose(); }
 
   @override
   Widget build(BuildContext context) {
+    if (!_argsLoaded) {
+      final args = ModalRoute.of(context)?.settings.arguments;
+      _args = args is Map<String, dynamic> ? args : {};
+      _argsLoaded = true;
+    }
     return Scaffold(
       backgroundColor: AppColors.white,
       body: SafeArea(
@@ -74,22 +111,29 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                   ),
                 ),
               ),
+              if (_error != null) ...[
+                const SizedBox(height: 8),
+                Text(_error!, style: const TextStyle(color: Colors.red, fontSize: 12)),
+              ],
               const SizedBox(height: 40),
 
               SizedBox(
                 width: double.infinity,
                 height: 52,
                 child: ElevatedButton(
-                  onPressed: _canConfirm
-                      ? () => Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false)
-                      : null,
+                  onPressed: (_canConfirm && !_loading) ? _submit : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _canConfirm ? AppColors.primary : const Color(0xFFEEEEEE),
                     foregroundColor: _canConfirm ? Colors.white : AppColors.textMedium,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     elevation: 0,
                   ),
-                  child: Text('Confirm'.tr(context), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                  child: _loading
+                      ? const SizedBox(
+                          width: 22, height: 22,
+                          child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                        )
+                      : Text('Confirm'.tr(context), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                 ),
               ),
             ],

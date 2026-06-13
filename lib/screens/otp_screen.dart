@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../theme/app_colors.dart';
 import '../l10n/app_strings.dart';
+import '../services/api_service.dart';
 
 class OtpScreen extends StatefulWidget {
   const OtpScreen({super.key});
@@ -14,6 +15,7 @@ class _OtpScreenState extends State<OtpScreen> {
   final List<TextEditingController> _ctrls = List.generate(4, (_) => TextEditingController());
   final List<FocusNode> _nodes = List.generate(4, (_) => FocusNode());
   bool _hasError = false;
+  bool _loading = false;
   int _seconds = 45;
   Timer? _timer;
   late Map<String, dynamic> _args;
@@ -46,21 +48,42 @@ class _OtpScreenState extends State<OtpScreen> {
   }
 
   // TEMP: fixed test OTP until a real SMS provider is integrated.
-  // Any signup/login/forgot-password flow is "verified" by entering 1234.
+  // Any signup/login flow is "verified" by entering 1234.
   static const String _testOtp = '1234';
 
-  void _confirm() {
-    if (!_complete) return;
+  Future<void> _confirm() async {
+    if (!_complete || _loading) return;
+    final mode = _args['mode'] as String? ?? 'signup';
+
+    if (mode == 'forgot') {
+      // Forgot-password codes are real, Mailgun-delivered codes verified
+      // against the backend.
+      final email = _args['email'] as String? ?? '';
+      setState(() { _loading = true; _hasError = false; });
+      try {
+        final res = await ApiService.verifyResetCode(email, _code);
+        if (!mounted) return;
+        if (res['success'] == true) {
+          Navigator.pushReplacementNamed(context, '/new-password', arguments: {
+            'email': email,
+            'code': _code,
+          });
+        } else {
+          setState(() => _hasError = true);
+        }
+      } catch (_) {
+        if (mounted) setState(() => _hasError = true);
+      } finally {
+        if (mounted) setState(() => _loading = false);
+      }
+      return;
+    }
+
     if (_code != _testOtp) {
       setState(() => _hasError = true);
       return;
     }
-    final mode = _args['mode'] as String? ?? 'signup';
-    if (mode == 'forgot') {
-      Navigator.pushReplacementNamed(context, '/new-password');
-    } else {
-      Navigator.pushReplacementNamed(context, '/location');
-    }
+    Navigator.pushReplacementNamed(context, '/location');
   }
 
   void _resend() {
@@ -68,6 +91,12 @@ class _OtpScreenState extends State<OtpScreen> {
     setState(() => _hasError = false);
     _startTimer();
     _nodes[0].requestFocus();
+
+    final mode = _args['mode'] as String? ?? 'signup';
+    if (mode == 'forgot') {
+      final email = _args['email'] as String? ?? '';
+      if (email.isNotEmpty) ApiService.forgotPassword(email);
+    }
   }
 
   @override
@@ -174,10 +203,12 @@ class _OtpScreenState extends State<OtpScreen> {
                     style: const TextStyle(color: Colors.red, fontSize: 12)),
               ],
 
-              // TEMP: testing hint until real SMS OTP is integrated.
-              const SizedBox(height: 6),
-              Text('Testing mode: enter 1234 to continue.'.tr(context),
-                  style: const TextStyle(color: AppColors.textLight, fontSize: 11, fontStyle: FontStyle.italic)),
+              // TEMP: testing hint until real SMS OTP is integrated (signup/login only).
+              if ((_args['mode'] as String? ?? 'signup') != 'forgot') ...[
+                const SizedBox(height: 6),
+                Text('Testing mode: enter 1234 to continue.'.tr(context),
+                    style: const TextStyle(color: AppColors.textLight, fontSize: 11, fontStyle: FontStyle.italic)),
+              ],
 
               const SizedBox(height: 12),
               Row(
@@ -210,14 +241,19 @@ class _OtpScreenState extends State<OtpScreen> {
                 width: double.infinity,
                 height: 52,
                 child: ElevatedButton(
-                  onPressed: _complete ? _confirm : null,
+                  onPressed: (_complete && !_loading) ? _confirm : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _complete ? AppColors.primary : const Color(0xFFEEEEEE),
                     foregroundColor: _complete ? Colors.white : AppColors.textMedium,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     elevation: 0,
                   ),
-                  child: Text('Confirm'.tr(context), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                  child: _loading
+                      ? const SizedBox(
+                          width: 22, height: 22,
+                          child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                        )
+                      : Text('Confirm'.tr(context), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                 ),
               ),
             ],
