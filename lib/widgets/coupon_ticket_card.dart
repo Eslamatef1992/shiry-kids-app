@@ -170,8 +170,9 @@ class CouponTicketCard extends StatelessWidget {
                       Text(price,
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w900,
-                              color: AppColors.textDark)),
+                              fontSize: 20, fontWeight: FontWeight.w900,
+                              color: AppColors.primary,
+                              letterSpacing: 0.2)),
                       const SizedBox(height: 2),
                       // Original price
                       Text(originalPrice,

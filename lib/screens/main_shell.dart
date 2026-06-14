@@ -61,7 +61,7 @@ class _MainShellState extends State<MainShell> {
         child: SafeArea(
           top: false,
           child: SizedBox(
-            height: 66,
+            height: 78,
             child: Directionality(
               textDirection: TextDirection.ltr,
               child: Row(
@@ -82,14 +82,14 @@ class _MainShellState extends State<MainShell> {
                             children: [
                               SvgPicture.asset(
                                 item.asset,
-                                width: 26, height: 26,
+                                width: 30, height: 30,
                                 colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
                               ),
                               if (item.showBadge && cartCount > 0)
                                 Positioned(
-                                  top: -8, right: -10,
+                                  top: -9, right: -12,
                                   child: Container(
-                                    width: 16, height: 16,
+                                    width: 18, height: 18,
                                     decoration: const BoxDecoration(
                                       color: AppColors.primary,
                                       shape: BoxShape.circle,
@@ -98,7 +98,7 @@ class _MainShellState extends State<MainShell> {
                                       child: Text(
                                         '$cartCount',
                                         style: const TextStyle(
-                                            color: Colors.white, fontSize: 9,
+                                            color: Colors.white, fontSize: 10,
                                             fontWeight: FontWeight.w700),
                                       ),
                                     ),
@@ -106,11 +106,11 @@ class _MainShellState extends State<MainShell> {
                                 ),
                             ],
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 6),
                           Text(
                             item.label.tr(context),
                             style: TextStyle(
-                              fontSize: 10,
+                              fontSize: 11,
                               fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
                               color: color,
                             ),
