@@ -24,7 +24,9 @@ void main() async {
   // the plugin crashes at startup with "No Firebase App '[DEFAULT]'".
   try {
     await Firebase.initializeApp();
-  } catch (_) {}
+  } catch (e) {
+    debugPrint(e.toString());
+  }
 
   // Make build-time errors visible on-screen (in red) instead of rendering
   // as a blank/invisible area. This makes silent layout/render failures
