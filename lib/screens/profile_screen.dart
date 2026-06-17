@@ -224,18 +224,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           // ── Logout / Login ────────────────────────────────────
           _Card(children: [
-            _loggedIn
-                ? _TextRow(label: 'Logout', onTap: () => _showLogoutDialog(context))
-                : _TextRow(label: 'Log In', onTap: () =>
-                    Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false)),
             if (_loggedIn) ...[
-              _Divider(),
               _TextRow(
                 label: 'Terminate Account',
                 color: Colors.red,
                 onTap: () => _showTerminateDialog(context),
               ),
+              _Divider(),
             ],
+            _loggedIn
+                ? _TextRow(label: 'Logout', onTap: () => _showLogoutDialog(context))
+                : _TextRow(label: 'Log In', onTap: () =>
+                Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false)),
+
           ]),
           const SizedBox(height: 24),
 

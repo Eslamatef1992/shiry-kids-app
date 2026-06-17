@@ -118,9 +118,7 @@ class _AdminScanScreenState extends State<AdminScanScreen>
           Center(
             child: SizedBox(
               width: 220, height: 220,
-              child: _state == _ScanState.idle
-                  ? _buildIdleFrame()
-                  : _buildActiveScanner(),
+              child: _buildActiveScanner(),
             ),
           ),
           const SizedBox(height: 24),
@@ -163,16 +161,6 @@ class _AdminScanScreenState extends State<AdminScanScreen>
             const SizedBox(height: 32),
         ],
       ),
-    );
-  }
-
-  Widget _buildIdleFrame() {
-    const r = 16.0;
-    const stroke = 4.0;
-    const len = 40.0;
-    final color = Colors.black;
-    return CustomPaint(
-      painter: _CornerPainter(color: color, radius: r, strokeWidth: stroke, cornerLen: len),
     );
   }
 

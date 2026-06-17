@@ -17,8 +17,10 @@ class MainShell extends StatefulWidget {
   State<MainShell> createState() => _MainShellState();
 }
 
-class _MainShellState extends State<MainShell> {
+class _MainShellState extends State<MainShell> with TickerProviderStateMixin {
   int _selectedIndex = 0;
+  late List<AnimationController> _bounceCtrl;
+  late List<Animation<double>> _bounceAnim;
 
   @override
   void initState() {
@@ -26,6 +28,26 @@ class _MainShellState extends State<MainShell> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) showAdPopup(context);
     });
+    _bounceCtrl = List.generate(
+      _items.length,
+      (_) => AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 400),
+      ),
+    );
+    _bounceAnim = _bounceCtrl.map((c) {
+      return TweenSequence<double>([
+        TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.30), weight: 40),
+        TweenSequenceItem(tween: Tween(begin: 1.30, end: 0.88), weight: 30),
+        TweenSequenceItem(tween: Tween(begin: 0.88, end: 1.0), weight: 30),
+      ]).animate(CurvedAnimation(parent: c, curve: Curves.easeOut));
+    }).toList();
+  }
+
+  @override
+  void dispose() {
+    for (final c in _bounceCtrl) c.dispose();
+    super.dispose();
   }
 
   final List<Widget> _screens = const [
@@ -43,6 +65,11 @@ class _MainShellState extends State<MainShell> {
     _NavItem(asset: 'assets/icons/nav_cart.svg',    label: 'Cart',       showBadge: true),
     _NavItem(asset: 'assets/icons/nav_profile.svg', label: 'My Profile'),
   ];
+
+  void _onTap(int i) {
+    setState(() => _selectedIndex = i);
+    _bounceCtrl[i].forward(from: 0);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,41 +99,55 @@ class _MainShellState extends State<MainShell> {
 
                   return Expanded(
                     child: GestureDetector(
-                      onTap: () => setState(() => _selectedIndex = i),
+                      onTap: () => _onTap(i),
                       behavior: HitTestBehavior.opaque,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              SvgPicture.asset(
-                                item.asset,
-                                width: 30, height: 30,
-                                colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
-                              ),
-                              if (item.showBadge && cartCount > 0)
-                                Positioned(
-                                  top: -9, right: -12,
-                                  child: Container(
-                                    width: 18, height: 18,
-                                    decoration: const BoxDecoration(
-                                      color: AppColors.primary,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        '$cartCount',
-                                        style: const TextStyle(
-                                            color: Colors.white, fontSize: 10,
-                                            fontWeight: FontWeight.w700),
+                          ScaleTransition(
+                            scale: _bounceAnim[i],
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                SvgPicture.asset(
+                                  item.asset,
+                                  width: 30, height: 30,
+                                  colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+                                ),
+                                if (item.showBadge && cartCount > 0)
+                                  Positioned(
+                                    top: -9, right: -12,
+                                    child: Container(
+                                      width: 18, height: 18,
+                                      decoration: const BoxDecoration(
+                                        color: AppColors.primary,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          '$cartCount',
+                                          style: const TextStyle(
+                                              color: Colors.white, fontSize: 10,
+                                              fontWeight: FontWeight.w700),
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                            ],
+                              ],
+                            ),
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 4),
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 250),
+                            curve: Curves.easeOut,
+                            width: isActive ? 20 : 0,
+                            height: 3,
+                            decoration: BoxDecoration(
+                              color: AppColors.primary,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          const SizedBox(height: 2),
                           Text(
                             item.label.tr(context),
                             style: TextStyle(
