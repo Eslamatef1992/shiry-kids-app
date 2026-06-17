@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'providers/cart_provider.dart';
 import 'providers/locale_provider.dart';
 import 'theme/app_theme.dart';
@@ -14,11 +15,18 @@ import 'screens/forgot_password_screen.dart';
 import 'screens/new_password_screen.dart';
 import 'screens/location_permission_screen.dart';
 import 'screens/main_shell.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // firebase_messaging plugin requires Firebase to be initialized on the Dart
+  // side even if push notifications are not actively used; without this call
+  // the plugin crashes at startup with "No Firebase App '[DEFAULT]'".
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    debugPrint(e.toString());
+  }
 
   // Make build-time errors visible on-screen (in red) instead of rendering
   // as a blank/invisible area. This makes silent layout/render failures
@@ -45,13 +53,6 @@ void main() async {
     ),
   );
 
-  // Push notifications (no-ops gracefully if Firebase config files aren't
-  // present yet — see services/notification_service.dart).
-  await NotificationService.init();
-  try {
-    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-  } catch (_) {}
-
   runApp(const ShiryKidsApp());
 }
 
@@ -75,6 +76,7 @@ class ShiryKidsApp extends StatelessWidget {
           localizationsDelegates: const [
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
+
             GlobalCupertinoLocalizations.delegate,
           ],
           initialRoute: '/',

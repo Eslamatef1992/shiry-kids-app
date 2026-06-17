@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../theme/app_colors.dart';
 import '../models/product.dart';
 import '../providers/cart_provider.dart';
-import '../widgets/wavy_app_bar.dart';
 import '../widgets/coupon_ticket_card.dart';
 import '../widgets/category_image.dart';
 import '../widgets/skeleton_loader.dart';
@@ -289,7 +288,7 @@ class _CategoriesRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-    height: 56,
+    height: 50,
     child: ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       scrollDirection: Axis.horizontal,
@@ -299,7 +298,7 @@ class _CategoriesRow extends StatelessWidget {
         final cat = categories[i];
         return Container(
           decoration: BoxDecoration(
-            color: const Color(0xFFFFEDED),
+            color: const Color(0xFFFFE9E3),
             borderRadius: BorderRadius.circular(28),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -381,7 +380,7 @@ class _ProductRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-    height: 270,
+    height: 260,
     child: ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       scrollDirection: Axis.horizontal,
@@ -427,23 +426,23 @@ class _ProductRow extends StatelessWidget {
                   ),
                 ]),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                  padding: const EdgeInsets.fromLTRB(10, 8, 10, 0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(p.name, maxLines: 1, overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textDark)),
+                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.textDark)),
                       const SizedBox(height: 2),
                       Text(p.description, maxLines: 1, overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 11, color: AppColors.textMedium)),
+                          style: const TextStyle(fontSize: 11, color: AppColors.textMedium,fontWeight: FontWeight.w700,)),
                       const SizedBox(height: 6),
                       Row(children: [
                         Text('${p.price.toInt()} Kwd',
                             style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.primary)),
                         const SizedBox(width: 5),
                         Text('${p.originalPrice.toInt()} Kwd',
-                            style: const TextStyle(fontSize: 10, color: AppColors.textLight,
-                                decoration: TextDecoration.lineThrough, decorationColor: AppColors.textLight)),
+                            style: const TextStyle(fontSize: 13,fontWeight: FontWeight.w500, color: AppColors.textLight,
+                                 decorationColor: AppColors.textLight)),
                         const SizedBox(width: 3),
                         Text('-${p.discountPercent} %',
                             style: const TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.w600)),
@@ -463,12 +462,12 @@ class _ProductRow extends StatelessWidget {
                         child: Container(
                           width: double.infinity, height: 32,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFFEDED),
+                            color: const Color(0xFFFFE9E3),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Center(
                             child: Text('Add To Cart'.tr(context),
-                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.primary)),
                           ),
                         ),
                       ),
