@@ -1,4 +1,7 @@
+
+
 import 'package:flutter/material.dart';
+import 'package:shiry_kids_app/widgets/show_img_dialog.dart';
 import '../theme/app_colors.dart';
 import '../widgets/wavy_app_bar.dart';
 import '../widgets/network_image.dart';
@@ -6,6 +9,8 @@ import '../services/api_service.dart';
 import '../l10n/app_strings.dart';
 
 const String _baseUrl = 'https://back.sherykids.com';
+
+
 
 String _imgUrl(dynamic v) {
   if (v == null || v.toString().isEmpty) return '';
@@ -16,13 +21,13 @@ String _imgUrl(dynamic v) {
 // ── Model ─────────────────────────────────────────────────────────────────────
 
 class _UserCoupon {
-  final String name, imageUrl;
+  final String name, imageUrl , qrCode;
   final double price;
   final int quantity;
   final bool used;
   const _UserCoupon({
     required this.name, required this.imageUrl, required this.price,
-    required this.quantity, required this.used,
+    required this.quantity, required this.used, required this.qrCode,
   });
 }
 
@@ -64,7 +69,7 @@ class _MyCouponsScreenState extends State<MyCouponsScreen> {
             .whereType<Map>()
             .map((e) => e.cast<String, dynamic>())
             .toList();
-
+           final qrCode = order['qr_code'];
         for (final item in items) {
           if (item['type'] != 'coupon') continue;
           final couponId = item['id'];
@@ -77,6 +82,7 @@ class _MyCouponsScreenState extends State<MyCouponsScreen> {
             price: double.tryParse(item['price']?.toString() ?? '0') ?? 0,
             quantity: int.tryParse(item['quantity']?.toString() ?? '1') ?? 1,
             used: used,
+            qrCode: qrCode ,
           ));
         }
       }
@@ -91,7 +97,7 @@ class _MyCouponsScreenState extends State<MyCouponsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: WavyAppBar(title: 'My Profile', showBack: true),
+      appBar: const WavyAppBar(title: 'My Profile', showBack: true),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -152,7 +158,7 @@ class _CouponCard extends StatelessWidget {
           // Middle content
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
+              padding: const EdgeInsets.fromLTRB(14, 12, 8, 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -163,22 +169,28 @@ class _CouponCard extends StatelessWidget {
                           fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.primary)),
                   const SizedBox(height: 4),
                   Text('${'Qty'.tr(context)}: ${coupon.quantity}',
-                      style: const TextStyle(fontSize: 12, color: AppColors.textMedium)),
-                  const Spacer(),
+                      style: const TextStyle(fontSize: 14, color: AppColors.textMedium)),
 
-                  // Used / Active button
-                  Container(
-                    width: double.infinity,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFE9E3),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Center(
-                      child: Text(
-                        (coupon.used ? 'Used' : 'Active').tr(context),
-                        style: const TextStyle(
-                            fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary),
+                  const Spacer(),
+                  InkWell(
+                    onTap: (){
+                      showDialog(context: context,
+                          builder:(context)=> ShowImgDialog(img: coupon.qrCode,isCoupon: true,),
+                      );
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFE9E3),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Center(
+                        child: Text(
+                             'View'.tr(context),
+                          style: const TextStyle(
+                              fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary),
+                        ),
                       ),
                     ),
                   ),
@@ -189,10 +201,22 @@ class _CouponCard extends StatelessWidget {
 
           // Right: price
           Padding(
-            padding: const EdgeInsets.fromLTRB(0, 12, 14, 12),
-            child: Text('${coupon.price.toInt()} Kd',
-                style: const TextStyle(
-                    fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.primary)),
+            padding: const EdgeInsets.fromLTRB(10, 12, 20, 12),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Used / Active button
+                Text(
+                  (coupon.used ? 'Used' : 'Active').tr(context),
+                  style: const TextStyle(
+                      fontSize: 14, fontWeight: FontWeight.w700, color: Colors.grey),
+                ),
+                const SizedBox(height: 4),
+                Text('${coupon.price.toInt()} Kd',
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.primary)),
+              ],
+            ),
           ),
         ],
       ),

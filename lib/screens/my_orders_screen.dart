@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../theme/app_colors.dart';
+import '../widgets/show_img_dialog.dart';
 import '../widgets/wavy_app_bar.dart';
 import 'order_invoice_screen.dart';
 import '../models/product.dart' show AppOrder;
@@ -171,11 +172,18 @@ class _AppOrderCard extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
-            child: Container(
-              width: double.infinity, height: 44,
-              decoration: BoxDecoration(color: const Color(0xFFFFE9E3), borderRadius: BorderRadius.circular(10)),
-              child: Center(
-                child: Text('View'.tr(context), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primary)),
+            child: InkWell(
+              onTap: (){
+                Navigator.push(context, MaterialPageRoute(
+                  builder: (_) => OrderInvoiceScreen(order: order,),
+                ));
+              },
+              child: Container(
+                width: double.infinity, height: 44,
+                decoration: BoxDecoration(color: const Color(0xFFFFE9E3), borderRadius: BorderRadius.circular(10)),
+                child: Center(
+                  child: Text('View'.tr(context), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                ),
               ),
             ),
           ),

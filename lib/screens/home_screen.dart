@@ -86,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.white /*AppColors.background*/,
       body: Column(
         children: [
           _HomeAppBar(onSearchTap: () => Navigator.push(
@@ -333,7 +333,7 @@ class _CouponsList extends StatelessWidget {
   Widget build(BuildContext context) => SizedBox(
     height: 172,
     child: ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 0),
       scrollDirection: Axis.horizontal,
       itemCount: coupons.length,
       separatorBuilder: (_, __) => const SizedBox(width: 14),
@@ -382,7 +382,7 @@ class _ProductRow extends StatelessWidget {
   Widget build(BuildContext context) => SizedBox(
     height: 260,
     child: ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 5),
       scrollDirection: Axis.horizontal,
       itemCount: products.length,
       separatorBuilder: (_, __) => const SizedBox(width: 12),
@@ -398,7 +398,7 @@ class _ProductRow extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.white,
               borderRadius: BorderRadius.circular(14),
-              boxShadow: const [BoxShadow(color: Color(0x0F000000), blurRadius: 8, offset: Offset(0, 2))],
+              boxShadow: const [BoxShadow(color: Color(0x0F000000), blurRadius: 8, offset: Offset(0, 4))],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

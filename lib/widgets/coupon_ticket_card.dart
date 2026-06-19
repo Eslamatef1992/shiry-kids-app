@@ -43,20 +43,22 @@ class CouponTicketCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        color: Color(0xffF8F8F8),
+      child: SizedBox(
         height: _cardH,
         child: Stack(
           clipBehavior: Clip.none,
           children: [
             // ── Ticket shape background + dashed lines ──────────
-            const Positioned.fill(
-              child: ClipPath(
+             Positioned.fill(
+              child: Image.asset('assets/images/bg_ticket.png',
+              fit:BoxFit.contain ,
+              ),
+              /*ClipPath(
                 clipper: _TicketClipper(stubW: _stubW, notchR: _notchR),
                 child: CustomPaint(
                   painter: _TicketPainter(stubW: _stubW, notchR: _notchR),
                 ),
-              ),
+              ),*/
             ),
 
             // ── Content row ─────────────────────────────────────
@@ -64,10 +66,10 @@ class CouponTicketCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Left image
-                SizedBox(
-                  width: _imgW,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(10, 12, 0, 0),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 15, 0, 15),
+                  child: SizedBox(
+                    width: _imgW,
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: smartImage(
@@ -86,90 +88,92 @@ class CouponTicketCard extends StatelessWidget {
                  const SizedBox(width: 12,),
                 // Middle content
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
 
-                      // ── Brand logo circle (overlaps image/content boundary) ──
+                        // ── Brand logo circle (overlaps image/content boundary) ──
 
-                      Container(
-                          width: 36, height: 36,
-                          margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 3),
-                            boxShadow: const [
-                              BoxShadow(color: Color(0x20000000), blurRadius: 4)
-                            ],
+                        Container(
+                            width: 36, height: 30,
+                            margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 3),
+                              boxShadow: const [
+                                BoxShadow(color: Color(0x20000000), blurRadius: 4)
+                              ],
+                            ),
+                            child: ClipOval(
+                              child: smartImage(
+                                brandImageUrl,
+                                fit: BoxFit.cover,
+                                placeholder: Container(
+                                  color: AppColors.primary.withOpacity(0.1),
+                                  child: const Icon(Icons.storefront_outlined,
+                                      size: 16, color: AppColors.primary),
+                                ),
+                              ),
+                            ),
                           ),
-                          child: ClipOval(
-                            child: smartImage(
-                              brandImageUrl,
-                              fit: BoxFit.cover,
-                              placeholder: Container(
-                                color: AppColors.primary.withOpacity(0.1),
-                                child: const Icon(Icons.storefront_outlined,
-                                    size: 16, color: AppColors.primary),
+
+                        // Brand name
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(0, 10, 10, 0),
+                          child: Text(brandName,
+                              style: const TextStyle(
+                                  fontSize: 13, fontWeight: FontWeight.w800,
+                                  color: Color(0xFFE73C00))),
+                        ),
+                        // Title
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
+                          child: Text(title,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  fontSize: 12, fontWeight: FontWeight.w600,
+                                  color: AppColors.textDark, height: 1.35)),
+                        ),
+                        // Countdown
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(0, 4, 10, 10),
+                          child: Text(countdown,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  fontSize: 10, color: AppColors.textLight)),
+                        ),
+                        // Pink bottom — Add To Cart button (or Out of Stock)
+                        GestureDetector(
+                          onTap: isOutOfStock ? null : onAddToCart,
+                          child: Container(
+                            width: double.infinity,
+                            height: 30,
+                            decoration: BoxDecoration(
+                              borderRadius:  BorderRadius.circular(8),
+                              color: isOutOfStock
+                                  ? const Color(0xFFEEEEEE)
+                                  : const Color(0xFFFFE9E3),
+                            ),
+                            child: Center(
+                              child: Text(
+                                isOutOfStock
+                                    ? 'Out of Stock'.tr(context)
+                                    : 'Add To Cart'.tr(context),
+                                style: TextStyle(
+                                    fontSize: 14, fontWeight: FontWeight.w500,
+                                    color: isOutOfStock
+                                        ? AppColors.textLight
+                                        : AppColors.primary),
                               ),
                             ),
                           ),
                         ),
-
-                      // Brand name
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 10, 10, 0),
-                        child: Text(brandName,
-                            style: const TextStyle(
-                                fontSize: 13, fontWeight: FontWeight.w800,
-                                color: Color(0xFFE73C00))),
-                      ),
-                      // Title
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 4, 10, 0),
-                        child: Text(title,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                                fontSize: 12, fontWeight: FontWeight.w600,
-                                color: AppColors.textDark, height: 1.35)),
-                      ),
-                      // Countdown
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 4, 10, 0),
-                        child: Text(countdown,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                                fontSize: 10, color: AppColors.textLight)),
-                      ),
-                      const Spacer(),
-                      // Pink bottom — Add To Cart button (or Out of Stock)
-                      GestureDetector(
-                        onTap: isOutOfStock ? null : onAddToCart,
-                        child: Container(
-                          width: double.infinity,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            borderRadius:  BorderRadius.circular(8),
-                            color: isOutOfStock
-                                ? const Color(0xFFEEEEEE)
-                                : const Color(0xFFFFE9E3),
-                          ),
-                          child: Center(
-                            child: Text(
-                              isOutOfStock
-                                  ? 'Out of Stock'.tr(context)
-                                  : 'Add To Cart'.tr(context),
-                              style: TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.w500,
-                                  color: isOutOfStock
-                                      ? AppColors.textLight
-                                      : AppColors.primary),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
 
@@ -199,7 +203,7 @@ class CouponTicketCard extends StatelessWidget {
                       Text(price,
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.w900,
+                              fontSize: 16, fontWeight: FontWeight.w900,
                               color: AppColors.primary,
                               letterSpacing: 0.2)),
                       const SizedBox(height: 2),
