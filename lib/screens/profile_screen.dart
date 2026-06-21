@@ -328,16 +328,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showLanguagePicker(BuildContext context) {
-    showModalBottomSheet(
+    showDialog(
       context: context,
       useRootNavigator: true,
-      isScrollControlled: true,
-      backgroundColor: AppColors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (_) => SafeArea(
-        top: false,
+      barrierColor: Colors.black26,
+      builder: (_) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: AppColors.white,
+        clipBehavior: Clip.antiAlias,
         child: const _LanguagePicker(),
       ),
     );
@@ -591,17 +589,21 @@ class _LanguagePicker extends StatelessWidget {
           _LangOption(flag: 'assets/icons/flag_kuwait.svg', label: 'Arabic',  value: 'ar', selected: selected, onTap: selectLanguage),
           const Divider(height: 1, indent: 16, endIndent: 16),
           _LangOption(flag: 'assets/icons/flag_us.svg',     label: 'English', value: 'en', selected: selected, onTap: selectLanguage),
-          const Divider(height: 1),
+
           // Cancel — plain text button matching Figma
           GestureDetector(
             onTap: () => Navigator.pop(context),
             child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              color: const Color(0xFFF5F5F5),
+              height: 48,
+              margin: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                color: const Color(0xFFF8F8F8),
+              ),
               child: Center(
                 child: Text('Cancel'.tr(context),
-                    style: const TextStyle(fontSize: 15, color: AppColors.textMedium, fontWeight: FontWeight.w500)),
+                    style: const TextStyle(fontSize: 16, color: Color(0xff868686), fontWeight: FontWeight.w600)),
               ),
             ),
           ),
@@ -640,15 +642,17 @@ class _LangOption extends StatelessWidget {
               width: 22, height: 22,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isSelected ? AppColors.primary : const Color(0xFFCCCCCC),
+                color: isSelected ? null : const Color(0xFFF8F8F8),
+                border: isSelected? Border.all(color: AppColors.primary):null,
               ),
               child: isSelected
                   ? Center(
                       child: Container(
-                        width: 10, height: 10,
+                        width: 14, height: 14,
+                        padding: const EdgeInsets.all(5),
                         decoration: const BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Color(0xFFBB2800), // darker orange inner dot
+                          color: AppColors.primary, // darker orange inner dot
                         ),
                       ),
                     )

@@ -32,9 +32,9 @@ class _ProductCardState extends State<ProductCard> {
               child: Stack(
                 children: [
                   Container(
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: AppColors.background,
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
                     ),
                     child: const Center(
                       child: Text('🧸', style: TextStyle(fontSize: 52)),

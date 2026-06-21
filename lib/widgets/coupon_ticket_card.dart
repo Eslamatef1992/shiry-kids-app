@@ -98,7 +98,7 @@ class CouponTicketCard extends StatelessWidget {
 
                         Container(
                             width: 36, height: 30,
-                            margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                            margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(color: Colors.white, width: 3),

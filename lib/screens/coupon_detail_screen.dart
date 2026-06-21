@@ -138,9 +138,6 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
                       indicator: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(20),
-                        boxShadow: const [
-                          BoxShadow(color: Color(0x14000000), blurRadius: 4)
-                        ],
                       ),
                       indicatorSize: TabBarIndicatorSize.tab,
                       dividerColor: Colors.transparent,
@@ -178,9 +175,9 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
                             const SizedBox(width: 8),
                             Text('${c.originalPrice.toInt()} Kd',
                                 style: const TextStyle(
-                                    fontSize: 14, color: AppColors.textLight,
+                                    fontSize: 14, color: AppColors.primary,
                                     decoration: TextDecoration.lineThrough,
-                                    decorationColor: AppColors.textLight)),
+                                    decorationColor: AppColors.primary)),
                             const SizedBox(width: 6),
                             Text('-${c.discountPercent}%',
                                 style: const TextStyle(
@@ -201,82 +198,113 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
                       color: const Color(0xFFF8F8F8),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Row(children: [
-                      Expanded(
-                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          Text('Expire Date'.tr(context),
-                              style: const TextStyle(fontSize: 11, color: AppColors.textLight)),
-                          const SizedBox(height: 4),
-                          Text(c.expiryDate,
-                              style: const TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.w700,
-                                  color: AppColors.textDark)),
-                        ]),
-                      ),
-                      Container(width: 1, height: 36, color: const Color(0xFFEEEEEE)),
-                      Expanded(
-                        child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                          Text('Coupons Left'.tr(context),
-                              style: const TextStyle(fontSize: 11, color: AppColors.textLight)),
-                          const SizedBox(height: 4),
-                          Text('${c.qrTotal > 0 ? c.qrAvailable : c.couponsLeft}',
-                              style: const TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.w700,
-                                  color: AppColors.textDark)),
-                        ]),
-                      ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Text('Expire Date'.tr(context),
+                            style: const TextStyle(fontSize: 12, color: AppColors.textLight,fontWeight: FontWeight.w500,)),
+                        const SizedBox(height: 4),
+                        Text(c.expiryDate,
+                            style: const TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.w700,
+                                color: AppColors.textDark)),
+                      ]),
+                      Container(width: 1, height: 36, color:Colors.white),
+                      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Text('Coupons Left'.tr(context),
+                            style: const TextStyle(fontSize: 11, color: AppColors.textLight)),
+                        const SizedBox(height: 4),
+                        Text('${c.qrTotal > 0 ? c.qrAvailable : c.couponsLeft}',
+                            style: const TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.w700,
+                                color: AppColors.textDark)),
+                      ]),
                     ]),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 32),
 
                   // ── Quantity picker ────────────────────────────
-                  if (!c.isOutOfStock) ...[
-                    Text('Number Of Cpouons You Want:'.tr(context),
-                        style: const TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.w700,
-                            color: AppColors.textDark)),
-                    const SizedBox(height: 14),
-                    Row(children: [
-                      _QtyBtn(
-                        icon: Icons.remove,
-                        onTap: () { if (_qty > 1) setState(() => _qty--); },
-                        filled: false,
-                      ),
-                      const SizedBox(width: 16),
-                      Text('$_qty',
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w700,
-                              color: AppColors.textDark)),
-                      const SizedBox(width: 16),
-                      _QtyBtn(
-                        icon: Icons.add,
-                        onTap: () {
-                          final max = c.qrTotal > 0 ? c.qrAvailable : null;
-                          if (max == null || _qty < max) setState(() => _qty++);
-                        },
-                        filled: true,
-                      ),
-                    ]),
-                    const SizedBox(height: 16),
-                  ],
-
-                  // ── Confirm ────────────────────────────────────
                   if (!c.isOutOfStock)
-                    SizedBox(
-                      width: double.infinity,
-                      height: 46,
-                      child: OutlinedButton(
-                        onPressed: _confirm,
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.primary,
-                          side: const BorderSide(color: AppColors.primary),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                        ),
-                        child: Text('Confirm'.tr(context),
-                            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 20,
+                            spreadRadius: 0,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Number Of Cpouons You Want:'.tr(context),
+                              style: const TextStyle(
+                                  fontSize: 14, fontWeight: FontWeight.w700,
+                                  color: AppColors.textDark)),
+                          const SizedBox(height: 14),
+                          Row(children: [
+                            _QtyBtn(
+                              icon: Icons.remove,
+                              onTap: () { if (_qty > 1) setState(() => _qty--); },
+                              filled: false,
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Container(
+                                height: 48,
+                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                decoration:  BoxDecoration(
+                                  color: const Color(0xffF8F8F8),
+                                  borderRadius: BorderRadius.circular(8)
+                                ),
+                                child: Center(
+                                  child: Text('$_qty',
+                                      style: const TextStyle(
+                                          fontSize: 18, fontWeight: FontWeight.w700,
+                                          color: AppColors.textDark)),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            _QtyBtn(
+                              icon: Icons.add,
+                              onTap: () {
+                                final max = c.qrTotal > 0 ? c.qrAvailable : null;
+                                if (max == null || _qty < max) setState(() => _qty++);
+                              },
+                              filled: true,
+                            ),
+                          ]),
+                          const SizedBox(height: 16),
+                          // ── Confirm ────────────────────────────────────
+                          InkWell(
+                            onTap:_confirm,
+                            child: Container(
+                              width: double.infinity,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                color: const Color(0xffFFE9E3),
+                              ),
+                              child: Center(
+                                child: Text('Confirm'.tr(context),
+                                    style: const TextStyle(fontSize: 15,
+                                        color: AppColors.primary,
+                                        fontWeight: FontWeight.w700)),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
+
+
                   const SizedBox(height: 100),
                 ]),
               ),
@@ -286,24 +314,28 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
       ]),
 
       // ── Add To Cart ──────────────────────────────────────────────
-      bottomNavigationBar: Padding(
-        padding: EdgeInsets.fromLTRB(
-            16, 8, 16, MediaQuery.of(context).padding.bottom + 12),
-        child: SizedBox(
-          height: 52,
-          child: ElevatedButton(
-            onPressed: c.isOutOfStock ? null : _addToCart,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: c.isOutOfStock ? const Color(0xFFCCCCCC) : AppColors.primary,
-              disabledBackgroundColor: const Color(0xFFCCCCCC),
-              foregroundColor: Colors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-            ),
-            child: Text(
-              c.isOutOfStock ? 'Out of Stock'.tr(context) : 'Add To Cart'.tr(context),
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+            border: Border(top: BorderSide(color: Colors.grey.shade200,width: 1.5)) ),
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+              16, 16, 16, MediaQuery.of(context).padding.bottom + 12),
+          child: SizedBox(
+            height: 48,
+            child: ElevatedButton(
+              onPressed: c.isOutOfStock ? null : _addToCart,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: c.isOutOfStock ? const Color(0xFFCCCCCC) : AppColors.primary,
+                disabledBackgroundColor: const Color(0xFFCCCCCC),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+              child: Text(
+                c.isOutOfStock ? 'Out of Stock'.tr(context) : 'Add To Cart'.tr(context),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
             ),
           ),
         ),
@@ -369,9 +401,9 @@ class _QtyBtn extends StatelessWidget {
     child: Container(
       width: 36, height: 36,
       decoration: BoxDecoration(
-        color: filled ? AppColors.primary : Colors.white,
-        shape: BoxShape.circle,
-        border: filled ? null : Border.all(color: const Color(0xFFDDDDDD)),
+        color: filled ? AppColors.primary : const Color(0xffFFE9E3),
+        borderRadius: BorderRadius.circular(8),
+       // border: filled ? null : Border.all(color: const Color(0xFFDDDDDD)),
       ),
       child: Icon(icon,
           size: 18,
