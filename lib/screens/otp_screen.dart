@@ -47,10 +47,6 @@ class _OtpScreenState extends State<OtpScreen> {
     setState(() {});
   }
 
-  // TEMP: fixed test OTP until a real SMS provider is integrated.
-  // Any signup/login flow is "verified" by entering 1234.
-  static const String _testOtp = '1234';
-
   Future<void> _confirm() async {
     if (!_complete || _loading) return;
     final mode = _args['mode'] as String? ?? 'signup';
@@ -79,11 +75,22 @@ class _OtpScreenState extends State<OtpScreen> {
       return;
     }
 
-    if (_code != _testOtp) {
-      setState(() => _hasError = true);
-      return;
+    // Verify OTP via backend API
+    final phone = _args['phone'] as String? ?? '';
+    setState(() { _loading = true; _hasError = false; });
+    try {
+      final res = await ApiService.verifyOtp(phone, _code);
+      if (!mounted) return;
+      if (res['success'] == true) {
+        Navigator.pushReplacementNamed(context, '/location');
+      } else {
+        setState(() => _hasError = true);
+      }
+    } catch (_) {
+      if (mounted) setState(() => _hasError = true);
+    } finally {
+      if (mounted) setState(() => _loading = false);
     }
-    Navigator.pushReplacementNamed(context, '/location');
   }
 
   void _resend() {
@@ -96,6 +103,9 @@ class _OtpScreenState extends State<OtpScreen> {
     if (mode == 'forgot') {
       final email = _args['email'] as String? ?? '';
       if (email.isNotEmpty) ApiService.forgotPassword(email);
+    } else {
+      final phone = _args['phone'] as String? ?? '';
+      if (phone.isNotEmpty) ApiService.sendOtp(phone);
     }
   }
 
@@ -202,26 +212,6 @@ class _OtpScreenState extends State<OtpScreen> {
                 Text('Invalid Verification Code.'.tr(context),
                     style: const TextStyle(color: Colors.red, fontSize: 12)),
               ],
-
-              // TEMP: testing hint until real SMS OTP is integrated (signup/login only).
-              if ((_args['mode'] as String? ?? 'signup') != 'forgot') ...[
-                const SizedBox(height: 6),
-                Text('Testing mode: enter 1234 to continue.'.tr(context),
-                    style: const TextStyle(color: AppColors.textLight, fontSize: 11, fontStyle: FontStyle.italic)),
-              ],
-
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  if (!_hasError)
-                    Row(children: [
-                      Text('Remaining '.tr(context), style: const TextStyle(fontSize: 12, color: AppColors.textMedium)),
-                      Text(
-                        '${(_seconds ~/ 60).toString().padLeft(2, '0')}:${(_seconds % 60).toString().padLeft(2, '0')} S',
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textDark),
-                      ),
-                    ])
                   else
                     const SizedBox(),
                   GestureDetector(
