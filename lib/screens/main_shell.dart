@@ -111,12 +111,12 @@ class _MainShellState extends State<MainShell> with TickerProviderStateMixin {
                               children: [
                                 SvgPicture.asset(
                                   item.asset,
-                                  width: 30, height: 30,
+                                  width: 35, height: 35,
                                   colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
                                 ),
                                 if (item.showBadge && cartCount > 0)
                                   Positioned(
-                                    top: -9, right: -12,
+                                    top: 1, right: -2,
                                     child: Container(
                                       width: 18, height: 18,
                                       decoration: const BoxDecoration(
@@ -136,12 +136,12 @@ class _MainShellState extends State<MainShell> with TickerProviderStateMixin {
                               ],
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 0),
                           AnimatedContainer(
                             duration: const Duration(milliseconds: 250),
                             curve: Curves.easeOut,
                             width: isActive ? 20 : 0,
-                            height: 3,
+                            height: 2,
                             decoration: BoxDecoration(
                               color: AppColors.primary,
                               borderRadius: BorderRadius.circular(2),
@@ -151,8 +151,8 @@ class _MainShellState extends State<MainShell> with TickerProviderStateMixin {
                           Text(
                             item.label.tr(context),
                             style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
+                              fontSize: 13,
+                              fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
                               color: color,
                             ),
                           ),

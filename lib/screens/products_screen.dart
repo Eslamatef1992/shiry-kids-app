@@ -85,12 +85,12 @@ class _ProductsScreenState extends State<ProductsScreen> {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
             child: Text(
               '${'All Categories'.tr(context)}(${_allProducts.length})',
-              style: const TextStyle(fontSize: 13, color: AppColors.textMedium),
+              style: const TextStyle(fontSize: 14, color: AppColors.textMedium,fontWeight: FontWeight.w600),
             ),
           ),
           const SizedBox(height: 8),
           SizedBox(
-            height: 72,
+            height: 84,
             child: ListView.separated(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               scrollDirection: Axis.horizontal,
@@ -104,7 +104,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                   child: Column(
                     children: [
                       Container(
-                        width: 52, height: 52,
+                        width: 60, height: 60,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
@@ -118,7 +118,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                                   imageUrl: cat.imageUrl,
                                   imagePath: cat.imagePath,
                                   emoji: cat.emoji,
-                                  size: 52,
+                                  size: 60,
                                   placeholderColor: isSelected ? AppColors.primary.withOpacity(0.08) : AppColors.white,
                                 )
                               : Container(
@@ -131,9 +131,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
                       Text(
                         cat.name.split(' ').first,
                         style: TextStyle(
-                          fontSize: 10,
+                          fontSize: 12,
                           color: isSelected ? AppColors.primary : AppColors.textMedium,
-                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
+                          fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
                         ),
                       ),
                     ],
@@ -290,13 +290,17 @@ class _ProductCard extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: onAddToCart,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFE9E3),
+                        backgroundColor: AppColors.primary,
                         foregroundColor: AppColors.primary,
                         elevation: 0,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         padding: EdgeInsets.zero,
                       ),
-                      child: Text('Add To Cart'.tr(context), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+                      child: Text('Add To Cart'.tr(context), style: const TextStyle(fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        color: Colors.white
+                      ),
+                      ),
                     ),
                   ),
                 ],

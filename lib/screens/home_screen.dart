@@ -247,7 +247,7 @@ class _BannerWidget extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(14),
           child: SizedBox(
-            height: 155,
+            height: 180,
             child: PageView.builder(
               controller: ctrl,
               onPageChanged: onChanged,
@@ -309,12 +309,13 @@ class _CategoriesRow extends StatelessWidget {
                   imageUrl: cat.imageUrl,
                   imagePath: cat.imagePath,
                   emoji: cat.emoji,
-                  size: 44,
+                  fit: BoxFit.fill,
+                  size: 50,
                 ),
               ),
               const SizedBox(width: 8),
               Text(cat.name,
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.primary)),
               const SizedBox(width: 8),
             ],
           ),
@@ -342,15 +343,15 @@ class _CouponsList extends StatelessWidget {
         final d = item.expiresAt.difference(DateTime.now());
         final countdown = '${d.inDays}d : ${d.inHours.remainder(24).toString().padLeft(2,"0")}h : ${d.inSeconds.remainder(60).toString().padLeft(2,"0")}s';
         return SizedBox(
-          width: 320,
+          width: 340,
           child: CouponTicketCard(
             imageUrl: item.imageUrl,
             brandImageUrl: item.brandImageUrl,
             brandName: item.brandName,
             title: item.title,
             countdown: countdown,
-            price: '${item.price.toStringAsFixed(3)} KD',
-            originalPrice: '${item.originalPrice.toStringAsFixed(3)} KD',
+            price: '${item.price} KD',
+            originalPrice: '${item.originalPrice} KD',
             discount: '-${item.discountPercent}%',
             isOutOfStock: item.isOutOfStock,
             onTap: () => Navigator.push(context, MaterialPageRoute(
@@ -462,12 +463,13 @@ class _ProductRow extends StatelessWidget {
                         child: Container(
                           width: double.infinity, height: 32,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFFE9E3),
+                            color: AppColors.primary,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Center(
                             child: Text('Add To Cart'.tr(context),
-                                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.primary)),
+                                style: const TextStyle(fontSize: 14,
+                                    fontWeight: FontWeight.w600, color: AppColors.white)),
                           ),
                         ),
                       ),

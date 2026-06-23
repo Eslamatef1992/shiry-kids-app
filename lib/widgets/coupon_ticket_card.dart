@@ -53,12 +53,6 @@ class CouponTicketCard extends StatelessWidget {
               child: Image.asset('assets/images/bg_ticket.png',
               fit:BoxFit.contain ,
               ),
-              /*ClipPath(
-                clipper: _TicketClipper(stubW: _stubW, notchR: _notchR),
-                child: CustomPaint(
-                  painter: _TicketPainter(stubW: _stubW, notchR: _notchR),
-                ),
-              ),*/
             ),
 
             // ── Content row ─────────────────────────────────────
@@ -87,8 +81,7 @@ class CouponTicketCard extends StatelessWidget {
                 ),
                  const SizedBox(width: 12,),
                 // Middle content
-                Expanded(
-                  child: Padding(
+                 Padding(
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -121,7 +114,7 @@ class CouponTicketCard extends StatelessWidget {
 
                         // Brand name
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 10, 10, 0),
+                          padding: const EdgeInsets.fromLTRB(0, 3, 10, 0),
                           child: Text(brandName,
                               style: const TextStyle(
                                   fontSize: 13, fontWeight: FontWeight.w800,
@@ -150,13 +143,14 @@ class CouponTicketCard extends StatelessWidget {
                         GestureDetector(
                           onTap: isOutOfStock ? null : onAddToCart,
                           child: Container(
-                            width: double.infinity,
+                            width: 100,
                             height: 30,
+                            margin: const EdgeInsets.only(right: 10,bottom: 5),
                             decoration: BoxDecoration(
                               borderRadius:  BorderRadius.circular(8),
                               color: isOutOfStock
-                                  ? const Color(0xFFEEEEEE)
-                                  : const Color(0xFFFFE9E3),
+                                  ? AppColors.white
+                                  : AppColors.primary,
                             ),
                             child: Center(
                               child: Text(
@@ -164,10 +158,10 @@ class CouponTicketCard extends StatelessWidget {
                                     ? 'Out of Stock'.tr(context)
                                     : 'Add To Cart'.tr(context),
                                 style: TextStyle(
-                                    fontSize: 14, fontWeight: FontWeight.w500,
+                                    fontSize: 14, fontWeight: FontWeight.w600,
                                     color: isOutOfStock
                                         ? AppColors.textLight
-                                        : AppColors.primary),
+                                        : Colors.white),
                               ),
                             ),
                           ),
@@ -175,8 +169,8 @@ class CouponTicketCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                ),
 
+                const SizedBox(width: 20,),
                 // Right stub
                 SizedBox(
                   width: _stubW,

@@ -6,7 +6,7 @@ class AppColors {
   AppColors._();
 
   // ── Brand / Accent ───────────────────────────────────────────
-  static const Color primary   = Color(0xFFFF383C); // Accents/Red
+  static const Color primary   = Color(0xffaa0036); // Accents/Red
   static const Color primaryLight = Color(0xFFFF6B6E);
   static const Color primaryDark  = Color(0xFFD42D30);
 

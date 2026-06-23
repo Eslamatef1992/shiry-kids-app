@@ -260,8 +260,10 @@ class _TotalRow extends StatelessWidget {
   Widget build(BuildContext context) => Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
-      Text(label.tr(context), style: const TextStyle(fontSize: 13, color: AppColors.textLight)),
-      Text(value, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600,
+      Text(label.tr(context), style: const TextStyle(fontSize: 13, color: AppColors.textLight,
+        fontWeight: FontWeight.w600,
+      )),
+      Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700,
           color: valueColor ?? AppColors.textDark)),
     ],
   );

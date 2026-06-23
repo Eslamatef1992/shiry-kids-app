@@ -76,18 +76,18 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
       body: Column(children: [
         // ── Breadcrumb ──────────────────────────────────────────
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
           child: Row(children: [
             GestureDetector(
               onTap: () => Navigator.pop(context),
               child: Text('Coupons'.tr(context),
-                  style: const TextStyle(fontSize: 12, color: AppColors.textMedium)),
+                  style: const TextStyle(fontSize: 12, color: AppColors.textMedium,fontWeight: FontWeight.w600)),
             ),
             const Text('  »  ',
                 style: TextStyle(fontSize: 12, color: AppColors.textMedium)),
             Text('Coupons Details'.tr(context),
-                style: const TextStyle(fontSize: 12, color: AppColors.textDark,
-                    fontWeight: FontWeight.w600)),
+                style: const TextStyle(fontSize: 14, color: AppColors.textDark,
+                    fontWeight: FontWeight.w700)),
           ]),
         ),
 
@@ -142,9 +142,9 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
                       indicatorSize: TabBarIndicatorSize.tab,
                       dividerColor: Colors.transparent,
                       labelStyle: const TextStyle(
-                          fontSize: 13, fontWeight: FontWeight.w700),
+                          fontSize: 13, fontWeight: FontWeight.w800),
                       unselectedLabelStyle:
-                          const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                          const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                       labelColor: AppColors.primary,
                       unselectedLabelColor: AppColors.textMedium,
                       tabs: [
@@ -160,8 +160,11 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
                       ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                           Text(description,
                               style: const TextStyle(
-                                  fontSize: 13, color: AppColors.textMedium,
-                                  height: 1.6)),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textMedium,
+                                  height: 1.6)
+                          ),
                           const SizedBox(height: 12),
                           // Countdown
                           _CountdownRow(expiresAt: c.expiresAt),
@@ -203,7 +206,7 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
                         children: [
                       Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         Text('Expire Date'.tr(context),
-                            style: const TextStyle(fontSize: 12, color: AppColors.textLight,fontWeight: FontWeight.w500,)),
+                            style: const TextStyle(fontSize: 12, color: AppColors.textLight,fontWeight: FontWeight.w600,)),
                         const SizedBox(height: 4),
                         Text(c.expiryDate,
                             style: const TextStyle(
@@ -213,7 +216,7 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
                       Container(width: 1, height: 36, color:Colors.white),
                       Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         Text('Coupons Left'.tr(context),
-                            style: const TextStyle(fontSize: 11, color: AppColors.textLight)),
+                            style: const TextStyle(fontSize: 11,fontWeight: FontWeight.w600,color: AppColors.textLight)),
                         const SizedBox(height: 4),
                         Text('${c.qrTotal > 0 ? c.qrAvailable : c.couponsLeft}',
                             style: const TextStyle(
