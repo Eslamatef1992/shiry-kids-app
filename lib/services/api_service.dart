@@ -328,4 +328,12 @@ class ApiService {
     }
     return res;
   }
+
+  // ── SMS OTP ───────────────────────────────────────────────────────────────
+  static Future<Map<String, dynamic>> sendOtp(String phone) async =>
+      _request('POST', '/auth/send-otp', body: {'phone': phone});
+
+  static Future<Map<String, dynamic>> verifyOtp(String phone, String code) async =>
+      _request('POST', '/auth/verify-otp', body: {'phone': phone, 'code': code});
+
 }
