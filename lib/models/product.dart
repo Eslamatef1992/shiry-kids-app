@@ -327,6 +327,32 @@ class ProductCategory {
   int get count => 0;
 }
 
+class CouponCategory {
+  final String id;
+  final String name;
+  final String nameAr;
+  final String slug;
+  final int sort;
+
+  const CouponCategory({
+    required this.id,
+    required this.name,
+    this.nameAr = '',
+    required this.slug,
+    this.sort = 0,
+  });
+
+  factory CouponCategory.fromJson(Map<String, dynamic> j) {
+    return CouponCategory(
+      id: j['id'].toString(),
+      name: j['name']?.toString() ?? '',
+      nameAr: j['name_ar']?.toString() ?? '',
+      slug: j['slug']?.toString() ?? '',
+      sort: int.tryParse(j['sort']?.toString() ?? '0') ?? 0,
+    );
+  }
+}
+
 class AppBanner {
   final String id;
   final String title;

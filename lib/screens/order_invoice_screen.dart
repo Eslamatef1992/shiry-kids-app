@@ -60,7 +60,7 @@ class _OrderInvoiceScreenState extends State<OrderInvoiceScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: WavyAppBar(title: 'My Profile', showBack: true),
+      appBar: const WavyAppBar(title: 'My Profile', showBack: true),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 32),
         children: [
@@ -200,7 +200,7 @@ class _OrderInvoiceScreenState extends State<OrderInvoiceScreen> {
                           SizedBox(width: 44, child: Text(i['color']?.toString() ?? '-',
                               textAlign: TextAlign.center,
                               style: const TextStyle(fontSize: 12, color: AppColors.textDark))),
-                          SizedBox(width: 54, child: Text('${price.toInt()} Kd',
+                          SizedBox(width: 54, child: Text('$price Kd',
                               textAlign: TextAlign.right,
                               style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textDark))),
                         ]),
@@ -224,13 +224,13 @@ class _OrderInvoiceScreenState extends State<OrderInvoiceScreen> {
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
             child: Column(
               children: [
-                _TotalRow(label: 'Subtotal',      value: '${subtotal.toInt()} Kw'),
+                _TotalRow(label: 'Subtotal',      value: '$subtotal Kw'),
                 const SizedBox(height: 10),
-                _TotalRow(label: 'Discount',      value: '0.00 Kw', valueColor: AppColors.primary),
+                const _TotalRow(label: 'Discount',      value: '0.00 Kw', valueColor: AppColors.primary),
                 const SizedBox(height: 10),
-                _TotalRow(label: 'Shipping Fees', value: '0.00 Kw'),
+                const _TotalRow(label: 'Shipping Fees', value: '0.00 Kw'),
                 const SizedBox(height: 10),
-                _TotalRow(label: 'Delivery Fees', value: '0.00 Kw'),
+                const _TotalRow(label: 'Delivery Fees', value: '0.00 Kw'),
                 const SizedBox(height: 14),
                 const Divider(height: 1, color: Color(0xFFF0F0F0)),
                 const SizedBox(height: 14),
@@ -239,7 +239,7 @@ class _OrderInvoiceScreenState extends State<OrderInvoiceScreen> {
                   children: [
                     Text('Total'.tr(context),
                         style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textDark)),
-                    Text('${order.total.toInt()} Kwd',
+                    Text('${order.total} Kwd',
                         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.primary)),
                   ],
                 ),

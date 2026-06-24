@@ -20,6 +20,7 @@ class CouponsScreen extends StatefulWidget {
 
 class _CouponsScreenState extends State<CouponsScreen> {
   List<CouponProduct> _allCoupons = [];
+  List<CouponCategory> _categories = [];
   String _selected = 'all';
   bool _loading = true;
   bool _error = false;
@@ -34,11 +35,21 @@ class _CouponsScreenState extends State<CouponsScreen> {
   Future<void> _loadCoupons() async {
     if (mounted) setState(() { _loading = true; _error = false; _errorMsg = null; });
     try {
-      final res = await ApiService.getCoupons();
+      final results = await Future.wait([
+        ApiService.getCoupons(),
+        ApiService.getCouponCategories(),
+      ]);
+      final couponsRes = results[0];
+      final categoriesRes = results[1];
       if (mounted) {
-        final list = (res['data'] as List?) ?? [];
+        final list = (couponsRes['data'] as List?) ?? [];
+        final categoryList = (categoriesRes['data'] as List?) ?? [];
         setState(() {
           _allCoupons = list.map((j) => CouponProduct.fromJson(j as Map<String, dynamic>)).toList();
+          _categories = categoryList
+              .map((j) => CouponCategory.fromJson(j as Map<String, dynamic>))
+              .toList()
+            ..sort((a, b) => a.sort.compareTo(b.sort));
           _loading = false;
         });
       }
@@ -70,29 +81,29 @@ class _CouponsScreenState extends State<CouponsScreen> {
         ),
 
         // ── Category chips ────────────────────────────────────────
-        SizedBox(
-          height: 44,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            children: [
-              _CategoryChip(
-                label: 'Birthday',
-                selected: _selected == 'birthday',
-                onTap: () => setState(() =>
-                    _selected = _selected == 'birthday' ? 'all' : 'birthday'),
-              ),
-              const SizedBox(width: 10),
-              _CategoryChip(
-                label: "Mother's Day",
-                selected: _selected == 'mothers_day',
-                onTap: () => setState(() =>
-                    _selected = _selected == 'mothers_day' ? 'all' : 'mothers_day'),
-              ),
-            ],
+        if (_categories.isNotEmpty)
+          SizedBox(
+            height: 44,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: _categories.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 10),
+              itemBuilder: (context, i) {
+                final cat = _categories[i];
+                final isAr = Localizations.maybeLocaleOf(context)?.languageCode == 'ar';
+                final label = isAr && cat.nameAr.isNotEmpty ? cat.nameAr : cat.name;
+                return _CategoryChip(
+                  label: label,
+                  slug: cat.slug,
+                  selected: _selected == cat.slug,
+                  onTap: () => setState(() =>
+                      _selected = _selected == cat.slug ? 'all' : cat.slug),
+                );
+              },
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
+        if (_categories.isNotEmpty) const SizedBox(height: 12),
 
         // ── Coupon list ───────────────────────────────────────────
         Expanded(
@@ -119,9 +130,19 @@ class _CouponsScreenState extends State<CouponsScreen> {
 
 class _CategoryChip extends StatelessWidget {
   final String label;
+  final String slug;
   final bool selected;
   final VoidCallback onTap;
-  const _CategoryChip({required this.label, required this.selected, required this.onTap});
+  const _CategoryChip({
+    required this.label, required this.slug, required this.selected, required this.onTap,
+  });
+
+  IconData get _icon {
+    final s = slug.toLowerCase();
+    if (s.contains('birthday')) return Icons.cake_outlined;
+    if (s.contains('mother')) return Icons.favorite_border;
+    return Icons.local_offer_outlined;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -143,13 +164,13 @@ class _CategoryChip extends StatelessWidget {
               color: selected ? AppColors.primary.withOpacity(0.15) : const Color(0xFFF0F0F0),
             ),
             child: Icon(
-              label == 'Birthday' ? Icons.cake_outlined : Icons.favorite_border,
+              _icon,
               size: 14,
               color: selected ? AppColors.primary : AppColors.textMedium,
             ),
           ),
           const SizedBox(width: 8),
-          Text(label.tr(context),
+          Text(label,
               style: TextStyle(
                   fontSize: 13, fontWeight: FontWeight.w600,
                   color: selected ? AppColors.primary : AppColors.textDark)),

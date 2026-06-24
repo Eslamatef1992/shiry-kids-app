@@ -216,7 +216,7 @@ class _CouponCard extends StatelessWidget {
                       fontSize: 14, fontWeight: FontWeight.w700, color: Colors.grey),
                 ),
                 const SizedBox(height: 4),
-                Text('${coupon.price.toInt()} Kd',
+                Text('${coupon.price} Kd',
                     style: const TextStyle(
                         fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.primary)),
               ],
