@@ -2,6 +2,10 @@ import 'package:flutter/foundation.dart';
 import '../models/product.dart';
 
 class CartProvider extends ChangeNotifier {
+  // A single checkout can only carry up to this many units of the same
+  // coupon — buying more requires a separate checkout.
+  static const int maxCouponQtyPerCheckout = 5;
+
   final List<CartCouponItem> _coupons = [];
   final List<CartItem> _products = [];
 
@@ -23,8 +27,10 @@ class CartProvider extends ChangeNotifier {
   void addCoupon(CartCouponItem item) {
     final idx = _coupons.indexWhere((c) => c.id == item.id);
     if (idx >= 0) {
-      _coupons[idx].quantity += item.quantity;
+      _coupons[idx].quantity =
+          (_coupons[idx].quantity + item.quantity).clamp(1, maxCouponQtyPerCheckout);
     } else {
+      item.quantity = item.quantity.clamp(1, maxCouponQtyPerCheckout);
       _coupons.add(item);
     }
     notifyListeners();
@@ -38,7 +44,10 @@ class CartProvider extends ChangeNotifier {
   void updateCouponQty(String id, int qty) {
     if (qty <= 0) { removeCoupon(id); return; }
     final idx = _coupons.indexWhere((c) => c.id == id);
-    if (idx >= 0) { _coupons[idx].quantity = qty; notifyListeners(); }
+    if (idx >= 0) {
+      _coupons[idx].quantity = qty.clamp(1, maxCouponQtyPerCheckout);
+      notifyListeners();
+    }
   }
 
   // ── Products ─────────────────────────────────────────────────────────────

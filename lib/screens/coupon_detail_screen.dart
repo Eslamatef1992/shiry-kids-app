@@ -201,8 +201,11 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
                             _QtyBtn(
                               icon: Icons.add,
                               onTap: () {
-                                final max = c.qrTotal > 0 ? c.qrAvailable : null;
-                                if (max == null || _qty < max) setState(() => _qty++);
+                                final stockMax = c.qrTotal > 0 ? c.qrAvailable : null;
+                                final max = stockMax == null
+                                    ? CartProvider.maxCouponQtyPerCheckout
+                                    : (stockMax < CartProvider.maxCouponQtyPerCheckout ? stockMax : CartProvider.maxCouponQtyPerCheckout);
+                                if (_qty < max) setState(() => _qty++);
                               },
                               filled: true,
                             ),

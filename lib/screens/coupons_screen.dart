@@ -65,7 +65,7 @@ class _CouponsScreenState extends State<CouponsScreen> {
             alignment: Alignment.centerLeft,
             child: Text('${'All Categories'.tr(context)}(${_allCoupons.length})',
                 style: const TextStyle(fontSize: 13, color: AppColors.textMedium,
-                    fontWeight: FontWeight.w500)),
+                    fontWeight: FontWeight.w600)),
           ),
         ),
 

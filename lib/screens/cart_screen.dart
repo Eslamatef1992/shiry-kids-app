@@ -314,7 +314,7 @@ class _CouponCartCard extends StatelessWidget {
                         fontSize: 18, fontWeight: FontWeight.w800,
                         color: AppColors.textDark)),
                 const Spacer(),
-                _QtyRow(qty: item.quantity, onQty: onQty),
+                _QtyRow(qty: item.quantity, onQty: onQty, maxQty: CartProvider.maxCouponQtyPerCheckout),
               ],
             ),
           ),
@@ -624,11 +624,13 @@ class _ColorDropdownOptions extends StatelessWidget {
 class _QtyRow extends StatelessWidget {
   final int qty;
   final ValueChanged<int> onQty;
-  const _QtyRow({required this.qty, required this.onQty});
+  final int? maxQty;
+  const _QtyRow({required this.qty, required this.onQty, this.maxQty});
 
   @override
   Widget build(BuildContext context) => Row(children: [
-    _QtyBtn(icon: Icons.add, onTap: () => onQty(qty + 1),isAdd: true,),
+    _QtyBtn(icon: Icons.add,isAdd: true,
+        onTap: maxQty == null || qty < maxQty! ? () => onQty(qty + 1) : null),
     Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14),
       child: Text('$qty', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textDark)),
