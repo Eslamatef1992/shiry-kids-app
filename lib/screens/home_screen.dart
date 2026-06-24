@@ -17,7 +17,8 @@ import '../l10n/app_strings.dart';
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final void Function(String categoryId)? onCategoryTap;
+  const HomeScreen({super.key, this.onCategoryTap});
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -118,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           if (_categories.isNotEmpty) ...[
                             _sectionTitle(context, 'Categories', null),
                             const SizedBox(height: 10),
-                            _CategoriesRow(categories: _categories),
+                            _CategoriesRow(categories: _categories, onCategoryTap: widget.onCategoryTap),
                             const SizedBox(height: 20),
                           ],
 
@@ -284,7 +285,8 @@ class _BannerWidget extends StatelessWidget {
 // ─── Categories Row ───────────────────────────────────────────────────────────
 class _CategoriesRow extends StatelessWidget {
   final List<ProductCategory> categories;
-  const _CategoriesRow({required this.categories});
+  final void Function(String categoryId)? onCategoryTap;
+  const _CategoriesRow({required this.categories, this.onCategoryTap});
 
   @override
   Widget build(BuildContext context) => SizedBox(
@@ -296,28 +298,31 @@ class _CategoriesRow extends StatelessWidget {
       separatorBuilder: (_, __) => const SizedBox(width: 10),
       itemBuilder: (_, i) {
         final cat = categories[i];
-        return Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFFFFE9E3),
-            borderRadius: BorderRadius.circular(28),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          child: Row(
-            children: [
-              ClipOval(
-                child: CategoryImage(
-                  imageUrl: cat.imageUrl,
-                  imagePath: cat.imagePath,
-                  emoji: cat.emoji,
-                  fit: BoxFit.fill,
-                  size: 50,
+        return GestureDetector(
+          onTap: () => onCategoryTap?.call(cat.id),
+          child: Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFE9E3),
+              borderRadius: BorderRadius.circular(28),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: Row(
+              children: [
+                ClipOval(
+                  child: CategoryImage(
+                    imageUrl: cat.imageUrl,
+                    imagePath: cat.imagePath,
+                    emoji: cat.emoji,
+                    fit: BoxFit.fill,
+                    size: 50,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Text(cat.name,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.primary)),
-              const SizedBox(width: 8),
-            ],
+                const SizedBox(width: 8),
+                Text(cat.name,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.primary)),
+                const SizedBox(width: 8),
+              ],
+            ),
           ),
         );
       },

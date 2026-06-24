@@ -11,7 +11,8 @@ import '../services/api_service.dart';
 import '../l10n/app_strings.dart';
 
 class ProductsScreen extends StatefulWidget {
-  const ProductsScreen({super.key});
+  final String? initialCategoryId;
+  const ProductsScreen({super.key, this.initialCategoryId});
   @override
   State<ProductsScreen> createState() => _ProductsScreenState();
 }
@@ -26,12 +27,28 @@ class _ProductsScreenState extends State<ProductsScreen> {
   bool _loading = true;
   bool _error = false;
   String? _errorMsg;
+  String? _pendingCategoryId;
 
   @override
   void initState() {
     super.initState();
+    _pendingCategoryId = widget.initialCategoryId;
     _loadData();
     _searchCtrl.addListener(() => setState(() {}));
+  }
+
+  @override
+  void didUpdateWidget(ProductsScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialCategoryId != null && widget.initialCategoryId != oldWidget.initialCategoryId) {
+      _selectCategoryById(widget.initialCategoryId);
+    }
+  }
+
+  void _selectCategoryById(String? categoryId) {
+    if (categoryId == null) return;
+    final idx = _categories.indexWhere((c) => c.id == categoryId);
+    if (idx != -1 && mounted) setState(() => _selectedCat = idx);
   }
 
   Future<void> _loadData() async {
@@ -48,6 +65,10 @@ class _ProductsScreenState extends State<ProductsScreen> {
           final prodData = prodRes['data'];
           final rows = prodData is Map ? (prodData['rows'] as List? ?? []) : (prodData as List? ?? []);
           _allProducts = rows.map((j) => Product.fromJson(j as Map<String, dynamic>)).toList();
+          if (_pendingCategoryId != null) {
+            final idx = _categories.indexWhere((c) => c.id == _pendingCategoryId);
+            if (idx != -1) _selectedCat = idx;
+          }
           _loading = false;
         });
       }

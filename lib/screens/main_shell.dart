@@ -19,6 +19,7 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> with TickerProviderStateMixin {
   int _selectedIndex = 0;
+  String? _pendingCategoryId;
   late List<AnimationController> _bounceCtrl;
   late List<Animation<double>> _bounceAnim;
 
@@ -50,12 +51,19 @@ class _MainShellState extends State<MainShell> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  final List<Widget> _screens = const [
-    HomeScreen(),
-    ProductsScreen(),
-    CouponsScreen(),
-    CartScreen(),
-    ProfileScreen(),
+  void _goToProductsCategory(String categoryId) {
+    setState(() {
+      _pendingCategoryId = categoryId;
+      _selectedIndex = 1;
+    });
+  }
+
+  List<Widget> get _screens => [
+    HomeScreen(onCategoryTap: _goToProductsCategory),
+    ProductsScreen(initialCategoryId: _pendingCategoryId),
+    const CouponsScreen(),
+    const CartScreen(),
+    const ProfileScreen(),
   ];
 
   static const _items = [
