@@ -3,29 +3,45 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
-
+import 'network_image.dart';
 
 class ShowImgDialog extends StatelessWidget {
-  const ShowImgDialog({super.key, required this.img, required this.isCoupon});
-  final String img ;
-  final bool  isCoupon ;
+  const ShowImgDialog({super.key, required this.images, required this.isCoupon});
+  final List<String> images;
+  final bool isCoupon;
 
-  Uint8List imageFromBase64String(String base64String) {
-    // حذف الجزء data:image/png;base64,
-    final String pureBase64 =
-        base64String.split(',').last;
 
-    return base64Decode(pureBase64);
-  }
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      child: Stack(
-        alignment: Alignment.topRight,
+      backgroundColor: Colors.white,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          isCoupon? Image.memory(imageFromBase64String(img)) : Image.network(img),
-          IconButton(icon: const Icon(Icons.close,size: 30,color: Colors.white,),
-          onPressed: ()=> Navigator.pop(context),
+          Padding(
+            padding: const EdgeInsets.only(top: 3,left: 10,right: 10),
+            child: IconButton(icon: const Icon(Icons.close,size: 30,color: Colors.black87,),
+              onPressed: ()=> Navigator.pop(context),
+            ),
+          ),
+          ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.7),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                alignment: WrapAlignment.center,
+                children: images.map((img) => ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: isCoupon
+                      ? Image.network('https://back.sherykids.com/$img', width: 150, height: 150, fit: BoxFit.contain)
+                      : smartImage(img, width: 150, height: 150, fit: BoxFit.contain),
+                )).toList(),
+              ),
+            ),
           ),
         ],
       ),

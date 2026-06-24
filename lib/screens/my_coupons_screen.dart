@@ -21,13 +21,14 @@ String _imgUrl(dynamic v) {
 // ── Model ─────────────────────────────────────────────────────────────────────
 
 class _UserCoupon {
-  final String name, imageUrl , qrCode;
+  final String name, imageUrl;
+  final List<String> qrImages;
   final double price;
   final int quantity;
   final bool used;
   const _UserCoupon({
     required this.name, required this.imageUrl, required this.price,
-    required this.quantity, required this.used, required this.qrCode,
+    required this.quantity, required this.used, required this.qrImages,
   });
 }
 
@@ -69,20 +70,23 @@ class _MyCouponsScreenState extends State<MyCouponsScreen> {
             .whereType<Map>()
             .map((e) => e.cast<String, dynamic>())
             .toList();
-           final qrCode = order['qr_code'];
         for (final item in items) {
           if (item['type'] != 'coupon') continue;
           final couponId = item['id'];
           final couponQrs = qrCodes.where((q) => q['coupon_id'] == couponId).toList();
           final used = couponQrs.isNotEmpty &&
               couponQrs.every((q) => q['status'] == 'used');
+          final qrImages = couponQrs
+              .map((q) => _imgUrl(q['image']))
+              .where((s) => s.isNotEmpty)
+              .toList();
           coupons.add(_UserCoupon(
             name: item['name']?.toString() ?? '',
             imageUrl: _imgUrl(item['image']),
             price: double.tryParse(item['price']?.toString() ?? '0') ?? 0,
             quantity: int.tryParse(item['quantity']?.toString() ?? '1') ?? 1,
             used: used,
-            qrCode: qrCode ,
+            qrImages: qrImages,
           ));
         }
       }
@@ -173,9 +177,9 @@ class _CouponCard extends StatelessWidget {
 
                   const Spacer(),
                   InkWell(
-                    onTap: (){
+                    onTap: coupon.qrImages.isEmpty ? null : () {
                       showDialog(context: context,
-                          builder:(context)=> ShowImgDialog(img: coupon.qrCode,isCoupon: true,),
+                          builder:(context)=> ShowImgDialog(images: coupon.qrImages, isCoupon: false),
                       );
                     },
                     child: Container(
