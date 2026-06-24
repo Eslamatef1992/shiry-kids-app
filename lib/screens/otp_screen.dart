@@ -212,6 +212,19 @@ class _OtpScreenState extends State<OtpScreen> {
                 Text('Invalid Verification Code.'.tr(context),
                     style: const TextStyle(color: Colors.red, fontSize: 12)),
               ],
+
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  if (!_hasError)
+                    Row(children: [
+                      Text('Remaining '.tr(context), style: const TextStyle(fontSize: 12, color: AppColors.textMedium)),
+                      Text(
+                        '\${(_seconds ~/ 60).toString().padLeft(2, '0')}:\${(_seconds % 60).toString().padLeft(2, '0')} S',
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textDark),
+                      ),
+                    ])
                   else
                     const SizedBox(),
                   GestureDetector(
