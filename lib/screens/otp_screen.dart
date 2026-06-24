@@ -221,7 +221,7 @@ class _OtpScreenState extends State<OtpScreen> {
                     Row(children: [
                       Text('Remaining '.tr(context), style: const TextStyle(fontSize: 12, color: AppColors.textMedium)),
                       Text(
-                        '\${(_seconds ~/ 60).toString().padLeft(2, '0')}:\${(_seconds % 60).toString().padLeft(2, '0')} S',
+                        '${(_seconds ~/ 60).toString().padLeft(2, '0')}:${(_seconds % 60).toString().padLeft(2, '0')} S',
                         style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textDark),
                       ),
                     ])
