@@ -10,6 +10,7 @@ import 'search_screen.dart';
 import 'coupon_detail_screen.dart';
 import '../services/api_service.dart';
 import 'product_detail_screen.dart';
+import 'see_all_screen.dart';
 import '../l10n/app_strings.dart';
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
@@ -84,6 +85,12 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() { _bannerCtrl.dispose(); super.dispose(); }
 
+  void _seeAll(BuildContext context, String title, List<Widget> items) {
+    Navigator.push(context, MaterialPageRoute(
+      builder: (_) => SeeAllScreen(title: title, items: items),
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -125,7 +132,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           // ── Featured Coupons ─────────────────────────────
                           if (_featuredCoupons.isNotEmpty) ...[
-                            _sectionTitle(context, 'Coupons', null),
+                            _sectionTitle(context, 'Coupons', () => _seeAll(
+                                context, 'Coupons',
+                                _featuredCoupons.map((c) => couponCard(context, c)).toList())),
                             const SizedBox(height: 10),
                             _CouponsList(coupons: _featuredCoupons),
                             const SizedBox(height: 20),
@@ -133,7 +142,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           // ── Best Sellers ────────────────────────────────
                           if (_featuredProducts.isNotEmpty) ...[
-                            _sectionTitle(context, 'Best Sellers', null),
+                            _sectionTitle(context, 'Best Sellers', () => _seeAll(
+                                context, 'Best Sellers',
+                                _featuredProducts.map((p) => productListCard(context, p)).toList())),
                             const SizedBox(height: 10),
                             _ProductRow(products: _featuredProducts),
                             const SizedBox(height: 20),
@@ -141,7 +152,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           // ── New Arrivals ────────────────────────────────
                           if (_newArrivals.isNotEmpty) ...[
-                            _sectionTitle(context, 'New Arrivals', null),
+                            _sectionTitle(context, 'New Arrivals', () => _seeAll(
+                                context, 'New Arrivals',
+                                _newArrivals.map((p) => productListCard(context, p)).toList())),
                             const SizedBox(height: 10),
                             _ProductRow(products: _newArrivals),
                             const SizedBox(height: 20),
@@ -149,7 +162,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           // ── Weekly Offers ────────────────────────────────
                           if (_weeklyOffers.isNotEmpty) ...[
-                            _sectionTitle(context, 'Weekly Offers', null),
+                            _sectionTitle(context, 'Weekly Offers', () => _seeAll(
+                                context, 'Weekly Offers',
+                                _weeklyOffers.map((p) => productListCard(context, p)).toList())),
                             const SizedBox(height: 10),
                             _ProductRow(products: _weeklyOffers),
                             const SizedBox(height: 36),
@@ -343,39 +358,43 @@ class _CouponsList extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       itemCount: coupons.length,
       separatorBuilder: (_, __) => const SizedBox(width: 14),
-      itemBuilder: (context, i) {
-        final item = coupons[i];
-        final d = item.expiresAt.difference(DateTime.now());
-        final countdown = '${d.inDays}d : ${d.inHours.remainder(24).toString().padLeft(2,"0")}h : ${d.inSeconds.remainder(60).toString().padLeft(2,"0")}s';
-        return SizedBox(
-          width: 340,
-          child: CouponTicketCard(
-            imageUrl: item.imageUrl,
-            brandImageUrl: item.brandImageUrl,
-            brandName: item.brandName,
-            title: item.title,
-            countdown: countdown,
-            price: '${item.price} KD',
-            originalPrice: '${item.originalPrice} KD',
-            discount: '-${item.discountPercent}%',
-            isOutOfStock: item.isOutOfStock,
-            onTap: () => Navigator.push(context, MaterialPageRoute(
-              builder: (_) => CouponDetailScreen(coupon: item),
-            )),
-            onAddToCart: () {
-              context.read<CartProvider>().addCoupon(item.toCartItem(quantity: 1));
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text('${item.title} ${'added to cart!'.tr(context)}'),
-                backgroundColor: AppColors.primary,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                duration: const Duration(seconds: 2),
-              ));
-            },
-          ),
-        );
-      },
+      itemBuilder: (context, i) => SizedBox(
+        width: 340,
+        child: couponCard(context, coupons[i]),
+      ),
     ),
+  );
+}
+
+// Builds a coupon ticket card wired to navigation/add-to-cart. Used both in
+// the home screen's horizontal row (wrapped with a fixed width) and in the
+// "See All" vertical list (full width).
+Widget couponCard(BuildContext context, CouponProduct item) {
+  final d = item.expiresAt.difference(DateTime.now());
+  final countdown = '${d.inDays}d : ${d.inHours.remainder(24).toString().padLeft(2,"0")}h : ${d.inSeconds.remainder(60).toString().padLeft(2,"0")}s';
+  return CouponTicketCard(
+    imageUrl: item.imageUrl,
+    brandImageUrl: item.brandImageUrl,
+    brandName: item.brandName,
+    title: item.title,
+    countdown: countdown,
+    price: '${item.price} KD',
+    originalPrice: '${item.originalPrice} KD',
+    discount: '-${item.discountPercent}%',
+    isOutOfStock: item.isOutOfStock,
+    onTap: () => Navigator.push(context, MaterialPageRoute(
+      builder: (_) => CouponDetailScreen(coupon: item),
+    )),
+    onAddToCart: () {
+      context.read<CartProvider>().addCoupon(item.toCartItem(quantity: 1));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('${item.title} ${'added to cart!'.tr(context)}'),
+        backgroundColor: AppColors.primary,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        duration: const Duration(seconds: 2),
+      ));
+    },
   );
 }
 
@@ -494,6 +513,108 @@ class _ProductRow extends StatelessWidget {
           ),
         );
       },
+    ),
+  );
+}
+
+// Full-width product card (image left, info right) used by the "See All"
+// vertical lists for Best Sellers / New Arrivals / Weekly Offers.
+Widget productListCard(BuildContext context, Product p) {
+  final catLabel = (p.category.isNotEmpty ? p.category : 'Product').tr(context);
+  return GestureDetector(
+    onTap: () => Navigator.push(context, MaterialPageRoute(
+      builder: (_) => ProductDetailScreen(product: p, categoryName: catLabel),
+    )),
+    child: Container(
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: const [BoxShadow(color: Color(0x0F000000), blurRadius: 8, offset: Offset(0, 4))],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Stack(children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.horizontal(left: Radius.circular(14)),
+              child: p.imageUrl.startsWith('http')
+                  ? Image.network(p.imageUrl, width: 120, height: 150, fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(width: 120, height: 150, color: const Color(0xFFF5F5F5), child: const Center(child: Text('🎁', style: TextStyle(fontSize: 32)))))
+                  : Image.asset(p.imageUrl, width: 120, height: 150, fit: BoxFit.cover),
+            ),
+            Positioned(
+              top: 8, left: 8,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFEDED),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(catLabel,
+                    style: const TextStyle(fontSize: 11,
+                        fontWeight: FontWeight.w700, color: AppColors.primary)),
+              ),
+            ),
+          ]),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(p.name, maxLines: 1, overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 17,
+                          fontWeight: FontWeight.w900, color: AppColors.textDark)),
+                  const SizedBox(height: 2),
+                  Text(p.description, maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 6),
+                  Row(children: [
+                    Text('${p.price.toInt()} Kwd',
+                        style: const TextStyle(fontSize: 14,
+                            fontWeight: FontWeight.w700, color: AppColors.primary)),
+                    const SizedBox(width: 5),
+                    Text('${p.originalPrice.toInt()} Kwd',
+                        style: const TextStyle(fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            decoration: TextDecoration.lineThrough)),
+                    const SizedBox(width: 3),
+                    Text('-${p.discountPercent} %',
+                        style: const TextStyle(fontSize: 14,
+                            color: AppColors.primary, fontWeight: FontWeight.w700)),
+                  ]),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: () {
+                      context.read<CartProvider>().addProduct(CartItem(product: p));
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text('${p.name} ${'added to cart!'.tr(context)}'),
+                        backgroundColor: AppColors.primary,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        duration: const Duration(seconds: 2),
+                      ));
+                    },
+                    child: Container(
+                      width: double.infinity, height: 32,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Center(
+                        child: Text('Add To Cart'.tr(context),
+                            style: const TextStyle(fontSize: 14,
+                                fontWeight: FontWeight.w600, color: AppColors.white)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     ),
   );
 }
