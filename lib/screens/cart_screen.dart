@@ -308,7 +308,7 @@ class _CouponCartCard extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(22,8,22,10),
             child: Row(
               children: [
-                Text('${item.price.toInt()} Kd',
+                Text('${item.price} Kd',
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                         fontSize: 18, fontWeight: FontWeight.w800,
@@ -514,7 +514,7 @@ class _ProductCartCard extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
           child: Row(children: [
-            Text('${p.price.toInt()} Kwd',
+            Text('${p.price} Kwd',
                 style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textDark)),
             const Spacer(),
             _QtyRow(qty: item.quantity, onQty: onQty),

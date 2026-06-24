@@ -348,7 +348,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   border: InputBorder.none,
                   isCollapsed: true,
                   hintText: 'Enter Coupon Discount'.tr(context),
-                  hintStyle: const TextStyle(fontSize: 13, color: AppColors.textLight),
+                  hintStyle: const TextStyle(fontSize: 14, color: AppColors.textMedium),
                 ),
                 style: const TextStyle(fontSize: 13, color: AppColors.textDark),
               ),
@@ -377,7 +377,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               child: _applyingCoupon
                   ? const SizedBox(width: 16, height: 16,
                       child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : Text('Submit'.tr(context), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white)),
+                  : Text('Submit'.tr(context), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white)),
             ),
           ),
         ]),
@@ -401,17 +401,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 100),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
-          // ── Shipping Details ──────────────────────────────────
-          _SectionLabel('Shipping Details'),
-          const SizedBox(height: 8),
-          _ShippingCard(
-            name: _name,
-            phone: _phone,
-            address: _address,
-            loading: _loadingProfile,
-            onTap: _pickLocation,
-          ),
-          const SizedBox(height: 18),
+          // ── Shipping Details (only when the cart has physical products) ──
+          if (widget.products.isNotEmpty) ...[
+            _SectionLabel('Shipping Details'),
+            const SizedBox(height: 8),
+            _ShippingCard(
+              name: _name,
+              phone: _phone,
+              address: _address,
+              loading: _loadingProfile,
+              onTap: _pickLocation,
+            ),
+            const SizedBox(height: 18),
+          ],
 
           // ── Cart Items ────────────────────────────────────────
           _SectionLabel('${'Cart Item'.tr(context)}($_totalQty)'),
@@ -551,7 +553,7 @@ class _SubLabel extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.only(bottom: 6),
     child: Text(text.tr(context),
-        style: const TextStyle(fontSize: 12, color: AppColors.textLight, fontWeight: FontWeight.w500)),
+        style: const TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.w600)),
   );
 }
 
@@ -632,12 +634,12 @@ class _ShippingCard extends StatelessWidget {
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               if (name != null && name!.isNotEmpty)
-                Text(name!, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textDark)),
+                Text(name!, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textDark)),
               Text(address!,
                   maxLines: 2, overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 12, color: AppColors.textMedium)),
+                  style: const TextStyle(fontSize: 14, color: AppColors.textMedium,fontWeight: FontWeight.w600)),
               if (phone != null && phone!.isNotEmpty)
-                Text(phone!, style: const TextStyle(fontSize: 12, color: AppColors.textMedium)),
+                Text(phone!, style: const TextStyle(fontSize: 12, color: Colors.black,fontWeight: FontWeight.w600)),
             ]),
           ),
           const Icon(Icons.chevron_right, color: AppColors.textMedium, size: 20),
@@ -688,13 +690,13 @@ class _CheckoutCouponCard extends StatelessWidget {
           ]),
           Row(children: [
             Flexible(
-              child: Text('${_safeInt(item.price)} Kd',
+              child: Text('${item.price} Kd',
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textDark)),
             ),
             const SizedBox(width: 6),
             Flexible(
-              child: Text('${_safeInt(item.originalPrice)} Kd',
+              child: Text('${item.originalPrice} Kd',
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 11, color: AppColors.textLight,
                       decoration: TextDecoration.lineThrough)),
@@ -742,7 +744,7 @@ class _CheckoutProductCard extends StatelessWidget {
                 style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textDark)),
             Text(catLabel,
                 style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w600)),
-            Text('${_safeInt(p.price)} Kwd',
+            Text('${p.price} Kwd',
                 style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textDark)),
             Text('${'Qty:'.tr(context)} ${item.quantity}',
                 style: const TextStyle(fontSize: 11, color: AppColors.textMedium)),
@@ -797,11 +799,11 @@ class _Row extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 5),
     child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-      Text(label.tr(context), style: const TextStyle(fontSize: 13, color: AppColors.textMedium)),
+      Text(label.tr(context), style: const TextStyle(fontSize: 14, color: AppColors.textMedium,fontWeight: FontWeight.w600)),
       Text(value, style: TextStyle(
         fontSize: 13,
         color: valueColor ?? AppColors.textDark,
-        fontWeight: valueBold ? FontWeight.w700 : FontWeight.w400,
+        fontWeight: valueBold ? FontWeight.w800 : FontWeight.w600,
       )),
     ]),
   );
