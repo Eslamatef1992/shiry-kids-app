@@ -180,8 +180,8 @@ class _CouponCard extends StatelessWidget {
       brandName: item.brandName,
       title: item.title,
       countdown: countdown,
-      price: '${item.price.toInt()} Kd',
-      originalPrice: '${item.originalPrice.toInt()} Kd',
+      price: '${item.price} Kd',
+      originalPrice: '${item.originalPrice} Kd',
       discount: '-${item.discountPercent}%',
       isOutOfStock: item.isOutOfStock,
       onTap: () => Navigator.push(

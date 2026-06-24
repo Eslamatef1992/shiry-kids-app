@@ -171,12 +171,12 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
                           const SizedBox(height: 10),
                           // Price
                           Row(children: [
-                            Text('${c.price.toInt()} Kd',
+                            Text('${c.price} Kd',
                                 style: const TextStyle(
                                     fontSize: 18, fontWeight: FontWeight.w800,
                                     color: AppColors.textDark)),
                             const SizedBox(width: 8),
-                            Text('${c.originalPrice.toInt()} Kd',
+                            Text('${c.originalPrice} Kd',
                                 style: const TextStyle(
                                     fontSize: 14, color: AppColors.primary,
                                     decoration: TextDecoration.lineThrough,
