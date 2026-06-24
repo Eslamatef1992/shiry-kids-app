@@ -95,7 +95,8 @@ class _MainShellState extends State<MainShell> with TickerProviderStateMixin {
                 children: order.map((i) {
                   final item = _items[i];
                   final isActive = _selectedIndex == i;
-                  final color = isActive ? AppColors.primary : const Color(0xFFAAAAAA);
+                  final color = isActive ? AppColors.primary :
+                   AppColors.textMedium;
 
                   return Expanded(
                     child: GestureDetector(
@@ -112,7 +113,8 @@ class _MainShellState extends State<MainShell> with TickerProviderStateMixin {
                                 SvgPicture.asset(
                                   item.asset,
                                   width: 35, height: 35,
-                                  colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+                                  colorFilter: ColorFilter.mode(
+                                      color, BlendMode.srcIn),
                                 ),
                                 if (item.showBadge && cartCount > 0)
                                   Positioned(
@@ -152,7 +154,8 @@ class _MainShellState extends State<MainShell> with TickerProviderStateMixin {
                             item.label.tr(context),
                             style: TextStyle(
                               fontSize: 13,
-                              fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                              fontWeight: isActive ? FontWeight.w800 :
+                              FontWeight.w600,
                               color: color,
                             ),
                           ),

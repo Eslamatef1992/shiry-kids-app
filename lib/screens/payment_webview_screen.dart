@@ -53,7 +53,7 @@ class _PaymentWebviewScreenState extends State<PaymentWebviewScreen> {
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 0,
-        title: Text('Pay Now'.tr(context)),
+        title: Text('Pay Now'.tr(context),style: const TextStyle(color: Colors.white),),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(false),

@@ -169,7 +169,7 @@ Widget _sectionTitle(BuildContext context, String title, VoidCallback? onSeeAll)
   child: Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
-      Text(title.tr(context), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textDark)),
+      Text(title.tr(context), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.textDark)),
       if (onSeeAll != null)
         GestureDetector(
           onTap: onSeeAll,
@@ -247,7 +247,7 @@ class _BannerWidget extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(14),
           child: SizedBox(
-            height: 180,
+            height: 200,
             child: PageView.builder(
               controller: ctrl,
               onPageChanged: onChanged,
@@ -315,7 +315,7 @@ class _CategoriesRow extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(cat.name,
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.primary)),
               const SizedBox(width: 8),
             ],
           ),
@@ -381,7 +381,7 @@ class _ProductRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-    height: 260,
+    height: 292,
     child: ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 5),
       scrollDirection: Axis.horizontal,
@@ -395,7 +395,7 @@ class _ProductRow extends StatelessWidget {
             builder: (_) => ProductDetailScreen(product: p, categoryName: catLabel),
           )),
           child: Container(
-            width: 162,
+            width: 200,
             decoration: BoxDecoration(
               color: AppColors.white,
               borderRadius: BorderRadius.circular(14),
@@ -409,9 +409,9 @@ class _ProductRow extends StatelessWidget {
                   ClipRRect(
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
                     child: p.imageUrl.startsWith('http')
-                        ? Image.network(p.imageUrl, width: 162, height: 130, fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(width: 162, height: 130, color: const Color(0xFFF5F5F5), child: const Center(child: Text('🎁', style: TextStyle(fontSize: 40)))))
-                        : Image.asset(p.imageUrl, width: 162, height: 130, fit: BoxFit.cover),
+                        ? Image.network(p.imageUrl, width: 200, height: 140, fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Container(width: 200, height: 130, color: const Color(0xFFF5F5F5), child: const Center(child: Text('🎁', style: TextStyle(fontSize: 40)))))
+                        : Image.asset(p.imageUrl, width: 200, height: 130, fit: BoxFit.cover),
                   ),
                   Positioned(
                     top: 8, left: 8,
@@ -422,7 +422,8 @@ class _ProductRow extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(catLabel,
-                          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                          style: const TextStyle(fontSize: 12,
+                              fontWeight: FontWeight.w700, color: AppColors.primary)),
                     ),
                   ),
                 ]),
@@ -432,21 +433,28 @@ class _ProductRow extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(p.name, maxLines: 1, overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.textDark)),
+                          style: const TextStyle(fontSize: 18,
+                              fontWeight: FontWeight.w900, color: AppColors.textDark)),
                       const SizedBox(height: 2),
-                      Text(p.description, maxLines: 1, overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 11, color: AppColors.textMedium,fontWeight: FontWeight.w700,)),
+                      Text(p.description, maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 13,
+                            fontWeight: FontWeight.w700,)),
                       const SizedBox(height: 6),
                       Row(children: [
                         Text('${p.price.toInt()} Kwd',
-                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                            style: const TextStyle(fontSize: 14,
+                                fontWeight: FontWeight.w700, color: AppColors.primary)),
                         const SizedBox(width: 5),
                         Text('${p.originalPrice.toInt()} Kwd',
-                            style: const TextStyle(fontSize: 13,fontWeight: FontWeight.w500, color: AppColors.textLight,
-                                 decorationColor: AppColors.textLight)),
+                            style: const TextStyle(fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              decoration: TextDecoration.lineThrough
+                                 )),
                         const SizedBox(width: 3),
                         Text('-${p.discountPercent} %',
-                            style: const TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.w600)),
+                            style: const TextStyle(fontSize: 14,
+                                color: AppColors.primary, fontWeight: FontWeight.w700)),
                       ]),
                       const SizedBox(height: 8),
                       GestureDetector(

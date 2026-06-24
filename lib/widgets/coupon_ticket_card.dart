@@ -117,7 +117,7 @@ class CouponTicketCard extends StatelessWidget {
                           padding: const EdgeInsets.fromLTRB(0, 3, 10, 0),
                           child: Text(brandName,
                               style: const TextStyle(
-                                  fontSize: 13, fontWeight: FontWeight.w800,
+                                  fontSize: 14, fontWeight: FontWeight.w900,
                                   color: Color(0xFFE73C00))),
                         ),
                         // Title
@@ -127,7 +127,7 @@ class CouponTicketCard extends StatelessWidget {
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
-                                  fontSize: 12, fontWeight: FontWeight.w600,
+                                  fontSize: 13, fontWeight: FontWeight.w600,
                                   color: AppColors.textDark, height: 1.35)),
                         ),
                         // Countdown
@@ -137,7 +137,8 @@ class CouponTicketCard extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
-                                  fontSize: 10, color: AppColors.textLight)),
+                                fontWeight: FontWeight.w600,
+                                  fontSize: 10, color: AppColors.textMedium)),
                         ),
                         // Pink bottom — Add To Cart button (or Out of Stock)
                         GestureDetector(
@@ -177,6 +178,7 @@ class CouponTicketCard extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      const SizedBox(height: 20),
                       // Discount badge
                       Container(
                         margin: const EdgeInsets.symmetric(horizontal: 6),
@@ -189,7 +191,7 @@ class CouponTicketCard extends StatelessWidget {
                         child: Text(discount,
                             textAlign: TextAlign.center,
                             style: const TextStyle(
-                                fontSize: 11, fontWeight: FontWeight.w800,
+                                fontSize: 12, fontWeight: FontWeight.w800,
                                 color: AppColors.primary)),
                       ),
                       const SizedBox(height: 10),
@@ -197,7 +199,7 @@ class CouponTicketCard extends StatelessWidget {
                       Text(price,
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w900,
+                              fontSize: 17, fontWeight: FontWeight.w900,
                               color: AppColors.primary,
                               letterSpacing: 0.2)),
                       const SizedBox(height: 2),
@@ -205,9 +207,10 @@ class CouponTicketCard extends StatelessWidget {
                       Text(originalPrice,
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                              fontSize: 10, color: AppColors.textLight,
+                              fontSize: 12, color: AppColors.textMedium,
+                              fontWeight: FontWeight.w500,
                               decoration: TextDecoration.lineThrough,
-                              decorationColor: AppColors.textLight)),
+                              decorationColor: AppColors.textMedium)),
                     ],
                   ),
                 ),

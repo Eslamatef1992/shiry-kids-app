@@ -266,6 +266,7 @@ class _CouponCartCard extends StatelessWidget {
                   ],
                 ),
               ),
+              // delete
               GestureDetector(
                 onTap: onDelete,
                 child: Container(
@@ -284,8 +285,9 @@ class _CouponCartCard extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 4,),
           // Coupon count
-          Container(
+         /* Container(
             margin: const EdgeInsets.fromLTRB(20, 8, 20, 8),
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 2,horizontal: 0),
@@ -299,8 +301,8 @@ class _CouponCartCard extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                       fontSize: 12, color: AppColors.textLight)),
             ),
-          ),
-          const Divider(height: 2, color: Colors.white,thickness: 2,),
+          ),*/
+          const Divider(height: 4, color: Colors.white,thickness: 4,),
           // price + quantity
           Padding(
             padding: const EdgeInsets.fromLTRB(22,8,22,10),
@@ -412,6 +414,7 @@ class _ProductCartCard extends StatelessWidget {
               ]),
             ),
           ),
+                 // delete
           GestureDetector(
             onTap: onDelete,
             child: Container(
@@ -498,7 +501,7 @@ class _ProductCartCard extends StatelessWidget {
                   color: Colors.white
               ),
               child: Center(
-                child: Text('${'Number Of Item'.tr(context)}: ${item.quantity}',
+                child: Text('${'Number Of Item'.tr(context)}: ${item.product.stock}',
                     style: const TextStyle(fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textLight)),

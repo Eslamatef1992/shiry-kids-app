@@ -138,8 +138,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               ? 'Lorem Ipsum Dolor Sit Amet, Consectetur Adipiscing Elit, Sed Do Eiusmod Tempor Incididunt Ut Labore Et Dolore Magna Aliqua. Ut Enim Ad Minim Veniam, Quis Nostrud Exercitation Ullamco Laboris Nisi Ut Aliquip Ex Ea Commodo Consequat.'
                               : product.description,
                           style: const TextStyle(
-                            fontSize: 13,
-                            color: AppColors.textMedium,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
                             height: 1.6,
                           ),
                         ),

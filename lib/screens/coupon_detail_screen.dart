@@ -112,7 +112,7 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
                   Row(children: [
                     ClipOval(
                       child: smartImage(c.brandImageUrl,
-                          width: 32, height: 32, fit: BoxFit.cover,
+                          width: 35, height: 35, fit: BoxFit.cover,
                           placeholder: Container(
                               color: AppColors.primary.withOpacity(0.1),
                               child: const Icon(Icons.storefront_outlined,
@@ -121,110 +121,33 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
                     const SizedBox(width: 10),
                     Text(c.brandName,
                         style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w700,
+                            fontSize: 18, fontWeight: FontWeight.w700,
                             color: AppColors.primary)),
                   ]),
                   const SizedBox(height: 14),
+                  // Price
+                  Row(children: [
+                    Text('${c.price} Kd',
+                        style: const TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.w800,
+                            color: AppColors.textDark)),
+                    const SizedBox(width: 8),
+                    Text('${c.originalPrice} Kd',
+                        style: const TextStyle(
+                            fontSize: 18, color: AppColors.primary,
+                            decoration: TextDecoration.lineThrough,
+                            decorationColor: AppColors.primary)),
+                    const SizedBox(width: 8),
+                    Text('-${c.discountPercent}%',
+                        style: const TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.w700,
+                            color: AppColors.primary)),
+                  ]),
+                  const SizedBox(height: 10),
+                  // Countdown
+                  _CountdownRow(expiresAt: c.expiresAt),
 
-                  // ── Tabs ──
-                  Container(
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF5F5F5),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: TabBar(
-                      controller: _tabs,
-                      indicator: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      indicatorSize: TabBarIndicatorSize.tab,
-                      dividerColor: Colors.transparent,
-                      labelStyle: const TextStyle(
-                          fontSize: 13, fontWeight: FontWeight.w800),
-                      unselectedLabelStyle:
-                          const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-                      labelColor: AppColors.primary,
-                      unselectedLabelColor: AppColors.textMedium,
-                      tabs: [
-                        Tab(text: 'Description'.tr(context)),
-                        Tab(text: 'Terms & Conditions'.tr(context)),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 14),
 
-                  // ── Tab content ──
-                  _tabs.index == 0
-                      ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          Text(description,
-                              style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.textMedium,
-                                  height: 1.6)
-                          ),
-                          const SizedBox(height: 12),
-                          // Countdown
-                          _CountdownRow(expiresAt: c.expiresAt),
-                          const SizedBox(height: 10),
-                          // Price
-                          Row(children: [
-                            Text('${c.price} Kd',
-                                style: const TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.w800,
-                                    color: AppColors.textDark)),
-                            const SizedBox(width: 8),
-                            Text('${c.originalPrice} Kd',
-                                style: const TextStyle(
-                                    fontSize: 14, color: AppColors.primary,
-                                    decoration: TextDecoration.lineThrough,
-                                    decorationColor: AppColors.primary)),
-                            const SizedBox(width: 6),
-                            Text('-${c.discountPercent}%',
-                                style: const TextStyle(
-                                    fontSize: 14, fontWeight: FontWeight.w700,
-                                    color: AppColors.primary)),
-                          ]),
-                        ])
-                      : Text(terms,
-                          style: const TextStyle(
-                              fontSize: 13, color: AppColors.textMedium, height: 1.7)),
-
-                  const SizedBox(height: 18),
-
-                  // ── Expire / Coupons left ──────────────────────
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF8F8F8),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text('Expire Date'.tr(context),
-                            style: const TextStyle(fontSize: 12, color: AppColors.textLight,fontWeight: FontWeight.w600,)),
-                        const SizedBox(height: 4),
-                        Text(c.expiryDate,
-                            style: const TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.w700,
-                                color: AppColors.textDark)),
-                      ]),
-                      Container(width: 1, height: 36, color:Colors.white),
-                      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text('Coupons Left'.tr(context),
-                            style: const TextStyle(fontSize: 11,fontWeight: FontWeight.w600,color: AppColors.textLight)),
-                        const SizedBox(height: 4),
-                        Text('${c.qrTotal > 0 ? c.qrAvailable : c.couponsLeft}',
-                            style: const TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.w700,
-                                color: AppColors.textDark)),
-                      ]),
-                    ]),
-                  ),
                   const SizedBox(height: 32),
 
                   // ── Quantity picker ────────────────────────────
@@ -248,7 +171,7 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
                         children: [
                           Text('Number Of Cpouons You Want:'.tr(context),
                               style: const TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.w700,
+                                  fontSize: 16, fontWeight: FontWeight.w700,
                                   color: AppColors.textDark)),
                           const SizedBox(height: 14),
                           Row(children: [
@@ -263,8 +186,8 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
                                 height: 48,
                                 padding: const EdgeInsets.symmetric(vertical: 10),
                                 decoration:  BoxDecoration(
-                                  color: const Color(0xffF8F8F8),
-                                  borderRadius: BorderRadius.circular(8)
+                                    color: const Color(0xffF8F8F8),
+                                    borderRadius: BorderRadius.circular(8)
                                 ),
                                 child: Center(
                                   child: Text('$_qty',
@@ -292,7 +215,7 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
                               width: double.infinity,
                               height: 40,
                               decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(10),
                                 color: const Color(0xffFFE9E3),
                               ),
                               child: Center(
@@ -306,6 +229,103 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
                         ],
                       ),
                     ),
+                  const SizedBox(height: 14),
+                  ElevatedButton(
+                    onPressed: c.isOutOfStock ? null : _addToCart,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: c.isOutOfStock ? const Color(0xFFCCCCCC) : AppColors.primary,
+                      disabledBackgroundColor: const Color(0xFFCCCCCC),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text(
+                      c.isOutOfStock ? 'Out of Stock'.tr(context) : 'Add To Cart'.tr(context),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // ── Tabs ──
+                  Container(
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF5F5F5),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: TabBar(
+                      controller: _tabs,
+                      indicator: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      dividerColor: Colors.transparent,
+                      labelStyle: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w800),
+                      unselectedLabelStyle:
+                          const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                      labelColor: AppColors.primary,
+                      //unselectedLabelColor: AppColors.textMedium,
+                      tabs: [
+                        Tab(text: 'Description'.tr(context)),
+                        Tab(text: 'Terms & Conditions'.tr(context)),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+                  // ── Tab content ──
+                  _tabs.index == 0
+                      ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Text(description,
+                              style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  height: 1.3)
+                          ),
+                        ])
+                      : Text(terms,
+                          style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              height: 1.3)),
+
+                  const SizedBox(height: 18),
+
+                  // ── Expire / Coupons left ──────────────────────
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8F8F8),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Text('Expire Date'.tr(context),
+                            style: const TextStyle(fontSize: 14, color: AppColors.textMedium,
+                              fontWeight: FontWeight.w700,)),
+                        const SizedBox(height: 4),
+                        Text(c.expiryDate,
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.w700,
+                                color: AppColors.textDark)),
+                      ]),
+                      /*Container(width: 1, height: 36, color:Colors.white),
+                      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            Text('Coupons Left'.tr(context),
+                                style: const TextStyle(fontSize: 11,fontWeight: FontWeight.w600,color: AppColors.textLight)),
+                            const SizedBox(height: 4),
+                            Text('${c.qrTotal > 0 ? c.qrAvailable : c.couponsLeft}',
+                                style: const TextStyle(
+                                    fontSize: 14, fontWeight: FontWeight.w700,
+                                    color: AppColors.textDark)),
+                          ]),*/
+                    ]),
+                  ),
+
 
 
                   const SizedBox(height: 100),
@@ -317,7 +337,7 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
       ]),
 
       // ── Add To Cart ──────────────────────────────────────────────
-      bottomNavigationBar: Container(
+      /*bottomNavigationBar: Container(
         decoration: BoxDecoration(
             border: Border(top: BorderSide(color: Colors.grey.shade200,width: 1.5)) ),
         child: Padding(
@@ -342,7 +362,7 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
             ),
           ),
         ),
-      ),
+      ),*/
     );
   }
 }
