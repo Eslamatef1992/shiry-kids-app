@@ -105,15 +105,15 @@ class PaymentSuccessScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          Wrap(
-                            spacing: 12,
-                            runSpacing: 12,
-                            alignment: WrapAlignment.center,
-                            children: couponQrImages.map((url) => ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: smartImage(url, width: 130, height: 130, fit: BoxFit.contain),
-                            )).toList(),
-                          ),
+                          ...couponQrImages.map((url) => Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: Image.network(
+                              'https://back.sherykids.com$url',
+                              width: 180,
+                              height: 180,
+                              fit: BoxFit.contain,
+                            ),
+                          ))
                         ],
                       )
                     else if (hasCoupons)

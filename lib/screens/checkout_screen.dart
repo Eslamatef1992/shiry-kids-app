@@ -254,12 +254,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         // Real per-unit QR codes uploaded by the admin for any purchased
         // coupons (assigned in upload order). Fall back to the generated
         // order QR if none were assigned.
-        final couponQrCodes = (order['coupon_qr_codes'] as List?) ?? [];
+        /*final couponQrCodes = (order['coupon_qr_codes'] as List?) ?? [];
         final couponQrImages = couponQrCodes
             .map((c) => (c as Map)['image']?.toString())
             .whereType<String>()
             .where((s) => s.isNotEmpty)
             .map((s) => s.startsWith('http') ? s : 'https://back.sherykids.com$s')
+            .toList();*/
+        final qrUrls = (order['coupon_qr_codes'] as List? ?? [])
+            .map((q) => q['image'].toString())
+            .where((img) => img.isNotEmpty)
             .toList();
 
         context.read<CartProvider>().clear();
@@ -271,7 +275,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             discount: discount,
             shippingFees: shipping,
             deliveryFees: delivery,
-            couponQrImages: couponQrImages,
+            couponQrImages: qrUrls,
             hasCoupons: widget.hasCoupons,
           ),
         ));
