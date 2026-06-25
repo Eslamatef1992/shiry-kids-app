@@ -166,6 +166,7 @@ class CartCouponItem {
   final String brandImageUrl;
   final String imageUrl;
   final int couponCount;
+  final int qrCodeAvailable;
   final double price;
   final double originalPrice;
   final String discount;
@@ -174,7 +175,7 @@ class CartCouponItem {
     required this.id, required this.title, required this.brandName,
     required this.brandImageUrl, required this.imageUrl,
     required this.couponCount, required this.price, required this.originalPrice,
-    required this.discount, this.quantity = 1,
+    required this.discount, this.quantity = 1, required this.qrCodeAvailable,
   });
   double get total => price * quantity;
 }
@@ -294,6 +295,7 @@ class CouponProduct {
         originalPrice: originalPrice,
         discount: '-${discountPercent}%',
         quantity: quantity,
+      qrCodeAvailable: qrAvailable,
       );
 }
 
