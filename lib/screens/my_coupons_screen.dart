@@ -26,9 +26,11 @@ class _UserCoupon {
   final double price;
   final int quantity;
   final bool used;
+  final String paymentStatus;
   const _UserCoupon({
     required this.name, required this.imageUrl, required this.price,
     required this.quantity, required this.used, required this.qrImages,
+    required this.paymentStatus,
   });
 }
 
@@ -80,6 +82,7 @@ class _MyCouponsScreenState extends State<MyCouponsScreen> {
               .map((q) => _imgUrl(q['image']))
               .where((s) => s.isNotEmpty)
               .toList();
+          if (order['payment_status'] != 'paid') continue;
           coupons.add(_UserCoupon(
             name: item['name']?.toString() ?? '',
             imageUrl: _imgUrl(item['image']),
@@ -87,6 +90,7 @@ class _MyCouponsScreenState extends State<MyCouponsScreen> {
             quantity: int.tryParse(item['quantity']?.toString() ?? '1') ?? 1,
             used: used,
             qrImages: qrImages,
+            paymentStatus: order['payment_status'],
           ));
         }
       }
