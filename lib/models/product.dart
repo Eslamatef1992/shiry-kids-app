@@ -242,7 +242,7 @@ class CouponProduct {
 
   /// Coupon is sold out only if it uses the per-unit QR system (qrTotal > 0)
   /// and all uploaded QR codes have already been assigned/used.
-  bool get isOutOfStock => qrTotal > 0 && qrAvailable <= 0;
+  bool get isOutOfStock =>  qrAvailable == 0;
 
   factory CouponProduct.fromJson(Map<String, dynamic> j) {
     final expiry = j['expiry_date'] != null

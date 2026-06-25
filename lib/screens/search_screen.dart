@@ -4,7 +4,30 @@ import '../theme/app_colors.dart';
 import '../models/product.dart';
 import '../services/api_service.dart';
 import '../l10n/app_strings.dart';
+import 'coupon_detail_screen.dart';
 import 'product_detail_screen.dart';
+
+class SearchItem {
+  final String type;
+  final dynamic data;
+
+  SearchItem({
+    required this.type,
+    required this.data,
+  });
+}
+
+class SearchSuggestion {
+  final String title;
+  final String type;
+  final dynamic data;
+
+  SearchSuggestion({
+    required this.title,
+    required this.type,
+    required this.data,
+  });
+}
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -14,8 +37,8 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   final _ctrl = TextEditingController();
-  List<Product> _results = [];
-  List<String> _suggestions = [];
+  List<SearchItem> _results = [];
+  List<SearchSuggestion> _suggestions = [];
   bool _loading = false;
   bool _searched = false;
   Timer? _debounce;
@@ -46,48 +69,184 @@ class _SearchScreenState extends State<SearchScreen> {
         ApiService.searchCoupons(q, limit: 5),
       ]);
 
-      final names = <String>{};
+      final suggestions = <SearchSuggestion>[];
 
       final productsRes = results[0];
+
       if (productsRes['success'] == true) {
         final data = productsRes['data'];
         final list = data is List ? data : [];
-        for (final j in list) {
-          final name = (j as Map)['name']?.toString();
-          if (name != null && name.isNotEmpty) names.add(name);
+
+        for (final item in list) {
+          final product =
+          Product.fromJson(item as Map<String, dynamic>);
+
+          suggestions.add(
+            SearchSuggestion(
+              title: product.name,
+              type: 'product',
+              data: product,
+            ),
+          );
         }
       }
 
       final couponsRes = results[1];
+
       if (couponsRes['success'] == true) {
         final data = couponsRes['data'];
         final list = data is List ? data : [];
-        for (final j in list) {
-          final title = (j as Map)['title']?.toString();
-          if (title != null && title.isNotEmpty) names.add(title);
+
+        for (final item in list) {
+          final coupon =
+          CouponProduct.fromJson(item as Map<String, dynamic>);
+
+          suggestions.add(
+            SearchSuggestion(
+              title: coupon.title,
+              type: 'coupon',
+              data: coupon,
+            ),
+          );
         }
       }
 
       if (mounted && _ctrl.text.trim() == q) {
-        setState(() => _suggestions = names.take(8).toList());
+        setState(() {
+          _suggestions = suggestions.take(10).toList();
+        });
       }
     } catch (_) {}
   }
 
   Future<void> _search(String q) async {
-    if (q.trim().isEmpty) { setState(() { _results = []; _searched = false; }); return; }
-    setState(() { _loading = true; _searched = true; _suggestions = []; });
+    if (q.trim().isEmpty) {
+      setState(() {
+        _results = [];
+        _searched = false;
+      });
+      return;
+    }
+
+    setState(() {
+      _loading = true;
+      _searched = true;
+      _suggestions = [];
+    });
+
     try {
-      final res = await ApiService.search(q.trim());
-      if (res['success'] == true) {
-        final data = res['data'];
+      final responses = await Future.wait([
+        ApiService.search(q.trim()),
+        ApiService.searchCoupons(q.trim()),
+      ]);
+
+      final List<SearchItem> items = [];
+
+      final productsRes = responses[0];
+
+      if (productsRes['success'] == true) {
+        final data = productsRes['data'];
+
         final list = data is List
             ? data
             : (data is Map ? (data['rows'] as List? ?? []) : []);
-        setState(() => _results = list.map((j) => Product.fromJson(j as Map<String, dynamic>)).toList());
+
+        items.addAll(
+          list.map(
+                (e) => SearchItem(
+              type: 'product',
+              data: Product.fromJson(
+                e as Map<String, dynamic>,
+              ),
+            ),
+          ),
+        );
       }
-    } catch (_) {} finally {
-      if (mounted) setState(() => _loading = false);
+
+      final couponsRes = responses[1];
+
+      if (couponsRes['success'] == true) {
+        final data = couponsRes['data'];
+
+        final list = data is List
+            ? data
+            : (data is Map ? (data['rows'] as List? ?? []) : []);
+
+        items.addAll(
+          list.map(
+                (e) => SearchItem(
+              type: 'coupon',
+              data: CouponProduct.fromJson(
+                e as Map<String, dynamic>,
+              ),
+            ),
+          ),
+        );
+      }
+
+      setState(() {
+        _results = items;
+      });
+    } catch (_) {
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
+    }
+  }
+  void _openSuggestion(SearchSuggestion item) {
+    if (item.type == 'product') {
+      final product = item.data as Product;
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ProductDetailScreen(
+            product: product,
+            categoryName: product.category,
+          ),
+        ),
+      );
+    } else {
+      final coupon = item.data as CouponProduct;
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => CouponDetailScreen(
+            coupon: coupon,
+          ),
+        ),
+      );
+    }
+  }
+
+  void _openResult(SearchItem item) {
+    if (item.type == 'product') {
+      final product = item.data as Product;
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ProductDetailScreen(
+            product: product,
+            categoryName: product.category,
+          ),
+        ),
+      );
+    } else {
+      final coupon = item.data as CouponProduct;
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => CouponDetailScreen(
+            coupon: coupon,
+          ),
+        ),
+      );
     }
   }
 
@@ -175,70 +334,63 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget _buildSuggestions() {
-    return ListView.separated(
+    return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       itemCount: _suggestions.length,
-      separatorBuilder: (_, __) => const Divider(height: 1, color: Color(0xFFF0F0F0)),
-      itemBuilder: (ctx, i) {
-        final label = _suggestions[i];
+      itemBuilder: (context, index) {
+        final item = _suggestions[index];
+
         return ListTile(
-          contentPadding: EdgeInsets.zero,
-          onTap: () => _selectSuggestion(label),
-          leading: Container(
-            width: 36, height: 36,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.primary.withOpacity(0.08),
-            ),
-            child: const Icon(Icons.search, size: 18, color: AppColors.primary),
+          onTap: () => _openSuggestion(item),
+          leading: Icon(
+            item.type == 'product'
+                ? Icons.shopping_bag_outlined
+                : Icons.local_offer_outlined,
+            color: AppColors.primary,
           ),
-          title: Text(label,
-              maxLines: 1, overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.textDark)),
-          trailing: GestureDetector(
-            onTap: () => _removeSuggestion(label),
-            child: const Icon(Icons.close, size: 18, color: AppColors.primary),
-          ),
+          title: Text(item.title),
         );
       },
     );
   }
 
   Widget _buildResultsGrid() {
-    return GridView.builder(
+    return ListView.builder(
       padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2, childAspectRatio: 0.72, crossAxisSpacing: 12, mainAxisSpacing: 12,
-      ),
       itemCount: _results.length,
-      itemBuilder: (ctx, i) {
-        final p = _results[i];
-        return GestureDetector(
-          onTap: () => Navigator.push(ctx, MaterialPageRoute(builder: (_) => ProductDetailScreen(product: p, categoryName: p.category))),
-          child: Container(
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 2))]),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                  child: p.imageUrl.startsWith('http')
-                    ? Image.network(p.imageUrl, fit: BoxFit.cover, width: double.infinity, errorBuilder: (_, __, ___) => const Icon(Icons.image, size: 40))
-                    : Image.asset(p.imageUrl, fit: BoxFit.cover, width: double.infinity),
-                ),
+      itemBuilder: (context, index) {
+        final item = _results[index];
+
+        if (item.type == 'product') {
+          final p = item.data as Product;
+
+          return ListTile(
+            onTap: () => _openResult(item),
+            leading: SizedBox(
+              width: 60,
+              height: 60,
+              child: Image.network(
+                p.imageUrl,
+                fit: BoxFit.cover,
               ),
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(p.name, maxLines: 1, overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 4),
-                  Text('${p.price.toStringAsFixed(3)} KD',
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.primary)),
-                ]),
-              ),
-            ]),
+            ),
+            title: Text(p.name),
+            subtitle: const Text('Product'),
+            trailing: Text('${p.price} KD'),
+          );
+        }
+
+        final coupon = item.data as CouponProduct;
+
+        return ListTile(
+          onTap: () => _openResult(item),
+          leading: const Icon(
+            Icons.local_offer,
+            color: AppColors.primary,
           ),
+          title: Text(coupon.title),
+          subtitle: const Text('Coupon'),
+          trailing: Text('${coupon.price} KD'),
         );
       },
     );
