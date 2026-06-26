@@ -214,6 +214,9 @@ class ApiService {
     return _request('GET', path, auth: true);
   }
 
+  static Future<Map<String, dynamic>> getOrder(dynamic id, {String type = 'order'}) async =>
+      _request('GET', '/orders/$id?type=$type', auth: true);
+
   // ── QR scan (admin) ───────────────────────────────────────────────────────
   static Future<Map<String, dynamic>> scanQR(String qrCode) async =>
       _request('POST', '/qr/scan', adminAuth: true, body: {'qr_code': qrCode});

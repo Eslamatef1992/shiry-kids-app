@@ -251,6 +251,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           }
         }
 
+        // For Knet/Visa, QR codes are assigned after Tap confirms payment,
+        // so we re-fetch the order to get the now-assigned QR codes.
+        if (_payment == 'knet' || _payment == 'visa') {
+          try {
+            final dbId = order['id'];
+            final orderType = isLoggedIn ? 'order' : 'guest_order';
+            final refreshed = await ApiService.getOrder(dbId, type: orderType);
+            if (refreshed['success'] == true) {
+              order.addAll(refreshed['data'] as Map<String, dynamic>? ?? {});
+            }
+          } catch (_) {}
+        }
+
         // Real per-unit QR codes uploaded by the admin for any purchased
         // coupons (assigned in upload order). Fall back to the generated
         // order QR if none were assigned.
