@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 import '../theme/app_colors.dart';
 import '../widgets/network_image.dart';
 import '../l10n/app_strings.dart';
@@ -18,10 +17,6 @@ class PaymentSuccessScreen extends StatelessWidget {
   /// generated order QR code.
   final List<String> couponQrImages;
 
-  /// Whether this order included any coupons. The QR section is only shown
-  /// for coupon purchases — product-only orders don't get a QR code.
-  final bool hasCoupons;
-
   const PaymentSuccessScreen({
     super.key,
     this.orderId = '#12345',
@@ -30,7 +25,6 @@ class PaymentSuccessScreen extends StatelessWidget {
     this.shippingFees = 0.0,
     this.deliveryFees = 1.5,
     this.couponQrImages = const [],
-    this.hasCoupons = false,
   });
 
   double get _total => subtotal - discount + shippingFees + deliveryFees;
@@ -88,8 +82,7 @@ class PaymentSuccessScreen extends StatelessWidget {
                     _DashedDivider(),
                     const SizedBox(height: 28),
 
-                    // QR code(s) — show real uploaded coupon QR codes if any
-                    // were assigned, otherwise the generated order QR.
+                    // Show only admin-uploaded QR code images — never auto-generate one.
                     if (couponQrImages.isNotEmpty)
                       Column(
                         children: [
@@ -113,25 +106,10 @@ class PaymentSuccessScreen extends StatelessWidget {
                               height: 180,
                               fit: BoxFit.contain,
                             ),
-                          ))
+                          )),
+                          const SizedBox(height: 8),
                         ],
-                      )
-                    else if (hasCoupons)
-                      QrImageView(
-                        data: 'SHIRY-ORDER-$orderId',
-                        version: QrVersions.auto,
-                        size: 130,
-                        eyeStyle: const QrEyeStyle(
-                          eyeShape: QrEyeShape.square,
-                          color: Color(0xFF000508),
-                        ),
-                        dataModuleStyle: const QrDataModuleStyle(
-                          dataModuleShape: QrDataModuleShape.square,
-                          color: Color(0xFF000508),
-                        ),
                       ),
-                    if (couponQrImages.isNotEmpty || hasCoupons)
-                      const SizedBox(height: 8),
                     Text(
                       orderId,
                       style: const TextStyle(

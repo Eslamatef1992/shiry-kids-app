@@ -289,7 +289,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             shippingFees: shipping,
             deliveryFees: delivery,
             couponQrImages: qrUrls,
-            hasCoupons: widget.hasCoupons,
           ),
         ));
       } else {
