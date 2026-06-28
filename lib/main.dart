@@ -3,8 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'providers/cart_provider.dart';
 import 'providers/locale_provider.dart';
+import 'services/notification_service.dart';
 import 'theme/app_theme.dart';
 import 'screens/splash_screen.dart';
 import 'screens/onboarding_screen.dart';
@@ -24,9 +26,15 @@ void main() async {
   // the plugin crashes at startup with "No Firebase App '[DEFAULT]'".
   try {
     await Firebase.initializeApp();
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   } catch (e) {
     debugPrint(e.toString());
   }
+
+  // Requests permission, registers the device's FCM token with the backend,
+  // and wires up foreground/background message listeners. Without this call
+  // push notifications never get enabled even though Firebase is initialized.
+  NotificationService.init();
 
   // Make build-time errors visible on-screen (in red) instead of rendering
   // as a blank/invisible area. This makes silent layout/render failures

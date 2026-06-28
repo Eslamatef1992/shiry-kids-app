@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../theme/app_colors.dart';
 import '../services/api_service.dart';
@@ -150,6 +151,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       controller: _phoneCtrl,
                       keyboardType: TextInputType.phone,
                       onChanged: (_) => setState(() {}),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(8),
+                      ],
                       decoration: InputDecoration(hintText: 'Enter Phone Number'.tr(context)),
                     ),
                   ),

@@ -20,7 +20,9 @@ class NotificationService {
 
   static Future<void> init() async {
     try {
-      await Firebase.initializeApp();
+      if (Firebase.apps.isEmpty) {
+        await Firebase.initializeApp();
+      }
     } catch (e) {
       debugPrint('Firebase not configured yet, skipping push notifications: $e');
       return;

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../theme/app_colors.dart';
@@ -26,7 +28,9 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _bannerCtrl = PageController();
-  int _bannerPage = 0;
+  Timer? _autoScrollTimer;
+   int _currentPage = 0;
+  int get _bannerCount => _banners.length;
   bool _loading = true;
   bool _error = false;
   String? _errorMsg;
@@ -38,9 +42,22 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Product> _newArrivals = [];
   List<Product> _weeklyOffers = [];
 
+  void _startAutoScroll() {
+    _autoScrollTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+      if (!_bannerCtrl.hasClients || _bannerCount == 0) return;
+      final next = (_currentPage + 1) % _bannerCount;
+      _bannerCtrl.animateToPage(
+        next,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+    _startAutoScroll();
     _loadAll();
   }
 
@@ -83,7 +100,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
-  void dispose() { _bannerCtrl.dispose(); super.dispose(); }
+  void dispose() {
+    _bannerCtrl.dispose();
+    _autoScrollTimer?.cancel();
+    super.dispose();
+  }
 
   void _seeAll(BuildContext context, String title, List<Widget> items) {
     Navigator.push(context, MaterialPageRoute(
@@ -117,8 +138,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           // ── Banner ──────────────────────────────────────
                           if (_banners.isNotEmpty) ...[
-                            _BannerWidget(ctrl: _bannerCtrl, page: _bannerPage,
-                                banners: _banners, onChanged: (p) => setState(() => _bannerPage = p)),
+                            _BannerWidget(ctrl: _bannerCtrl,
+                                page: _currentPage,
+                                banners: _banners,
+                                onChanged: (p) => setState(() => _currentPage  = p)),
                             const SizedBox(height: 18),
                           ],
 
