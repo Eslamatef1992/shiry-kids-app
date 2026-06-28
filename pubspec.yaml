@@ -33,6 +33,9 @@ dependencies:
   geocoding: ^3.0.0
   image_picker: ^1.1.2
   webview_flutter: ^4.7.0
+  share_plus: ^13.2.0
+  path_provider: ^2.1.6
+  dio: ^5.9.2
 
 dev_dependencies:
   flutter_test:
