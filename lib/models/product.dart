@@ -217,6 +217,8 @@ class CouponProduct {
   final int? discountPercentValue;
   final int qrTotal;
   final int qrAvailable;
+  final String? lat;
+  final String? lng;
 
   const CouponProduct({
     required this.id,
@@ -238,7 +240,7 @@ class CouponProduct {
     this.featured = false,
     this.discountPercentValue,
     this.qrTotal = 0,
-    this.qrAvailable = 0,
+    this.qrAvailable = 0, required this.lat, required this.lng,
   });
 
   /// Coupon is sold out only if it uses the per-unit QR system (qrTotal > 0)
@@ -274,6 +276,8 @@ class CouponProduct {
           : null,
       qrTotal: int.tryParse(j['qr_total']?.toString() ?? '0') ?? 0,
       qrAvailable: int.tryParse(j['qr_available']?.toString() ?? '0') ?? 0,
+      lat: j['lat'],
+      lng: j['lng'],
     );
   }
 

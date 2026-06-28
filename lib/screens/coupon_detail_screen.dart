@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../theme/app_colors.dart';
 import '../models/product.dart';
 import '../providers/cart_provider.dart';
@@ -31,6 +32,24 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
   void dispose() {
     _tabs.dispose();
     super.dispose();
+  }
+
+  Future<void> openGoogleMapsDirections({
+    required double latitude,
+    required double longitude,
+  }) async {
+    final Uri url = Uri.parse(
+      'https://www.google.com/maps/dir/?api=1&destination=$latitude,$longitude&travelmode=driving',
+    );
+
+    if (await canLaunchUrl(url)) {
+      await launchUrl(
+        url,
+        mode: LaunchMode.externalApplication,
+      );
+    } else {
+      throw 'Could not launch Google Maps';
+    }
   }
 
   void _confirm() {
@@ -123,6 +142,15 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
                         style: const TextStyle(
                             fontSize: 18, fontWeight: FontWeight.w700,
                             color: AppColors.primary)),
+                    const Spacer(),
+                    if(c.lat !=null&&c.lng!=null)
+                    InkWell(
+                      onTap: (){
+                        openGoogleMapsDirections(
+                            latitude: double.parse(c.lat!),
+                            longitude: double.parse(c.lng!));
+                      },
+                        child: const Icon(Icons.directions,size: 35,)),
                   ]),
                   const SizedBox(height: 14),
                   // Price
