@@ -247,20 +247,21 @@ class _HomeAppBar extends StatelessWidget {
                   onTap: onSearchTap,
                   child: const Icon(Icons.search, color: Colors.white, size: 26),
                 ),
-                const SizedBox(width: 16),
-                // My Coupons — same icon used in Profile ▸ Coupons.
+                const SizedBox(width: 5),
+                // My Coupons — same icon used in the bottom nav bar.
                 GestureDetector(
                   onTap: () => Navigator.push(context, MaterialPageRoute(
                     builder: (_) => const MyCouponsScreen(),
                   )),
                   behavior: HitTestBehavior.opaque,
                   child: SvgPicture.asset(
-                    'assets/icons/icon_coupons.svg',
-                    width: 26, height: 26,
+                    'assets/icons/nav_coupons.svg',
+                    width: 35, height: 37,
+                    fit: BoxFit.contain,
                     colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 5),
                 // Flag of the active language — tap to switch (same picker as
                 // Profile ▸ Change Language).
                 const LanguageFlagButton(size: 28),
