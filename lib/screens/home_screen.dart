@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import '../theme/app_colors.dart';
 import '../models/product.dart';
@@ -8,11 +9,13 @@ import '../providers/cart_provider.dart';
 import '../widgets/coupon_ticket_card.dart';
 import '../widgets/category_image.dart';
 import '../widgets/skeleton_loader.dart';
+import '../widgets/language_picker.dart';
 import 'search_screen.dart';
 import 'coupon_detail_screen.dart';
 import '../services/api_service.dart';
 import 'product_detail_screen.dart';
 import 'see_all_screen.dart';
+import 'my_coupons_screen.dart';
 import '../l10n/app_strings.dart';
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
@@ -244,6 +247,23 @@ class _HomeAppBar extends StatelessWidget {
                   onTap: onSearchTap,
                   child: const Icon(Icons.search, color: Colors.white, size: 26),
                 ),
+                const SizedBox(width: 16),
+                // My Coupons — same icon used in Profile ▸ Coupons.
+                GestureDetector(
+                  onTap: () => Navigator.push(context, MaterialPageRoute(
+                    builder: (_) => const MyCouponsScreen(),
+                  )),
+                  behavior: HitTestBehavior.opaque,
+                  child: SvgPicture.asset(
+                    'assets/icons/icon_coupons.svg',
+                    width: 26, height: 26,
+                    colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                // Flag of the active language — tap to switch (same picker as
+                // Profile ▸ Change Language).
+                const LanguageFlagButton(size: 28),
               ],
             ),
           ),

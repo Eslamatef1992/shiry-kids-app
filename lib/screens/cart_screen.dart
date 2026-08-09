@@ -315,7 +315,7 @@ class _CouponCartCard extends StatelessWidget {
                         color: AppColors.textDark)),
                 const Spacer(),
                 _QtyRow(qty: item.quantity, onQty: onQty,
-                    maxQty: item.qrCodeAvailable < CartProvider.maxCouponQtyPerCheckout ? item.qrCodeAvailable : CartProvider.maxCouponQtyPerCheckout),
+                    maxQty: CartProvider.maxQtyForStock(item.qrCodeAvailable)),
               ],
             ),
           ),

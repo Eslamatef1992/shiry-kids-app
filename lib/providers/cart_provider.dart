@@ -4,7 +4,15 @@ import '../models/product.dart';
 class CartProvider extends ChangeNotifier {
   // A single checkout can only carry up to this many units of the same
   // coupon — buying more requires a separate checkout.
-  static const int maxCouponQtyPerCheckout = 5;
+  static const int maxCouponQtyPerCheckout = 10;
+
+  /// How many units of a coupon the cart may hold: the per-checkout cap,
+  /// further limited by [qrAvailable] — the QR codes still available for that
+  /// coupon. Returns 0 when the coupon is sold out.
+  static int maxQtyForStock(int qrAvailable) =>
+      qrAvailable < maxCouponQtyPerCheckout
+          ? qrAvailable
+          : maxCouponQtyPerCheckout;
 
   final List<CartCouponItem> _coupons = [];
   final List<CartItem> _products = [];
@@ -25,12 +33,15 @@ class CartProvider extends ChangeNotifier {
   // ── Coupons ──────────────────────────────────────────────────────────────
 
   void addCoupon(CartCouponItem item) {
+    // [item] comes straight from the API, so it carries the freshest stock.
+    final max = maxQtyForStock(item.qrCodeAvailable);
+    if (max <= 0) return; // sold out — nothing left to add
     final idx = _coupons.indexWhere((c) => c.id == item.id);
     if (idx >= 0) {
       _coupons[idx].quantity =
-          (_coupons[idx].quantity + item.quantity).clamp(1, maxCouponQtyPerCheckout);
+          (_coupons[idx].quantity + item.quantity).clamp(1, max);
     } else {
-      item.quantity = item.quantity.clamp(1, maxCouponQtyPerCheckout);
+      item.quantity = item.quantity.clamp(1, max);
       _coupons.add(item);
     }
     notifyListeners();
@@ -45,7 +56,9 @@ class CartProvider extends ChangeNotifier {
     if (qty <= 0) { removeCoupon(id); return; }
     final idx = _coupons.indexWhere((c) => c.id == id);
     if (idx >= 0) {
-      _coupons[idx].quantity = qty.clamp(1, maxCouponQtyPerCheckout);
+      final max = maxQtyForStock(_coupons[idx].qrCodeAvailable);
+      if (max <= 0) { removeCoupon(id); return; }
+      _coupons[idx].quantity = qty.clamp(1, max);
       notifyListeners();
     }
   }
