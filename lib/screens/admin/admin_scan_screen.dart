@@ -39,9 +39,11 @@ class _AdminScanScreenState extends State<AdminScanScreen>
   }
 
   void _onDetect(BarcodeCapture capture) {
-    if (_state != _ScanState.idle && _state != _ScanState.scanning) return;
+    if (_state != _ScanState.idle) return;
     final code = capture.barcodes.firstOrNull?.rawValue;
     if (code == null) return;
+
+    debugPrint('[QR-SCAN] sending qr_code=[$code]');
 
     setState(() {
       _scannedCode = code;
@@ -50,6 +52,7 @@ class _AdminScanScreenState extends State<AdminScanScreen>
 
     // Call real backend API
     ApiService.scanQR(code).then((res) {
+      debugPrint('[QR-SCAN] raw response => $res');
       if (!mounted) return;
       final apiStatus = res['status'] as String? ?? 'not_found';
       _ScanState result;
@@ -67,7 +70,8 @@ class _AdminScanScreenState extends State<AdminScanScreen>
       }
       setState(() => _state = result);
       widget.onResult(ScannedQr(code: code, scannedAt: DateTime.now(), status: qrStatus));
-    }).catchError((_) {
+    }).catchError((e) {
+      debugPrint('[QR-SCAN] error => $e');
       if (!mounted) return;
       setState(() => _state = _ScanState.notFound);
       widget.onResult(ScannedQr(code: code, scannedAt: DateTime.now(), status: QrStatus.notFound));
@@ -104,12 +108,12 @@ class _AdminScanScreenState extends State<AdminScanScreen>
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(20, 16, 20, 0),
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text('Scan Qr Code To Show Qr Code Status',
-                  style: const TextStyle(fontSize: 13, color: Color(0xFF999999))),
+                  style: TextStyle(fontSize: 13, color: Color(0xFF999999))),
             ),
           ),
           const Spacer(),
