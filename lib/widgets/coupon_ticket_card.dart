@@ -19,7 +19,7 @@ class CouponTicketCard extends StatelessWidget {
   final VoidCallback? onAddToCart;
   final bool isOutOfStock;
 
-  static const double _cardH  = 172.0;
+  static const double _cardH  = 179.0;
   static const double _imgW   = 118.0;
   static const double _stubW  = 72.0;
   static const double _notchR = 10.0;
@@ -81,7 +81,8 @@ class CouponTicketCard extends StatelessWidget {
                 ),
                  const SizedBox(width: 12,),
                 // Middle content
-                 Padding(
+                 Expanded(
+                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -121,14 +122,16 @@ class CouponTicketCard extends StatelessWidget {
                                   color: Color(0xFFE73C00))),
                         ),
                         // Title
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
-                          child: Text(title,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                  fontSize: 13, fontWeight: FontWeight.w600,
-                                  color: AppColors.textDark, height: 1.35)),
+                        Flexible(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
+                            child: Text(title,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                    fontSize: 13, fontWeight: FontWeight.w600,
+                                    color: AppColors.textDark, height: 1.35)),
+                          ),
                         ),
                         // Countdown
                         Padding(
@@ -170,6 +173,7 @@ class CouponTicketCard extends StatelessWidget {
                       ],
                     ),
                   ),
+                ),
 
                 const SizedBox(width: 20,),
                 // Right stub

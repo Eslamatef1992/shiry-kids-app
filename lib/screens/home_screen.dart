@@ -396,7 +396,7 @@ class _CouponsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-    height: 172,
+    height: 179,
     child: ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 0),
       scrollDirection: Axis.horizontal,
