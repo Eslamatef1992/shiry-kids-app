@@ -114,10 +114,12 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
         Expanded(
           child: SingleChildScrollView(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              // ── Hero image ──
+              // ── Hero image (uses detail_image when available) ──
               AspectRatio(
                 aspectRatio: 16 / 9,
-                child: smartImage(c.imageUrl, fit: BoxFit.cover,
+                child: smartImage(
+                    c.detailImageUrl.isNotEmpty ? c.detailImageUrl : c.imageUrl,
+                    fit: BoxFit.cover,
                     placeholder: Container(
                         color: const Color(0xFFF0F0F0),
                         child: const Icon(Icons.image_outlined,

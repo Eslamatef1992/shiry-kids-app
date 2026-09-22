@@ -203,6 +203,7 @@ class CouponProduct {
   final String brandName;
   final String brandImageUrl;
   final String imageUrl;
+  final String detailImageUrl;
   final double price;
   final double originalPrice;
   final String expiryDate;
@@ -227,6 +228,7 @@ class CouponProduct {
     required this.brandName,
     required this.brandImageUrl,
     required this.imageUrl,
+    this.detailImageUrl = '',
     required this.price,
     required this.originalPrice,
     required this.expiryDate,
@@ -260,6 +262,7 @@ class CouponProduct {
       brandName: vendor['name']?.toString() ?? '',
       brandImageUrl: _imgUrl(vendor['logo']),
       imageUrl: _imgUrl(j['image']),
+      detailImageUrl: _imgUrl(j['detail_image']),
       price: _safeDouble(j['price']),
       originalPrice: _safeDouble(j['original_price']),
       expiryDate: expiry.toLocal().toString().split(' ').first,
