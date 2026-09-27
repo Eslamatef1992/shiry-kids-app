@@ -31,15 +31,8 @@ void main() async {
     debugPrint(e.toString());
   }
 
-  // Requests permission, registers the device's FCM token with the backend,
-  // and wires up foreground/background message listeners. Without this call
-  // push notifications never get enabled even though Firebase is initialized.
   NotificationService.init();
 
-  // Make build-time errors visible on-screen (in red) instead of rendering
-  // as a blank/invisible area. This makes silent layout/render failures
-  // (e.g. a widget subtree throwing during build) easy to diagnose without
-  // needing console access.
   ErrorWidget.builder = (FlutterErrorDetails details) {
     return Container(
       color: Colors.white,

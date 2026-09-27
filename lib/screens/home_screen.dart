@@ -109,11 +109,38 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  void _seeAll(BuildContext context, String title, List<Widget> items) {
+  void _seeAll(BuildContext context, String title, List<Widget> items,
+      [Future<List<Widget>> Function()? loadAll]) {
     Navigator.push(context, MaterialPageRoute(
-      builder: (_) => SeeAllScreen(title: title, items: items),
+      builder: (_) => SeeAllScreen(title: title, items: items, loadAll: loadAll),
     ));
   }
+
+  // API list responses come either as a plain list or as {rows: [...]}.
+  static List _rows(Map<String, dynamic> res) {
+    final data = res['data'];
+    return data is Map ? (data['rows'] as List? ?? []) : (data as List? ?? []);
+  }
+
+  // Full (unlimited) lists fetched by the "See All" screens — Home itself
+  // only loads a short preview of each section.
+  static const _seeAllLimit = 1000;
+
+  Future<List<Widget>> Function() _allCoupons(BuildContext context) => () async {
+    final res = await ApiService.getCoupons(limit: _seeAllLimit);
+    return _rows(res)
+        .map((j) => couponCard(context, CouponProduct.fromJson(j as Map<String, dynamic>)))
+        .toList();
+  };
+
+  Future<List<Widget>> Function() _allProducts(BuildContext context,
+      {bool? featured, bool? isNewArrival, bool? isWeeklyOffer, String? sortBy}) => () async {
+    final res = await ApiService.getProducts(limit: _seeAllLimit, featured: featured,
+        isNewArrival: isNewArrival, isWeeklyOffer: isWeeklyOffer, sortBy: sortBy);
+    return _rows(res)
+        .map((j) => productListCard(context, Product.fromJson(j as Map<String, dynamic>)))
+        .toList();
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -160,7 +187,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           if (_featuredCoupons.isNotEmpty) ...[
                             _sectionTitle(context, 'Coupons', () => _seeAll(
                                 context, 'Coupons',
-                                _featuredCoupons.map((c) => couponCard(context, c)).toList())),
+                                _featuredCoupons.map((c) => couponCard(context, c)).toList(),
+                                _allCoupons(context))),
                             const SizedBox(height: 10),
                             _CouponsList(coupons: _featuredCoupons),
                             const SizedBox(height: 20),
@@ -170,7 +198,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           if (_featuredProducts.isNotEmpty) ...[
                             _sectionTitle(context, 'Best Sellers', () => _seeAll(
                                 context, 'Best Sellers',
-                                _featuredProducts.map((p) => productListCard(context, p)).toList())),
+                                _featuredProducts.map((p) => productListCard(context, p)).toList(),
+                                _allProducts(context, featured: true))),
                             const SizedBox(height: 10),
                             _ProductRow(products: _featuredProducts),
                             const SizedBox(height: 20),
@@ -180,7 +209,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           if (_newArrivals.isNotEmpty) ...[
                             _sectionTitle(context, 'New Arrivals', () => _seeAll(
                                 context, 'New Arrivals',
-                                _newArrivals.map((p) => productListCard(context, p)).toList())),
+                                _newArrivals.map((p) => productListCard(context, p)).toList(),
+                                _allProducts(context, isNewArrival: true, sortBy: 'created_at'))),
                             const SizedBox(height: 10),
                             _ProductRow(products: _newArrivals),
                             const SizedBox(height: 20),
@@ -190,7 +220,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           if (_weeklyOffers.isNotEmpty) ...[
                             _sectionTitle(context, 'Weekly Offers', () => _seeAll(
                                 context, 'Weekly Offers',
-                                _weeklyOffers.map((p) => productListCard(context, p)).toList())),
+                                _weeklyOffers.map((p) => productListCard(context, p)).toList(),
+                                _allProducts(context, isWeeklyOffer: true))),
                             const SizedBox(height: 10),
                             _ProductRow(products: _weeklyOffers),
                             const SizedBox(height: 36),
