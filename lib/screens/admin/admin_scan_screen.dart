@@ -4,7 +4,7 @@ import '../../theme/app_colors.dart';
 import '../../services/api_service.dart';
 import 'admin_home_screen.dart';
 
-enum _ScanState { idle, scanning, valid, used, notFound }
+enum _ScanState { idle, scanning, valid, used, redeemed, notFound }
 
 class AdminScanScreen extends StatefulWidget {
   final void Function(ScannedQr result) onResult;
@@ -63,6 +63,9 @@ class _AdminScanScreenState extends State<AdminScanScreen>
           break;
         case 'used':
           result = _ScanState.used; qrStatus = QrStatus.used;
+          break;
+        case 'redeemed':
+          result = _ScanState.redeemed; qrStatus = QrStatus.redeemed;
           break;
         default:
           result = _ScanState.notFound; qrStatus = QrStatus.notFound;
@@ -130,6 +133,7 @@ class _AdminScanScreenState extends State<AdminScanScreen>
           // Status message
           if (_state == _ScanState.valid)     _StatusMsg.valid()
           else if (_state == _ScanState.used) _StatusMsg.used()
+          else if (_state == _ScanState.redeemed) _StatusMsg.redeemed()
           else if (_state == _ScanState.notFound) _StatusMsg.notFound(),
 
           if (_state != _ScanState.idle && _state != _ScanState.scanning)
@@ -271,6 +275,8 @@ class _StatusMsg extends StatelessWidget {
       icon: Icons.check, label: 'Valid Qr Code', color: Color(0xFF1DB76A));
   factory _StatusMsg.used() => const _StatusMsg(
       icon: Icons.close, label: 'Qr Code Already Used', color: Color(0xFFFF3B30));
+  factory _StatusMsg.redeemed() => const _StatusMsg(
+      icon: Icons.verified, label: 'Scanned and Redeemed', color: Color(0xFF2F6FED));
   factory _StatusMsg.notFound() => const _StatusMsg(
       icon: Icons.block, label: 'Not Found', color: Color(0xFFE8A500));
 

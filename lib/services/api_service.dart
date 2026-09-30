@@ -221,9 +221,12 @@ class ApiService {
   static Future<Map<String, dynamic>> scanQR(String qrCode) async =>
       _request('POST', '/qr/check', adminAuth: true, body: {'qr_code': qrCode});
 
-  // ── QR redeem — marks the code as used (call only at point of redemption) ─
+  // ── QR redeem — admin redeems a used code (moves it to "redeemed") ───────
   static Future<Map<String, dynamic>> redeemQR(String qrCode) async =>
-      _request('POST', '/qr/scan', adminAuth: true, body: {'qr_code': qrCode});
+      _request('POST', '/qr/redeem', adminAuth: true, body: {'qr_code': qrCode});
+
+  static Future<Map<String, dynamic>> getQRRedemptions() async =>
+      _request('GET', '/qr/redemptions', adminAuth: true);
 
   static Future<Map<String, dynamic>> getQRHistory({String? status}) async {
     var path = '/qr/history?limit=100';
