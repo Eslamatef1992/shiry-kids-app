@@ -70,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final results = await Future.wait([
         ApiService.getBanners(),
         ApiService.getCategories(),
-        ApiService.getCoupons(featured: true, limit: 5),
+        ApiService.getCoupons(limit: _seeAllLimit),
         ApiService.getProducts(featured: true, limit: 6),
         ApiService.getProducts(isNewArrival: true, limit: 6, sortBy: 'created_at'),
         ApiService.getProducts(isWeeklyOffer: true, limit: 6),
@@ -82,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
               .map((j) => AppBanner.fromJson(j as Map<String, dynamic>)).toList();
           _categories = ((results[1]['data'] as List?) ?? [])
               .map((j) => ProductCategory.fromJson(j as Map<String, dynamic>)).toList();
-          _featuredCoupons = ((results[2]['data'] as List?) ?? [])
+          _featuredCoupons = _rows(results[2])
               .map((j) => CouponProduct.fromJson(j as Map<String, dynamic>)).toList();
           final data3 = results[3]['data'];
           final prodRows0 = data3 is Map ? (data3['rows'] as List? ?? []) : (data3 as List? ?? []);
