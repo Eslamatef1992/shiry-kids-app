@@ -306,6 +306,9 @@ class ApiService {
   // ── CMS pages ─────────────────────────────────────────────────────────────
   static Future<Map<String, dynamic>> getCmsPage(String slug) async => _request('GET', '/cms/$slug');
 
+  // ── App version / force-update check ─────────────────────────────────────
+  static Future<Map<String, dynamic>> getAppVersion() async => _request('GET', '/app/version');
+
   // ── Push notifications ────────────────────────────────────────────────────
   static Future<Map<String, dynamic>> registerDeviceToken(String token, {String? platform}) async {
     final loggedIn = await isLoggedIn();
