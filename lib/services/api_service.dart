@@ -62,15 +62,26 @@ class ApiService {
 
     if (response.statusCode == 401) {
       await _tryRefresh(adminAuth: adminAuth);
-      // Retry once
+      // Retry once with refreshed token
+      final prefs = await SharedPreferences.getInstance();
       final newToken = adminAuth
-          ? (await SharedPreferences.getInstance()).getString('admin_token')
-          : (await SharedPreferences.getInstance()).getString('auth_token');
+          ? prefs.getString('admin_token')
+          : prefs.getString('auth_token');
       if (newToken != null) headers['Authorization'] = 'Bearer $newToken';
       switch (method.toUpperCase()) {
         case 'POST':   response = await http.post(uri, headers: headers, body: bodyStr).timeout(timeout); break;
         case 'PUT':    response = await http.put(uri, headers: headers, body: bodyStr).timeout(timeout); break;
+        case 'PATCH':  response = await http.patch(uri, headers: headers, body: bodyStr).timeout(timeout); break;
+        case 'DELETE': response = await http.delete(uri, headers: headers).timeout(timeout); break;
         default:       response = await http.get(uri, headers: headers).timeout(timeout);
+      }
+      // If still 401 after refresh, session is fully expired — return friendly message
+      if (response.statusCode == 401) {
+        if (!adminAuth) {
+          await prefs.remove('auth_token');
+          await prefs.remove('refresh_token');
+        }
+        return {'success': false, 'message': 'Your session has expired. Please log in again.'};
       }
     }
 
