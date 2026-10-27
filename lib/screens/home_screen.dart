@@ -116,6 +116,25 @@ class _HomeScreenState extends State<HomeScreen> {
     ));
   }
 
+  Future<void> _handleBannerTap(AppBanner banner) async {
+    final link = banner.link;
+    if (link == null || link.isEmpty) return;
+    final match = RegExp(r'shirykidsfun://coupon/(\d+)').firstMatch(link);
+    if (match == null) return;
+    final id = int.tryParse(match.group(1) ?? '');
+    if (id == null) return;
+    try {
+      final res = await ApiService.getCoupon(id);
+      if (!mounted) return;
+      if (res['success'] == true && res['data'] != null) {
+        final coupon = CouponProduct.fromJson(res['data'] as Map<String, dynamic>);
+        Navigator.push(context, MaterialPageRoute(
+          builder: (_) => CouponDetailScreen(coupon: coupon),
+        ));
+      }
+    } catch (_) {}
+  }
+
   // API list responses come either as a plain list or as {rows: [...]}.
   static List _rows(Map<String, dynamic> res) {
     final data = res['data'];
@@ -168,10 +187,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           // ── Banner ──────────────────────────────────────
                           if (_banners.isNotEmpty) ...[
-                            _BannerWidget(ctrl: _bannerCtrl,
+                            _BannerWidget(
+                                ctrl: _bannerCtrl,
                                 page: _currentPage,
                                 banners: _banners,
-                                onChanged: (p) => setState(() => _currentPage  = p)),
+                                onChanged: (p) => setState(() => _currentPage = p),
+                                onTap: _handleBannerTap),
                             const SizedBox(height: 18),
                           ],
 
@@ -328,7 +349,8 @@ class _BannerWidget extends StatelessWidget {
   final int page;
   final List<AppBanner> banners;
   final ValueChanged<int> onChanged;
-  const _BannerWidget({required this.ctrl, required this.page, required this.banners, required this.onChanged});
+  final ValueChanged<AppBanner>? onTap;
+  const _BannerWidget({required this.ctrl, required this.page, required this.banners, required this.onChanged, this.onTap});
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -345,10 +367,15 @@ class _BannerWidget extends StatelessWidget {
               itemCount: banners.length,
               itemBuilder: (_, i) {
                 final b = banners[i];
-                return b.imageUrl.startsWith('http')
+                final img = b.imageUrl.startsWith('http')
                     ? Image.network(b.imageUrl, fit: BoxFit.cover, width: double.infinity,
                         errorBuilder: (_, __, ___) => Container(color: const Color(0xFFFFEDED)))
                     : Image.asset(b.imageUrl, fit: BoxFit.cover, width: double.infinity);
+                if (b.link == null || b.link!.isEmpty || onTap == null) return img;
+                return GestureDetector(
+                  onTap: () => onTap!(b),
+                  child: img,
+                );
               },
             ),
           ),

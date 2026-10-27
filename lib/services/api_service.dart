@@ -85,7 +85,11 @@ class ApiService {
       }
     }
 
-    return jsonDecode(response.body) as Map<String, dynamic>;
+    try {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    } catch (_) {
+      return {'success': false, 'message': 'Unexpected server response (${response.statusCode})'};
+    }
   }
 
   static Future<void> _tryRefresh({bool adminAuth = false}) async {
