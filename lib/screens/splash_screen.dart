@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'dart:io' show Platform;
 import '../theme/app_colors.dart';
 import '../services/api_service.dart';
 
@@ -70,6 +73,12 @@ class _SplashScreenState extends State<SplashScreen>
         _pulseCtrl.stop();
         await _exitCtrl.forward();
         if (!mounted) return;
+
+        // ── Force-update check ─────────────────────────────────
+        final needsUpdate = await _checkForceUpdate();
+        if (!mounted) return;
+        if (needsUpdate) return; // dialog is showing — stop navigation
+
         // If the user already has a valid session, skip onboarding/login
         // and go straight to the app so they stay logged in between
         // app launches/backgrounds.
@@ -78,6 +87,107 @@ class _SplashScreenState extends State<SplashScreen>
         Navigator.pushReplacementNamed(context, loggedIn ? '/home' : '/onboarding');
       });
     });
+  }
+
+  // Returns true if a force-update dialog was shown (caller should halt navigation).
+  Future<bool> _checkForceUpdate() async {
+    try {
+      final info = await PackageInfo.fromPlatform();
+      final current = info.version; // e.g. "1.2.3"
+
+      final res = await ApiService.getAppVersion();
+      if (res['success'] != true) return false;
+      final data = res['data'] as Map<String, dynamic>;
+
+      final bool forceUpdate = data['force_update'] == true;
+      if (!forceUpdate) return false;
+
+      final minVersion = Platform.isIOS
+          ? (data['ios_min_version'] as String? ?? '1.0.0')
+          : (data['android_min_version'] as String? ?? '1.0.0');
+      final storeUrl = Platform.isIOS
+          ? (data['ios_store_url'] as String? ?? '')
+          : (data['android_store_url'] as String? ?? '');
+
+      if (!_isOutdated(current, minVersion)) return false;
+
+      // Show non-dismissible update dialog
+      if (!mounted) return true;
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => WillPopScope(
+          onWillPop: () async => false,
+          child: AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            contentPadding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 72, height: 72,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.system_update_rounded, color: AppColors.primary, size: 38),
+                ),
+                const SizedBox(height: 18),
+                const Text(
+                  'Update Required',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'A new version of Shiry Kids is available. Please update to continue.',
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600], height: 1.5),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    onPressed: () async {
+                      if (storeUrl.isNotEmpty) {
+                        final uri = Uri.parse(storeUrl);
+                        if (await canLaunchUrl(uri)) await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      }
+                    },
+                    child: const Text('Update Now', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      return true;
+    } catch (_) {
+      return false; // never block the app on a version-check error
+    }
+  }
+
+  // Returns true if [current] version is less than [minimum].
+  // Compares major.minor.patch numerically.
+  bool _isOutdated(String current, String minimum) {
+    List<int> parse(String v) =>
+        v.split('.').map((p) => int.tryParse(p) ?? 0).toList();
+    final c = parse(current);
+    final m = parse(minimum);
+    for (int i = 0; i < 3; i++) {
+      final cv = i < c.length ? c[i] : 0;
+      final mv = i < m.length ? m[i] : 0;
+      if (cv < mv) return true;
+      if (cv > mv) return false;
+    }
+    return false;
   }
 
   @override

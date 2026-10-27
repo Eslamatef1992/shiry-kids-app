@@ -48,8 +48,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
       if (!mounted) return;
       if (res['success'] == true) {
-        // Send OTP via SMS before showing the OTP screen
-        await ApiService.sendOtp('+965${_phoneCtrl.text.trim()}');
+        // Send OTP — ignore errors so a failed SMS doesn't block navigation
+        try { await ApiService.sendOtp('+965${_phoneCtrl.text.trim()}'); } catch (_) {}
+        if (!mounted) return;
         Navigator.pushNamed(context, '/otp', arguments: {
           'phone': '+965${_phoneCtrl.text.trim()}',
           'mode': 'signup',
