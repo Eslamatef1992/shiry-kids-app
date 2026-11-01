@@ -7,25 +7,27 @@ import 'location_picker_screen.dart';
 
 class GuestCheckoutScreen extends StatefulWidget {
   final void Function(Map<String, String?> data)? onSaved;
-  const GuestCheckoutScreen({super.key, this.onSaved});
+  final bool hasProducts;
+  const GuestCheckoutScreen({super.key, this.onSaved, this.hasProducts = false});
   @override
   State<GuestCheckoutScreen> createState() => _GuestCheckoutScreenState();
 }
 
 class _GuestCheckoutScreenState extends State<GuestCheckoutScreen> {
   final _nameFocus  = FocusNode();
-  final _emailFocus = FocusNode();
   final _phoneFocus = FocusNode();
   String _name  = '';
-  String _email = '';
   String _phone = '';
+  String? _phoneError;
   String? _locationCity;
   String? _locationDetail;
+
+  bool _isPhoneValid(String phone) =>
+      phone.replaceAll(RegExp(r'\D'), '').length == 8;
 
   @override
   void dispose() {
     _nameFocus.dispose();
-    _emailFocus.dispose();
     _phoneFocus.dispose();
     super.dispose();
   }
@@ -66,38 +68,12 @@ class _GuestCheckoutScreenState extends State<GuestCheckoutScreen> {
             const SizedBox(height: 8),
             TextField(
               focusNode: _nameFocus,
-              onChanged: (v) => _name = v,
-              textInputAction: TextInputAction.next,
-              onSubmitted: (_) => FocusScope.of(context).requestFocus(_emailFocus),
-              style: const TextStyle(fontSize: 14, color: AppColors.textDark),
-              decoration: InputDecoration(
-                hintText: 'Enter Full Name'.tr(context),
-                hintStyle: const TextStyle(color: AppColors.textLight, fontSize: 13),
-                filled: true,
-                fillColor: const Color(0xFFF5F5F5),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-                focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: AppColors.primary, width: 1.5)),
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // ── Email ─────────────────────────────────────────────
-            Text('Email'.tr(context),
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textDark)),
-            const SizedBox(height: 8),
-            TextField(
-              focusNode: _emailFocus,
-              onChanged: (v) => _email = v,
-              keyboardType: TextInputType.emailAddress,
+              onChanged: (v) => setState(() => _name = v),
               textInputAction: TextInputAction.next,
               onSubmitted: (_) => FocusScope.of(context).requestFocus(_phoneFocus),
               style: const TextStyle(fontSize: 14, color: AppColors.textDark),
               decoration: InputDecoration(
-                hintText: 'Enter Email'.tr(context),
+                hintText: 'Enter Full Name'.tr(context),
                 hintStyle: const TextStyle(color: AppColors.textLight, fontSize: 13),
                 filled: true,
                 fillColor: const Color(0xFFF5F5F5),
@@ -119,53 +95,74 @@ class _GuestCheckoutScreenState extends State<GuestCheckoutScreen> {
               decoration: BoxDecoration(
                 color: const Color(0xFFF5F5F5),
                 borderRadius: BorderRadius.circular(10),
+                border: _phoneError != null
+                    ? Border.all(color: Colors.red, width: 1.5)
+                    : null,
               ),
-              child: Row(children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Row(mainAxisSize: MainAxisSize.min, children: [
-                    ClipRect(
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        widthFactor: 0.48,
-                        child: SvgPicture.asset(
-                          'assets/icons/phone_prefix_kw.svg',
-                          height: 28,
-                          fit: BoxFit.contain,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        ClipRect(
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            widthFactor: 0.48,
+                            child: SvgPicture.asset(
+                              'assets/icons/phone_prefix_kw.svg',
+                              height: 28,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        const Text('+965',
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600,
+                                color: AppColors.textDark)),
+                      ]),
+                    ),
+                    Container(width: 1, height: 24, color: const Color(0xFFDDDDDD)),
+                    Expanded(
+                      child: TextField(
+                        focusNode: _phoneFocus,
+                        onChanged: (v) => setState(() {
+                          _phone = v;
+                          _phoneError = v.isEmpty
+                              ? null
+                              : (_isPhoneValid(v) ? null : 'Phone must be exactly 8 digits');
+                        }),
+                        keyboardType: TextInputType.phone,
+                        maxLength: 8,
+                        textInputAction: TextInputAction.done,
+                        style: const TextStyle(fontSize: 14, color: AppColors.textDark),
+                        decoration: InputDecoration(
+                          hintText: 'Enter Phone Number'.tr(context),
+                          hintStyle: const TextStyle(color: AppColors.textLight, fontSize: 13),
+                          filled: false,
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          counterText: '',
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 6),
-                    const Text('+965',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600,
-                            color: AppColors.textDark)),
                   ]),
-                ),
-                Container(width: 1, height: 24, color: const Color(0xFFDDDDDD)),
-                Expanded(
-                  child: TextField(
-                    focusNode: _phoneFocus,
-                    onChanged: (v) => _phone = v,
-                    keyboardType: TextInputType.phone,
-                    textInputAction: TextInputAction.done,
-                    style: const TextStyle(fontSize: 14, color: AppColors.textDark),
-                    decoration: InputDecoration(
-                      hintText: 'Enter Phone Number'.tr(context),
-                      hintStyle: const TextStyle(color: AppColors.textLight, fontSize: 13),
-                      filled: false,
-                      border: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                  if (_phoneError != null)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                      child: Text(_phoneError!,
+                          style: const TextStyle(color: Colors.red, fontSize: 11)),
                     ),
-                  ),
-                ),
-              ]),
+                ],
+              ),
             ),
             const SizedBox(height: 20),
 
-            // ── Location ──────────────────────────────────────────
-            if (_locationCity == null)
+            // ── Location — only for product orders ────────────────
+            if (widget.hasProducts && _locationCity == null)
               GestureDetector(
                 onTap: _openLocationPicker,
                 child: Container(
@@ -195,7 +192,7 @@ class _GuestCheckoutScreenState extends State<GuestCheckoutScreen> {
                   ]),
                 ),
               )
-            else
+            else if (widget.hasProducts)
               GestureDetector(
                 onTap: _openLocationPicker,
                 child: Container(
@@ -229,13 +226,19 @@ class _GuestCheckoutScreenState extends State<GuestCheckoutScreen> {
               height: 52,
               child: ElevatedButton(
                 onPressed: () {
-                  if (_name.trim().isEmpty || _phone.trim().isEmpty) {
+                  if (_name.trim().isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Please enter your name and phone number'.tr(context)), backgroundColor: Colors.red),
+                      SnackBar(content: Text('Please enter your name'.tr(context)), backgroundColor: Colors.red),
                     );
                     return;
                   }
-                  if (_locationDetail == null) {
+                  if (!_isPhoneValid(_phone)) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Phone must be exactly 8 digits'), backgroundColor: Colors.red),
+                    );
+                    return;
+                  }
+                  if (widget.hasProducts && _locationDetail == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Please set your delivery location'.tr(context)), backgroundColor: Colors.red),
                     );
@@ -244,9 +247,8 @@ class _GuestCheckoutScreenState extends State<GuestCheckoutScreen> {
                   if (widget.onSaved != null) {
                     widget.onSaved!({
                       'name': _name.trim(),
-                      'email': _email.trim().isNotEmpty ? _email.trim() : null,
-                      'phone': '+965${_phone.trim()}',
-                      'address': _locationDetail,
+                      'phone': _phone.replaceAll(RegExp(r'\D'), ''),
+                      'address': widget.hasProducts ? _locationDetail : 'Kuwait',
                     });
                   }
                 },
