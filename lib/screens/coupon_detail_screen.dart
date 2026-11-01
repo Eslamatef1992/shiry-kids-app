@@ -8,6 +8,7 @@ import '../providers/cart_provider.dart';
 import '../widgets/wavy_app_bar.dart';
 import '../widgets/network_image.dart';
 import '../l10n/app_strings.dart';
+import '../services/api_service.dart';
 import 'checkout_screen.dart';
 import 'guest_checkout_screen.dart';
 
