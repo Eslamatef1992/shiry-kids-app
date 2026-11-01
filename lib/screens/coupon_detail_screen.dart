@@ -8,6 +8,8 @@ import '../providers/cart_provider.dart';
 import '../widgets/wavy_app_bar.dart';
 import '../widgets/network_image.dart';
 import '../l10n/app_strings.dart';
+import 'checkout_screen.dart';
+import 'guest_checkout_screen.dart';
 
 class CouponDetailScreen extends StatefulWidget {
   final CouponProduct coupon;
@@ -52,15 +54,53 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
     }
   }
 
-  void _confirm() {
-    // Confirm locks in the qty — nothing visible to do here since Add To Cart is bottom btn
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${'Quantity set to'.tr(context)} $_qty'),
-        backgroundColor: AppColors.primary,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        duration: const Duration(seconds: 1),
+  Future<void> _payNow() async {
+    final couponItem = widget.coupon.toCartItem(quantity: _qty);
+    final loggedIn = await ApiService.isLoggedIn();
+    if (!mounted) return;
+
+    if (loggedIn) {
+      Navigator.push(context, MaterialPageRoute(
+        builder: (_) => CheckoutScreen(
+          coupons: [couponItem],
+          products: const [],
+          hasCoupons: true,
+        ),
+      ));
+      return;
+    }
+
+    // Not logged in — ask login or guest
+    showDialog(
+      context: context,
+      barrierColor: Colors.black45,
+      builder: (_) => _PayDialog(
+        onLogin: () {
+          Navigator.pop(context);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.pushNamed(context, '/login');
+          });
+        },
+        onGuest: () {
+          Navigator.pop(context);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.push(context, MaterialPageRoute(
+              builder: (_) => GuestCheckoutScreen(
+                hasProducts: false,
+                onSaved: (data) => Navigator.push(context, MaterialPageRoute(
+                  builder: (_) => CheckoutScreen(
+                    coupons: [couponItem],
+                    products: const [],
+                    hasCoupons: true,
+                    guestName: data['name'],
+                    guestPhone: data['phone'],
+                    initialAddress: data['address'],
+                  ),
+                )),
+              ),
+            ));
+          });
+        },
       ),
     );
   }
@@ -238,20 +278,25 @@ class _CouponDetailScreenState extends State<CouponDetailScreen>
                             ),
                           ]),
                           const SizedBox(height: 16),
-                          // ── Confirm ────────────────────────────────────
+                          // ── Pay Now ────────────────────────────────────
                           InkWell(
-                            onTap:_confirm,
+                            onTap: c.isOutOfStock ? null : _payNow,
                             child: Container(
                               width: double.infinity,
                               height: 40,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
-                                color: const Color(0xffFFE9E3),
+                                color: c.isOutOfStock
+                                    ? const Color(0xFFEEEEEE)
+                                    : AppColors.primary,
                               ),
                               child: Center(
-                                child: Text('Confirm'.tr(context),
-                                    style: const TextStyle(fontSize: 15,
-                                        color: AppColors.primary,
+                                child: Text('Pay Now'.tr(context),
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        color: c.isOutOfStock
+                                            ? AppColors.textMedium
+                                            : Colors.white,
                                         fontWeight: FontWeight.w700)),
                               ),
                             ),
@@ -463,4 +508,63 @@ class _QtyBtn extends StatelessWidget {
           color: filled ? Colors.white : AppColors.primary),
     ),
   );
+}
+
+// ── Login vs Guest dialog (used by Pay Now) ───────────────────────────────────
+class _PayDialog extends StatelessWidget {
+  final VoidCallback onLogin;
+  final VoidCallback onGuest;
+  const _PayDialog({required this.onLogin, required this.onGuest});
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Pay Now',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800,
+                    color: AppColors.textDark)),
+            const SizedBox(height: 8),
+            const Text('How would you like to proceed?',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 13, color: AppColors.textMedium)),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: onLogin,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                child: const Text('Log In', style: TextStyle(fontWeight: FontWeight.w700)),
+              ),
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: OutlinedButton(
+                onPressed: onGuest,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  side: const BorderSide(color: AppColors.primary),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                child: const Text('Continue as Guest',
+                    style: TextStyle(fontWeight: FontWeight.w600)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
