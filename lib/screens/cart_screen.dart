@@ -55,6 +55,7 @@ class _CartScreenState extends State<CartScreen> {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             Navigator.push(context, MaterialPageRoute(
               builder: (_) => GuestCheckoutScreen(
+                hasProducts: products.isNotEmpty,
                 onSaved: (data) => Navigator.push(context, MaterialPageRoute(
                   builder: (_) => CheckoutScreen(
                     coupons: coupons,
